@@ -1793,6 +1793,49 @@ Réponds UNIQUEMENT avec le code HTML, sans backticks ni explication.`}]});
   }catch(e){sts('mkSts','❌ '+e.message+(apiKey()?'':' — ajoute ta clé API dans ⚙️'),'err');}
 }
 function mkBackManual(){mkAIHtml=null;mkRender();}
+  const FAL_PROXY = "https://inca-fal-proxy.vercel.app/api/generate-image";
+let mkPhotoBase64 = null;
+
+function mkPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    mkPhotoBase64 = reader.result;
+    $('mkPhotoPreview').innerHTML = `<img src="${mkPhotoBase64}" style="max-width:100%;max-height:90px;border-radius:8px">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function mkGenAIPhoto() {
+  if (!mkPhotoBase64) { sts('mkSts', '⚠️ Upload une photo produit d\'abord.', 'err'); return; }
+  const v = mkVals();
+  sts('mkSts', '📸 Génération du visuel photo-réaliste… (10-20s)', 'load');
+  try {
+    const prompt = `Professional product photography of ${v.prod}, studio lighting, premium background, commercial advertising style, high detail, 4k quality, centered composition`;
+    const res = await fetch(FAL_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'fal-ai/flux-pro/kontext',
+        prompt: prompt,
+        image_url: mkPhotoBase64
+      })
+    });
+    const data = await res.json();
+    if (!data.images || !data.images[0]) throw new Error(data.error || 'Pas d\'image reçue');
+    mkAIHtml = `<div style="width:${MK_FMT[mkFormat][0]}px;height:${MK_FMT[mkFormat][1]}px;background:url('${data.images[0].url}') center/cover;position:relative">
+      <div style="position:absolute;bottom:5%;left:5%;right:5%;background:rgba(0,0,0,.6);color:#fff;padding:16px;border-radius:12px;font-weight:800">
+        <div style="font-size:14px;opacity:.8">${esc(v.prod)}</div>
+        <div style="font-size:32px">${mkPrice(v.neu||v.old)}</div>
+      </div>
+    </div>`;
+    mkRender();
+    sts('mkSts', '✅ Visuel généré avec FLUX.', 'ok');
+  } catch (e) {
+    sts('mkSts', '❌ ' + e.message, 'err');
+  }
+}
 
 /* ================== OPPORTUNITÉS D'IMPORT ================== */
 const SUPPLIERS=[
