@@ -530,6 +530,12 @@ tbody tr:hover{background:var(--card2)}
         <div class="pill" data-c="energy" onclick="mkCat('energy')">⚡ Energy</div>
         <div class="pill" data-c="snack" onclick="mkCat('snack')">🍫 Snack & Gourmand</div>
       </div>
+      <div class="mkt-lbl">Style de scène</div>
+      <div class="pills" id="mkScenePills">
+        <div class="pill act" data-s="static" onclick="mkScene('static')">📷 Studio</div>
+        <div class="pill" data-s="action" onclick="mkScene('action')">💦 Versé / Action</div>
+        <div class="pill" data-s="hand" onclick="mkScene('hand')">🤚 Tenu en main</div>
+      </div>
       <div class="mkt-lbl">Photo produit (optionnel)</div>
       <div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
         <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
@@ -1817,6 +1823,16 @@ function mkCat(c) {
   mkCategory = c;
   document.querySelectorAll('#mkCatPills .pill').forEach(p => p.classList.toggle('act', p.dataset.c === c));
 }
+let mkSceneType = 'static';
+function mkScene(s) {
+  mkSceneType = s;
+  document.querySelectorAll('#mkScenePills .pill').forEach(p => p.classList.toggle('act', p.dataset.s === s));
+}
+const SCENE_STYLE = {
+  static: 'professional product photography, clean composition',
+  action: 'dynamic candid lifestyle photo, liquid pouring or splashing naturally, motion captured mid-action, genuine energetic moment, shot like a real Instagram influencer photo on a phone camera, natural unedited color grading, slight authentic imperfection, not a sterile studio render',
+  hand: 'a real human hand naturally holding or about to drink the product, candid lifestyle moment, genuine emotion and energy on a sunny day, shot like a real iPhone photo, natural skin tones, authentic unposed feel, not corporate stock photo'
+};
 const CATEGORY_AMBIANCE = {
   sport: 'bright natural sunlight, tropical Réunion island atmosphere, soft blurred green palm leaves and ocean blue tones in background, healthy active lifestyle feel, clean fresh bright mood, warm terracotta orange (#c45b18) color accents, summer vibe',
   energy: 'warm amber and terracotta orange tones (#c45b18 brand color), dynamic studio lighting, subtle motion energy, bold but elegant not aggressive',
@@ -1830,7 +1846,7 @@ async function mkGenAIPhoto() {
   sts('mkSts', '📸 Génération du visuel photo-réaliste… (10-20s)', 'load');
   try {
     const ambiance = CATEGORY_AMBIANCE[mkCategory];
-    const prompt = 'Keep this exact product completely unchanged - identical colors, label, design, packaging. Do not alter the product. Place it in this realistic environment: ' + ambiance + '. Shot like a real professional photograph with a real camera, natural authentic lighting, realistic depth of field, photorealistic, NOT a digital illustration, NOT oversaturated, NOT an obviously AI-generated look, avoid plastic/glossy artificial rendering, looks like genuine commercial product photography, leave clear empty space at top and bottom for text overlay.';
+    const prompt = 'Keep this exact product completely unchanged - identical colors, label, design, packaging, do not alter the product itself. ' + SCENE_STYLE[mkSceneType] + '. Setting: ' + ambiance + '. Photorealistic, NOT an obviously AI-generated look, avoid plastic/glossy artificial rendering, looks like genuine authentic photography, leave clear empty space at top and bottom for text overlay.';
     const res = await fetch(FAL_PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
