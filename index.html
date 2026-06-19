@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INCA IMPORT — Outils</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4ff;--white:#fff;--border:#e2e8f8;
+  --blue:#3b5bdb;--blue2:#4c6ef5;--blue-soft:#eef2ff;
+  --green:#0ca678;--green-soft:#e6fcf5;
+  --orange:#e8590c;--orange-soft:#fff4e6;
+  --amber:#e67700;--amber-soft:#fff8e1;
+  --purple:#7048e8;--purple-soft:#f3f0ff;
+  --teal:#0891b2;--teal-soft:#ecfeff;
+  --red:#e03131;--red-soft:#fff5f5;
+  --text:#0f172a;--text2:#334155;--text3:#64748b;
+  --sans:'Plus Jakarta Sans',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --sh:0 1px 4px rgba(59,91,219,.08),0 8px 24px rgba(59,91,219,.07);
+  --sh-hover:0 4px 20px rgba(59,91,219,.15),0 12px 40px rgba(59,91,219,.1);
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{
+  background:linear-gradient(135deg,#0f1f5c 0%,#1e3a8a 45%,var(--blue) 100%);
+  padding:3rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;
+}
+.hdr::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(255,255,255,.07),transparent);
+}
+.hdr-logo{
+  display:inline-block;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);color:#fff;font-weight:800;font-size:11px;
+  letter-spacing:3px;padding:7px 16px;border-radius:8px;text-transform:uppercase;
+  margin-bottom:1.25rem;
+}
+.hdr-title{font-size:clamp(28px,5vw,42px);font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:.65rem}
+.hdr-sub{font-size:15px;color:rgba(255,255,255,.65);font-weight:500;max-width:520px;margin:0 auto 2rem}
+.hdr-stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.hdr-stat{text-align:center}
+.hdr-stat-v{font-family:var(--mono);font-size:22px;font-weight:800;color:#fff}
+.hdr-stat-l{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* ── MAIN ── */
+.wrap{max-width:1180px;margin:0 auto;padding:2.5rem 1.5rem}
+
+.section-label{
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FEATURED CARD ── */
+.featured{
+  background:var(--white);border:1px solid var(--border);border-radius:20px;
+  padding:2rem 2.5rem;box-shadow:var(--sh);margin-bottom:1.5rem;
+  display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;
+  position:relative;overflow:hidden;transition:all .25s;cursor:pointer;
+  text-decoration:none;color:inherit;
+}
+.featured::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--blue),var(--blue2),var(--purple));
+}
+.featured:hover{box-shadow:var(--sh-hover);transform:translateY(-2px)}
+.featured-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--blue-soft),var(--purple-soft));
+  border:1px solid rgba(112,72,232,.2);color:var(--purple);
+  font-size:10px;font-weight:700;letter-spacing:.5px;padding:4px 12px;border-radius:20px;
+  margin-bottom:.75rem;
+}
+.featured-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:.5rem;letter-spacing:-.5px}
+.featured-desc{font-size:14px;color:var(--text3);line-height:1.6;max-width:540px;margin-bottom:1.25rem}
+.featured-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ftag{background:var(--bg);border:1px solid var(--border);color:var(--text3);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.featured-cta{
+  background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;
+  border:none;padding:14px 28px;border-radius:12px;font-family:var(--sans);
+  font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(59,91,219,.35);transition:all .2s;
+  display:flex;align-items:center;gap:8px;
+}
+.featured-cta:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(59,91,219,.45)}
+.featured-ico{font-size:48px;line-height:1;flex-shrink:0}
+
+/* ── STOCK WIDGET CARD ── */
+.stock-card{
+  background:var(--white);border:1px solid var(--border);border-radius:20px;
+  box-shadow:var(--sh);margin-bottom:1.5rem;overflow:hidden;
+  position:relative;
+}
+.stock-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--green),#34d399,var(--teal));
+}
+.stock-header{
+  padding:1.5rem 2rem 1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+}
+.stock-header-left{flex:1;min-width:200px}
+.stock-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--green-soft),var(--teal-soft));
+  border:1px solid rgba(8,145,178,.2);color:var(--teal);
+  font-size:10px;font-weight:700;letter-spacing:.5px;padding:4px 12px;border-radius:20px;
+  margin-bottom:.6rem;
+}
+.stock-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:.25rem}
+.stock-subtitle{font-size:12px;color:var(--text3)}
+.stock-kpis{display:flex;gap:1rem;flex-wrap:wrap;padding:0 2rem 1.25rem}
+.stock-kpi{
+  flex:1;min-width:110px;background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;padding:.9rem 1rem;
+}
+.stock-kpi-v{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--text)}
+.stock-kpi-l{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-top:3px}
+.stock-kpi.green .stock-kpi-v{color:var(--green)}
+.stock-kpi.orange .stock-kpi-v{color:var(--orange)}
+.stock-kpi.red .stock-kpi-v{color:var(--red)}
+.stock-kpi.blue .stock-kpi-v{color:var(--blue)}
+
+.stock-alerts{padding:0 2rem .75rem;display:flex;gap:8px;flex-wrap:wrap}
+.salert{
+  display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+  font-size:11px;font-weight:700;
+}
+.salert.red{background:var(--red-soft);color:var(--red)}
+.salert.orange{background:var(--amber-soft);color:var(--amber)}
+.salert.green{background:var(--green-soft);color:var(--green)}
+
+.stock-table-wrap{border-top:1px solid var(--border);overflow-x:auto;max-height:240px;overflow-y:auto}
+.stock-table{width:100%;border-collapse:collapse}
+.stock-table thead th{
+  padding:8px 16px;font-size:10px;font-weight:700;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--text3);background:var(--bg);
+  text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;white-space:nowrap;
+}
+.stock-table tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.stock-table tbody tr:hover{background:var(--bg)}
+.stock-table tbody tr:last-child{border-bottom:none}
+.stock-table td{padding:10px 16px;font-size:12px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700}
+.badge-green{background:var(--green-soft);color:var(--green)}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-orange{background:var(--amber-soft);color:var(--amber)}
+.badge-blue{background:var(--blue-soft);color:var(--blue)}
+.badge-gray{background:var(--bg);color:var(--text3);border:1px solid var(--border)}
+
+.stock-footer{
+  padding:1rem 2rem;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
+  background:var(--bg);
+}
+.stock-footer-note{font-size:11px;color:var(--text3)}
+.btn-stock-open{
+  background:linear-gradient(135deg,var(--green),#0d9e72);color:#fff;
+  border:none;padding:10px 20px;border-radius:10px;font-family:var(--sans);
+  font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;
+  box-shadow:0 3px 10px rgba(12,166,120,.3);transition:all .2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-stock-open:hover{transform:scale(1.02);box-shadow:0 5px 16px rgba(12,166,120,.4)}
+.btn-stock-export{
+  background:var(--white);color:var(--green);border:1.5px solid var(--green);
+  padding:9px 16px;border-radius:10px;font-family:var(--sans);
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.btn-stock-export:hover{background:var(--green-soft)}
+.empty-stock{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+
+/* ── TOOL GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.1rem;margin-bottom:2rem}
+
+.tool-card{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  padding:1.5rem;box-shadow:var(--sh);transition:all .22s;
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:1rem;
+  position:relative;overflow:hidden;
+}
+.tool-card:hover{box-shadow:var(--sh-hover);transform:translateY(-3px)}
+.tool-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+.tool-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.tool-status{font-size:9px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px}
+.st-new{background:linear-gradient(135deg,#d3fae8,#a5f3d3);color:#065f46}
+.st-stable{background:var(--blue-soft);color:var(--blue)}
+.st-beta{background:var(--amber-soft);color:var(--amber)}
+
+.tool-title{font-size:16px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem}
+.tool-desc{font-size:12px;color:var(--text3);line-height:1.55;flex:1}
+.tool-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.75rem;border-top:1px solid var(--border)}
+.tool-tags{display:flex;gap:4px;flex-wrap:wrap}
+.ttag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px}
+.tool-arrow{width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0}
+.tool-card:hover .tool-arrow{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:2.5rem 1.5rem;color:var(--text3);font-size:12px}
+.footer-logo{font-family:var(--mono);font-weight:700;color:var(--blue);margin-bottom:.4rem;font-size:13px}
+
+/* ── COLORS ── */
+.ic-blue{background:var(--blue-soft)}.ic-green{background:var(--green-soft)}
+.ic-orange{background:var(--orange-soft)}.ic-purple{background:var(--purple-soft)}
+.ic-teal{background:var(--teal-soft)}.ic-amber{background:var(--amber-soft)}
+.ic-red{background:var(--red-soft)}
+.tt-blue{background:var(--blue-soft);color:var(--blue)}
+.tt-green{background:var(--green-soft);color:var(--green)}
+.tt-orange{background:var(--orange-soft);color:var(--orange)}
+.tt-purple{background:var(--purple-soft);color:var(--purple)}
+.tt-teal{background:var(--teal-soft);color:var(--teal)}
+.tt-amber{background:var(--amber-soft);color:var(--amber)}
+
+@media(max-width:640px){
+  .featured{grid-template-columns:1fr;padding:1.5rem}
+  .featured-ico{display:none}
+  .hdr-stats{gap:1.25rem}
+  .grid{grid-template-columns:1fr}
+  .stock-kpis{gap:.75rem}
+  .stock-header{padding:1.25rem 1.25rem .75rem}
+  .stock-kpis,.stock-alerts,.stock-footer{padding-left:1.25rem;padding-right:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">INCA IMPORT</div>
+  <div class="hdr-title">Suite d'outils opérationnels</div>
+  <div class="hdr-sub">Calculateurs CRR · Optimiseur conteneur · Dashboard ventes · Gestion stock · Veille produits</div>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hdrOutils">7</div><div class="hdr-stat-l">Outils actifs</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hdrStock">—</div><div class="hdr-stat-l">Unités en stock</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hdrValeur">—</div><div class="hdr-stat-l">Valeur stock</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-v">La Réunion</div><div class="hdr-stat-l">Marché cible</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- FEATURED -->
+<div class="section-label">⭐ Outil principal</div>
+<a class="featured" href="INCA_Suite.html">
+  <div>
+    <div class="featured-badge">🆕 Suite unifiée · v1</div>
+    <div class="featured-title">📦 INCA Suite — Tout-en-un</div>
+    <div class="featured-desc">Plateforme intégrée : chargez un catalogue fournisseur (PDF/Excel) → extraction IA des prix → calcul CRR automatique avec taxes 2026 → matching contre vos ventes réelles → verdicts (IMPORTER/NÉGOCIER/REJETER) → optimisation conteneur 40' par score → veille produits mondiale.</div>
+    <div class="featured-tags">
+      <span class="ftag">📥 Extraction IA PDF/Excel</span>
+      <span class="ftag">💶 CRR taxes 2026</span>
+      <span class="ftag">📊 Dashboard ventes intégré</span>
+      <span class="ftag">🚢 Conteneur 40' auto-optimisé</span>
+      <span class="ftag">🌍 Veille IA monde</span>
+      <span class="ftag">⬇ Export XLSX</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:1rem">
+    <div class="featured-ico">⚡</div>
+    <button class="featured-cta">Ouvrir INCA Suite →</button>
+  </div>
+</a>
+
+<!-- STOCK WIDGET -->
+<div class="section-label">📦 Stock temps réel</div>
+<div class="stock-card">
+  <div class="stock-header">
+    <div class="stock-header-left">
+      <div class="stock-badge">🟢 Module stock · FIFO · DLC</div>
+      <div class="stock-title">Stock INCA IMPORT — COMPROS La Possession</div>
+      <div class="stock-subtitle">Entrées/sorties · Valorisation CRR · Alertes DLC · Export Pennylane</div>
+    </div>
+    <a href="stock.html" class="btn-stock-open">Gérer le stock →</a>
+  </div>
+
+  <div class="stock-kpis" id="stockKpis">
+    <div class="stock-kpi blue"><div class="stock-kpi-v" id="kpiRefs">—</div><div class="stock-kpi-l">Références</div></div>
+    <div class="stock-kpi green"><div class="stock-kpi-v" id="kpiUnites">—</div><div class="stock-kpi-l">Unités dispo</div></div>
+    <div class="stock-kpi green"><div class="stock-kpi-v" id="kpiValeur">—</div><div class="stock-kpi-l">Valeur stock</div></div>
+    <div class="stock-kpi" id="kpiDlcCard"><div class="stock-kpi-v" id="kpiDlc">—</div><div class="stock-kpi-l">Lots DLC &lt;60j</div></div>
+    <div class="stock-kpi" id="kpiReapCard"><div class="stock-kpi-v" id="kpiReap">—</div><div class="stock-kpi-l">Réappros</div></div>
+  </div>
+
+  <div class="stock-alerts" id="stockAlerts"></div>
+
+  <div class="stock-table-wrap">
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Fournisseur</th>
+          <th>Qté dispo</th>
+          <th>Valeur CRR</th>
+          <th>DLC proche</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody id="stockWidgetTable"></tbody>
+    </table>
+  </div>
+
+  <div class="stock-footer">
+    <div class="stock-footer-note" id="stockFooterNote">Données synchronisées depuis stock.html (localStorage)</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-stock-export" onclick="exportStockQuick()">⬇ CSV Pennylane</button>
+      <a href="stock.html" class="btn-stock-open" style="font-size:12px;padding:9px 16px;">➕ Saisir entrée/sortie</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLS GRID -->
+<div class="section-label">🧰 Tous les outils</div>
+<div class="grid">
+
+  <a class="tool-card" href="INCA_CRR_Batch.html">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-blue">📋</div>
+      <span class="tool-status st-stable">Stable</span>
+    </div>
+    <div>
+      <div class="tool-title">CRR Batch</div>
+      <div class="tool-desc">Importez n'importe quelle offre fournisseur Excel et obtenez instantanément le coût de revient rendu La Possession pour chaque produit. Exportable en Excel.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags">
+        <span class="ttag tt-blue">Import Excel</span>
+        <span class="ttag tt-blue">CRR auto</span>
+        <span class="ttag tt-blue">Export</span>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+  <a class="tool-card" href="calculateur_crr_reunion.html">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-purple">🧮</div>
+      <span class="tool-status st-stable">Stable</span>
+    </div>
+    <div>
+      <div class="tool-title">Calculateur CRR Réunion</div>
+      <div class="tool-desc">Calculateur unitaire du coût de revient rendu La Possession. OM · OMR · TVA · Fret · Taxe sucre · Stickering.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags">
+        <span class="ttag tt-purple">OM 25.5%</span>
+        <span class="ttag tt-purple">DSG Transit</span>
+        <span class="ttag tt-purple">Taxe sucre</span>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+  <a class="tool-card" href="dashboard_ventes.html">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-green">📊</div>
+      <span class="tool-status st-stable">Stable</span>
+    </div>
+    <div>
+      <div class="tool-title">Dashboard Ventes</div>
+      <div class="tool-desc">Analyse des ventes 2024–2025 par famille de produits sur les 3 stations OLA, TOTAL et VITO. Marges, rotations, top produits.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags">
+        <span class="ttag tt-green">OLA</span>
+        <span class="ttag tt-green">TOTAL</span>
+        <span class="ttag tt-green">VITO</span>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+  <a class="tool-card" href="veille_produits.html">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-orange">🔍</div>
+      <span class="tool-status st-stable">Stable</span>
+    </div>
+    <div>
+      <div class="tool-title">Veille Produits</div>
+      <div class="tool-desc">Intelligence marché en temps réel. Recherche fournisseurs, analyse tendances, veille concurrentielle marché réunionnais.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags">
+        <span class="ttag tt-orange">IA Claude</span>
+        <span class="ttag tt-orange">Web search</span>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+  <a class="tool-card" href="stock.html">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-green">📦</div>
+      <span class="tool-status st-new">Nouveau</span>
+    </div>
+    <div>
+      <div class="tool-title">Gestion Stock</div>
+      <div class="tool-desc">Entrées/sorties FIFO, suivi DLC par lot, valorisation CRR, alertes réapprovisionnement, export CSV Pennylane mensuel.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags">
+        <span class="ttag tt-green">FIFO</span>
+        <span class="ttag tt-green">DLC</span>
+        <span class="ttag tt-green">Pennylane</span>
+      </div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+  <a class="tool-card" href="INCA_Optimiseur_Conteneur_v2.html" style="opacity:.65">
+    <div class="tool-card-top">
+      <div class="tool-ico ic-teal">🚢</div>
+      <span class="tool-status st-beta">Ancienne version</span>
+    </div>
+    <div>
+      <div class="tool-title">Optimiseur Conteneur v2</div>
+      <div class="tool-desc">Version précédente. Préférez la v3 intégrée dans INCA Suite.</div>
+    </div>
+    <div class="tool-footer">
+      <div class="tool-tags"><span class="ttag tt-teal">Déprécié</span></div>
+      <div class="tool-arrow">→</div>
+    </div>
+  </a>
+
+</div>
+
+<!-- INFO BAR -->
+<div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:2rem">
+  <div style="font-size:20px">ℹ️</div>
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:700;color:var(--text)">Données ventes intégrées — OLA · TOTAL CAVERNE · VITO CAVERNE · 2024–2025</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:3px">Les outils d'optimisation utilisent les volumes de ventes réels pour scorer les produits fournisseurs. Paramètres CRR basés sur la cotation DSG Transit Repiquet MI251003405.</div>
+  </div>
+  <a href="calculateur_crr_reunion.html" style="background:var(--blue-soft);color:var(--blue);border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">Modifier les taux →</a>
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">INCA IMPORT SAS</div>
+  <div>29 Route des Premiers Français · 97460 Saint-Paul · La Réunion</div>
+  <div style="margin-top:.4rem">SIRET 945 112 753 00013 · EORI FR94511275300013 · Entrepôt COMPROS La Possession</div>
+</div>
+
+<script>
+// ── Lit le localStorage de stock.html (même domaine GitHub Pages) ──
+function loadStockData() {
+  try {
+    const raw = localStorage.getItem('inca_stock_v2');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function fmtN(n) { return (n||0).toLocaleString('fr-FR'); }
+function fmtE(n) { 
+  if (n >= 1000) return (n/1000).toFixed(1).replace('.',',')+' k€';
+  return (n||0).toFixed(0)+' €'; 
+}
+function daysUntil(d) { if(!d) return null; return Math.floor((new Date(d)-new Date())/86400000); }
+
+function getStock(state, pid) {
+  return (state.lots||[]).filter(l=>l.productId===pid).reduce((s,l)=>s+l.qtyRestante,0);
+}
+function getCRR(state, pid) {
+  const lots = (state.lots||[]).filter(l=>l.productId===pid&&l.qtyRestante>0);
+  if (!lots.length) { const p=(state.products||[]).find(x=>x.id===pid); return p?p.crr:0; }
+  const tot = lots.reduce((s,l)=>s+l.qtyRestante,0);
+  return lots.reduce((s,l)=>s+l.qtyRestante*l.crr,0) / (tot||1);
+}
+function getNextDLC(state, pid) {
+  const lots = (state.lots||[]).filter(l=>l.productId===pid&&l.qtyRestante>0&&l.dlc).sort((a,b)=>new Date(a.dlc)-new Date(b.dlc));
+  return lots.length ? lots[0].dlc : null;
+}
+
+function renderStockWidget() {
+  const state = loadStockData();
+
+  if (!state || !(state.products||[]).length) {
+    document.getElementById('kpiRefs').textContent = '0';
+    document.getElementById('kpiUnites').textContent = '0';
+    document.getElementById('kpiValeur').textContent = '0 €';
+    document.getElementById('kpiDlc').textContent = '0';
+    document.getElementById('kpiReap').textContent = '0';
+    document.getElementById('stockAlerts').innerHTML = '<span style="font-size:12px;color:var(--text3);">Aucun produit — <a href="stock.html" style="color:var(--green);font-weight:700;">Saisir la première entrée →</a></span>';
+    document.getElementById('stockWidgetTable').innerHTML = '<tr><td colspan="6" class="empty-stock">Aucun stock enregistré — <a href="stock.html" style="color:var(--green);font-weight:700;">Commencer ici →</a></td></tr>';
+    return;
+  }
+
+  const prods = state.products || [];
+  const totalUnites = prods.reduce((s,p)=>s+getStock(state,p.id),0);
+  const totalValeur = prods.reduce((s,p)=>s+getStock(state,p.id)*getCRR(state,p.id),0);
+  const dlcAlerts = (state.lots||[]).filter(l=>{ const d=daysUntil(l.dlc); return d!==null&&d<=60&&d>=0&&l.qtyRestante>0; }).length;
+  const dlcExpired = (state.lots||[]).filter(l=>{ const d=daysUntil(l.dlc); return d!==null&&d<0&&l.qtyRestante>0; }).length;
+  const reappros = prods.filter(p=>p.seuil&&getStock(state,p.id)<=p.seuil).length;
+
+  // KPIs
+  document.getElementById('kpiRefs').textContent = prods.length;
+  document.getElementById('kpiUnites').textContent = fmtN(totalUnites);
+  document.getElementById('kpiValeur').textContent = fmtE(totalValeur);
+  document.getElementById('kpiDlc').textContent = dlcAlerts;
+  document.getElementById('kpiReap').textContent = reappros;
+
+  // KPI colors
+  const dlcCard = document.getElementById('kpiDlcCard');
+  dlcCard.className = 'stock-kpi ' + (dlcAlerts>0?'orange':'green');
+  const reapCard = document.getElementById('kpiReapCard');
+  reapCard.className = 'stock-kpi ' + (reappros>0?'red':'green');
+
+  // Header stats
+  document.getElementById('hdrStock').textContent = fmtN(totalUnites);
+  document.getElementById('hdrValeur').textContent = fmtE(totalValeur);
+
+  // Alerts
+  let alerts = '';
+  if (dlcExpired > 0) alerts += `<div class="salert red">❌ ${dlcExpired} lot(s) périmé(s)</div>`;
+  if (dlcAlerts > 0) alerts += `<div class="salert orange">⚠️ ${dlcAlerts} lot(s) DLC &lt;60j</div>`;
+  if (reappros > 0) alerts += `<div class="salert orange">⚡ ${reappros} réappro(s) nécessaire(s)</div>`;
+  if (!alerts) alerts = '<div class="salert green">✅ Aucune alerte stock</div>';
+  document.getElementById('stockAlerts').innerHTML = alerts;
+
+  // Timestamp
+  const lastMouv = (state.mouvements||[])[0];
+  document.getElementById('stockFooterNote').textContent = lastMouv
+    ? 'Dernier mouvement : ' + new Date(lastMouv.date).toLocaleDateString('fr-FR')
+    : 'Données synchronisées depuis stock.html';
+
+  // Table — top 8 par valeur
+  const rows = prods.map(p=>({p, stock:getStock(state,p.id), crr:getCRR(state,p.id), dlc:getNextDLC(state,p.id)}))
+    .sort((a,b)=>(b.stock*b.crr)-(a.stock*a.crr)).slice(0,8);
+
+  const pmap = Object.fromEntries(prods.map(p=>[p.id,p]));
+
+  document.getElementById('stockWidgetTable').innerHTML = rows.map(({p,stock,crr,dlc})=>{
+    const days = daysUntil(dlc);
+    const dlcTxt = days===null ? '—' : days<0 ? '<span class="badge badge-red">PÉRIMÉ</span>' : days<14 ? `<span class="badge badge-red">${days}j</span>` : days<60 ? `<span class="badge badge-orange">${days}j</span>` : `<span style="font-size:11px;color:var(--text3);">${days}j</span>`;
+    const status = stock===0 ? '<span class="badge badge-gray">Épuisé</span>' :
+      p.seuil&&stock<=p.seuil ? '<span class="badge badge-orange">Réappro</span>' :
+      days!==null&&days<0 ? '<span class="badge badge-red">Périmé</span>' :
+      '<span class="badge badge-green">OK</span>';
+    return `<tr>
+      <td><strong style="font-size:13px;">${p.nom}</strong>${p.ref?`<span style="font-size:10px;color:var(--text3);margin-left:6px;">${p.ref}</span>`:''}${p.categorie?`<br><span style="font-size:10px;color:var(--text3);">${p.categorie}</span>`:''}
+      </td>
+      <td style="font-size:11px;color:var(--text3);">${p.fournisseur||'—'}</td>
+      <td><strong>${fmtN(stock)}</strong></td>
+      <td><strong>${fmtE(stock*crr)}</strong><br><span style="font-size:10px;color:var(--text3);">${crr.toFixed(3)}€/u</span></td>
+      <td>${dlcTxt}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty-stock">Stock vide</td></tr>';
+}
+
+function exportStockQuick() {
+  const state = loadStockData();
+  if (!state) { alert('Aucune donnée stock'); return; }
+  const pmap = Object.fromEntries((state.products||[]).map(p=>[p.id,p]));
+  const header = 'Date;Type;Produit;Lot;Quantite;Station;CRR_unitaire;Valeur_EUR;Reference;Compte\n';
+  const lines = (state.mouvements||[]).map(m=>[
+    m.date, m.type==='entree'?'ENTREE':'SORTIE',
+    pmap[m.productId]?.nom||'', m.lot||'', m.qty, m.station||'',
+    (m.crr||0).toFixed(3), ((m.qty||0)*(m.crr||0)).toFixed(2), m.bl||'',
+    m.type==='entree'?'607':'707'
+  ].join(';')).join('\n');
+  const blob = new Blob(['\uFEFF'+header+lines],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`INCA_IMPORT_Pennylane_${new Date().toISOString().slice(0,7)}.csv`; a.click();
+}
+
+renderStockWidget();
+</script>
+</body>
+</html>

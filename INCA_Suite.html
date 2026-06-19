@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INCA IMPORT — Suite Achat & Import</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%231A2744'/><path d='M50 18 L58 42 L82 50 L58 58 L50 82 L42 58 L18 50 L42 42 Z' fill='%23B8924A'/></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F5F7;--card:#FFFFFF;--card2:#FAFAFC;
+  --ink:#1D1D1F;--ink2:#6E6E73;--ink3:#AEAEB2;
+  --line:rgba(0,0,0,.07);--line2:rgba(0,0,0,.12);
+  --blue:#0071E3;--blue2:#0A84FF;--blue-bg:#EAF3FE;
+  --green:#34C759;--green-d:#1E8E3E;--green-bg:#E8F8EC;
+  --amber:#FF9F0A;--amber-d:#C77700;--amber-bg:#FFF4E0;
+  --red:#FF3B30;--red-d:#D70015;--red-bg:#FFEBEA;
+  --purple:#AF52DE;--purple-bg:#F6EDFC;
+  --navy:#1A2744;--gold:#B8924A;--gold-d:#96743A;--gold-bg:#F7F0E4;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Inter,Roboto,sans-serif;
+  --mono:ui-monospace,'SF Mono','Cascadia Code','JetBrains Mono',Menlo,monospace;
+  --r:14px;--r2:18px;
+  --sh:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.06);
+  --sh2:0 2px 6px rgba(0,0,0,.06),0 16px 40px rgba(0,0,0,.10);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(0,113,227,.18)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== Header (frosted glass) ===== */
+.hdr{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.hdr-in{max-width:1440px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.brand-mark{width:32px;height:32px;border-radius:9px;background:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(26,39,68,.3)}
+.brand-mark svg{width:18px;height:18px}
+.brand-name{font-weight:800;font-size:15px;letter-spacing:-.2px;color:var(--navy)}
+.brand-name span{color:var(--gold)}
+.brand-sub{font-size:10px;color:var(--ink2);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:-1px}
+/* Segmented nav */
+.seg{display:flex;background:rgba(118,118,128,.10);border-radius:12px;padding:3px;gap:2px;margin:0 auto}
+.seg button{border:none;background:transparent;padding:7px 16px;border-radius:9px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button.act{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.seg .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:none}
+.seg .dot.on{display:block}
+.hdr-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chip{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;letter-spacing:.2px}
+.chip.gold{background:var(--gold-bg);color:var(--gold-d)}
+.chip.green{background:var(--green-bg);color:var(--green-d)}
+
+main{max-width:1440px;margin:0 auto;padding:24px}
+.view{display:none;animation:vfade .35s cubic-bezier(.3,0,.2,1)}
+.view.act{display:block}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ===== Cards / KPI ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh);padding:20px;margin-bottom:16px;transition:box-shadow .3s}
+.card:hover{box-shadow:var(--sh2)}
+.card-t{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-t::before{content:'';width:4px;height:14px;border-radius:2px;background:var(--blue)}
+.card-t.g::before{background:var(--green)}.card-t.o::before{background:var(--amber)}.card-t.p::before{background:var(--purple)}.card-t.au::before{background:var(--gold)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px 18px;box-shadow:var(--sh);animation:kpi-in .5s cubic-bezier(.3,0,.2,1) both}
+.kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}.kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.25s}
+@keyframes kpi-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.kpi-l{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2);margin-bottom:6px}
+.kpi-v{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.kpi-s{font-size:11px;color:var(--ink2);margin-top:4px;font-weight:500}
+.kpi-d{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-top:6px}
+.up{background:var(--green-bg);color:var(--green-d)}.dn{background:var(--red-bg);color:var(--red-d)}.nt{background:rgba(118,118,128,.1);color:var(--ink2)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ===== Buttons / inputs ===== */
+.btn{border:none;border-radius:12px;padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(0,113,227,.3)}
+.btn.pri:hover{background:#0077ED;box-shadow:0 4px 16px rgba(0,113,227,.4)}
+.btn.go{background:linear-gradient(180deg,#3DDC68,#2DB84F);color:#fff;box-shadow:0 2px 10px rgba(52,199,89,.35)}
+.btn.gold{background:linear-gradient(180deg,#C9A45C,var(--gold));color:#fff;box-shadow:0 2px 10px rgba(184,146,74,.35)}
+.btn.gh{background:rgba(118,118,128,.10);color:var(--ink)}
+.btn.gh:hover{background:rgba(118,118,128,.18)}
+.btn.dng{background:var(--red-bg);color:var(--red-d)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.inp,select.inp{background:#fff;border:1.5px solid var(--line2);border-radius:11px;padding:9px 13px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);outline:none;transition:border .2s,box-shadow .2s;width:100%}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
+.inp.mono{font-family:var(--mono)}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
+.iwrap{position:relative}
+.iwrap .sfx{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--ink3)}
+
+/* pills */
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:7px 16px;border-radius:20px;border:1.5px solid var(--line2);background:#fff;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--sans)}
+.pill:hover{border-color:var(--blue)}
+.pill.act{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.pill.act.gold{border-color:var(--gold);color:var(--gold-d);background:var(--gold-bg)}
+
+/* drop zones */
+.drop{border:2px dashed var(--line2);border-radius:var(--r2);background:var(--card);padding:42px 24px;text-align:center;cursor:pointer;transition:all .3s}
+.drop:hover,.drop.over{border-color:var(--blue);background:var(--blue-bg)}
+.drop-ic{width:54px;height:54px;border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--blue-bg)}
+.drop h3{font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px}
+.drop p{font-size:12px;color:var(--ink2);line-height:1.6;font-weight:500}
+.fmt-row{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.fmt{background:rgba(118,118,128,.08);border-radius:7px;padding:4px 11px;font-size:10px;font-weight:700;color:var(--ink2);letter-spacing:.4px}
+input[type=file]{display:none}
+
+/* verdicts */
+.vd{font-size:10px;font-weight:800;letter-spacing:.4px;padding:4px 11px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.vd.imp{background:var(--green-bg);color:var(--green-d)}
+.vd.neg{background:var(--amber-bg);color:var(--amber-d)}
+.vd.rej{background:var(--red-bg);color:var(--red-d)}
+.vd.new{background:var(--purple-bg);color:var(--purple)}
+.vd.eq{background:rgba(118,118,128,.1);color:var(--ink2)}
+
+/* tables */
+.tbl-wrap{overflow:auto;border-radius:var(--r);border:1px solid var(--line);max-height:640px}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+thead th{position:sticky;top:0;z-index:5;background:var(--card2);text-align:left;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);padding:11px 10px;border-bottom:1px solid var(--line2);cursor:pointer;user-select:none;white-space:nowrap}
+thead th.num{text-align:right}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody td.num{text-align:right;font-family:var(--mono);font-weight:600}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--card2)}
+.pname{font-weight:700;font-size:12px;line-height:1.3}
+.psub{font-size:10px;color:var(--ink2);margin-top:1px}
+.psub b{color:var(--gold-d)}
+.qty-inp{width:78px;background:#fff;border:1.5px solid var(--line2);border-radius:9px;padding:6px 8px;font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;outline:none}
+.qty-inp:focus{border-color:var(--blue)}
+.mini{font-size:10px;color:var(--ink3)}
+
+/* container gauge — signature */
+.cgauge{background:linear-gradient(180deg,#FDFDFE,#F4F6FA);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;box-shadow:var(--sh)}
+.cont-svg{width:100%;height:84px}
+.cg-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+.cg-big{font-family:var(--mono);font-size:22px;font-weight:800;letter-spacing:-.5px}
+.cg-lbl{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2)}
+.bar{height:8px;border-radius:5px;background:rgba(118,118,128,.12);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--blue2),var(--blue));transition:width .7s cubic-bezier(.3,0,.2,1)}
+.bar i.warn{background:linear-gradient(90deg,var(--amber),#FF8A00)}
+.bar i.full{background:linear-gradient(90deg,var(--red),#FF6B5E)}
+
+/* rows / lists */
+.row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:11px;background:var(--card2);margin-bottom:6px;transition:background .15s}
+.row:hover{background:#F0F1F5}
+.row .rk{font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:18px;text-align:center;font-weight:700}
+.row .nm{flex:1;font-size:12px;font-weight:700;min-width:0;line-height:1.3}
+.row .sb{font-size:10px;color:var(--ink2);font-weight:500}
+.row .vl{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;white-space:nowrap}
+.row .b{flex:0 0 72px;height:5px;background:rgba(118,118,128,.13);border-radius:3px;overflow:hidden}
+.row .b i{display:block;height:100%;border-radius:3px}
+
+/* status banners */
+.sts{border-radius:12px;padding:11px 15px;font-size:12px;font-weight:600;line-height:1.6;margin:12px 0;display:none}
+.sts.show{display:block;animation:vfade .3s}
+.sts.ok{background:var(--green-bg);color:var(--green-d)}
+.sts.err{background:var(--red-bg);color:var(--red-d)}
+.sts.inf{background:var(--blue-bg);color:#005BB8}
+.sts.warn{background:var(--amber-bg);color:var(--amber-d)}
+
+/* AI thinking */
+.ai-think{display:none;align-items:center;gap:14px;background:linear-gradient(120deg,#EFF5FF,#F6F0FF);border:1px solid rgba(0,113,227,.15);border-radius:var(--r2);padding:18px 22px;margin:14px 0}
+.ai-think.show{display:flex}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(0,113,227,.18);border-top-color:var(--blue);animation:rot 1s linear infinite;flex-shrink:0}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ai-think .t1{font-weight:800;font-size:13px}
+.ai-think .t2{font-size:11px;color:var(--ink2);margin-top:2px}
+
+/* veille cards */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.vcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:18px;box-shadow:var(--sh);position:relative;overflow:hidden;animation:kpi-in .5s both;display:flex;flex-direction:column;gap:10px}
+.vcard .acc{position:absolute;top:0;left:0;right:0;height:4px}
+.vscore{position:absolute;top:14px;right:14px;font-family:var(--mono);font-weight:800;font-size:15px;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center}
+.vs-h{background:var(--green-bg);color:var(--green-d)}.vs-m{background:var(--amber-bg);color:var(--amber-d)}.vs-l{background:var(--red-bg);color:var(--red-d)}
+.vcat{font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:14px;display:inline-block;width:fit-content}
+.vname{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.25;padding-right:48px}
+.vbrand{font-size:11px;color:var(--ink2);font-weight:600}
+.vwhy{font-size:12px;line-height:1.55;color:#3A3A3C;background:var(--card2);border-left:3px solid var(--blue);border-radius:8px;padding:10px 12px}
+.vmeter{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vm{background:var(--card2);border-radius:10px;padding:8px;text-align:center}
+.vm .v{font-family:var(--mono);font-weight:800;font-size:14px}
+.vm .l{font-size:8.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink2);margin-top:2px}
+.vprices{display:flex;gap:8px}
+.vp{flex:1;background:var(--card2);border-radius:10px;padding:8px 10px}
+.vp .l{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink2)}
+.vp .v{font-family:var(--mono);font-weight:700;font-size:12px;margin-top:2px}
+.vcontact{background:var(--gold-bg);border-radius:11px;padding:10px 12px;font-size:11px;line-height:1.7}
+.vcontact a{color:var(--gold-d);font-weight:700;text-decoration:none}
+.vcontact a:hover{text-decoration:underline}
+.vtags{display:flex;gap:5px;flex-wrap:wrap}
+.vtag{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:12px;background:rgba(118,118,128,.09);color:var(--ink2)}
+.vtag.hot{background:var(--red-bg);color:var(--red-d)}.vtag.halal{background:var(--green-bg);color:var(--green-d)}.vtag.new{background:var(--purple-bg);color:var(--purple)}
+
+/* misc */
+.empty{padding:64px 24px;text-align:center;color:var(--ink2)}
+.empty .ic{font-size:42px;margin-bottom:12px;opacity:.55}
+.empty h3{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.empty p{font-size:12px;line-height:1.7;max-width:460px;margin:0 auto}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar .sp{flex:1}
+.search{position:relative;min-width:220px}
+.search input{padding-left:34px}
+.search::before{content:'⌕';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--ink3)}
+.tag-match{font-size:9px;font-weight:800;padding:2px 7px;border-radius:9px;background:var(--gold-bg);color:var(--gold-d)}
+.tag-ai{font-size:9px;font-weight:800;padding:2px 7px;border-radius:9px;background:var(--purple-bg);color:var(--purple)}
+.chart-w{position:relative;height:250px}
+.hint{font-size:11px;color:var(--ink2);line-height:1.65;background:var(--card2);border-radius:11px;padding:10px 13px}
+.hint b{color:var(--ink)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:22px;box-shadow:var(--sh2);max-width:560px;width:100%;max-height:84vh;overflow:auto;padding:24px;animation:kpi-in .3s}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:14px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border:none}
+@media(max-width:860px){
+  .hdr-in{padding:0 12px;gap:8px}
+  .brand-name,.brand-sub{display:none}
+  .seg button{padding:7px 10px;font-size:12px}
+  main{padding:14px}
+  .hdr-r{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr"><div class="hdr-in">
+  <div class="brand">
+    <div class="brand-mark"><svg viewBox="0 0 100 100"><path d="M50 12 L60 40 L88 50 L60 60 L50 88 L40 60 L12 50 L40 40 Z" fill="#B8924A"/></svg></div>
+    <div><div class="brand-name">INCA <span>IMPORT</span></div><div class="brand-sub">Suite Achat & Import · Réunion</div></div>
+  </div>
+  <nav class="seg" id="nav">
+    <button data-v="ventes" class="act">📊 Ventes</button>
+    <button data-v="catalogue">🧠 Catalogue IA</button>
+    <button data-v="conteneur">🚢 Conteneur <span class="dot" id="dotCont"></span></button>
+    <button data-v="veille">🌍 Veille</button>
+    <button data-v="compare">⚖️ Comparateur</button>
+    <button data-v="marketing">📣 Promo</button>
+    <button data-v="reglages">⚙️</button>
+  </nav>
+  <div class="hdr-r">
+    <span class="chip gold" id="refChip">229 prix réf.</span>
+    <span class="chip green" id="dataChip" style="display:none">💾 Données sauvegardées</span>
+  </div>
+</div></header>
+
+<main>
+
+<!-- ============ VUE VENTES ============ -->
+<section class="view act" id="v-ventes">
+  <div id="ventesEmpty">
+    <div class="drop" id="dropVentes" onclick="document.getElementById('fiVentes').click()">
+      <div class="drop-ic">📊</div>
+      <h3>Chargez vos fichiers de ventes</h3>
+      <p>Glissez les fichiers <b>VENTES_PAR_FAMILLES</b> (OLA · TOTAL · VITO) d'une même année.<br>Les données sont sauvegardées localement — rechargez chaque année une seule fois.</p>
+      <div class="fmt-row"><span class="fmt">XLSX</span><span class="fmt">XLS</span><span class="fmt">Multi-stations</span><span class="fmt">Multi-années</span></div>
+      <div style="margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px">
+        <span class="cg-lbl">Année des fichiers</span>
+        <input type="number" class="inp mono" id="yearInput" value="2025" style="width:120px;text-align:center;font-size:17px" onclick="event.stopPropagation()">
+      </div>
+      <input type="file" id="fiVentes" multiple accept=".xlsx,.xls">
+    </div>
+    <div id="filesLoaded" style="margin-top:14px;display:flex;flex-direction:column;gap:7px"></div>
+    <button class="btn go" id="saveVentesBtn" style="display:none;width:100%;margin-top:12px;justify-content:center;padding:14px" onclick="saveVentes()">💾 Sauvegarder & analyser</button>
+    <div id="savedYears" style="margin-top:18px"></div>
+  </div>
+
+  <div id="ventesDash" style="display:none">
+    <div class="toolbar">
+      <div class="pills" id="stPills"></div>
+      <div class="pills" id="yrPills"></div>
+      <span class="sp"></span>
+      <select class="inp" id="rotSel" style="width:auto" onchange="renderDash()">
+        <option value="3.5">Rotation cible 3,5 mois</option>
+        <option value="3">3 mois</option><option value="4">4 mois</option>
+        <option value="5">5 mois</option><option value="6">6 mois</option>
+      </select>
+      <button class="btn gh" onclick="showVentesUpload()">＋ Ajouter une année</button>
+    </div>
+    <div class="kpis" id="kpiGrid"></div>
+    <div class="grid2">
+      <div class="card"><div class="card-t">Top 15 produits (quantité)</div><div id="topProds"></div></div>
+      <div class="card"><div class="card-t g">Familles — CA & marge</div><div id="famList"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-t o">Comparaison stations</div><div class="chart-w"><canvas id="chStations"></canvas></div></div>
+      <div class="card"><div class="card-t p">Répartition CA par famille</div><div class="chart-w"><canvas id="chFam"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-t au">Recherche produit & rotation</div>
+      <div class="toolbar"><div class="search" style="flex:1"><input class="inp" id="prodSearch" placeholder="Rechercher un article vendu (ex: monster, pokka, oasis…)" oninput="renderProdSearch()"></div></div>
+      <div id="prodSearchRes"></div>
+    </div>
+  </div>
+  <div class="card" id="oppCard" style="margin-top:16px">
+    <div class="card-t g">🎯 Top opportunités d'import (basé sur vos ventes)</div>
+    <p style="font-size:12px;color:var(--ink2);margin:4px 0 10px">Classement par enjeu annuel (volume × prix d'achat local). Le <b>FOB max</b> est le prix fournisseur à ne pas dépasser pour garder ≥ 5% de gain après CRR complet (fret, OM, TVA, taxe soda, stickering). Fournisseurs suggérés selon ta filière.</p>
+    <button class="btn" onclick="renderOpps()">🎯 Générer les opportunités</button>
+    <div class="tbl-wrap" style="max-height:520px;overflow:auto;margin-top:12px"><table class="tbl" id="oppTable"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============ VUE CATALOGUE IA ============ -->
+<section class="view" id="v-compare">
+<div class="wrap2">
+  <div class="card">
+    <div class="card-t g">⚖️ Comparateur de catalogues fournisseurs</div>
+    <p style="font-size:12px;color:var(--ink2);margin:4px 0 14px">Charge 2 ou 3 catalogues (Excel ou PDF). Les produits identiques sont rapprochés automatiquement, même sous des appellations légèrement différentes, et comparés au référentiel local.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="cmpZones">
+      <div class="drop" id="cmpDrop0" style="min-height:110px"><b>Catalogue A</b><div class="mini" id="cmpName0">PDF / Excel</div><input type="file" id="cmpFile0" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+      <div class="drop" id="cmpDrop1" style="min-height:110px"><b>Catalogue B</b><div class="mini" id="cmpName1">PDF / Excel</div><input type="file" id="cmpFile1" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+      <div class="drop" id="cmpDrop2" style="min-height:110px"><b>Catalogue C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="cmpName2">PDF / Excel</div><input type="file" id="cmpFile2" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn" onclick="runCompare()">⚖️ Comparer les catalogues</button>
+      <button class="btn gh" onclick="exportCompare()">⬇ Export Excel</button>
+    </div>
+    <div id="cmpSts" style="margin-top:8px"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-t g">🚛 Comparateur de devis transitaires</div>
+    <p style="font-size:12px;color:var(--ink2);margin:4px 0 14px">Charge 2 ou 3 cotations PDF (DSG, autres transitaires). L'IA extrait fret, frais fixes, transit time — la comparaison porte sur les <b>frais transitaire hors droits & taxes</b> (OM/TVA identiques quel que soit le prestataire). Clé API requise.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      <div class="drop" id="trDrop0" style="min-height:100px"><b>Devis A</b><div class="mini" id="trName0">PDF</div><input type="file" id="trFile0" accept=".pdf" hidden></div>
+      <div class="drop" id="trDrop1" style="min-height:100px"><b>Devis B</b><div class="mini" id="trName1">PDF</div><input type="file" id="trFile1" accept=".pdf" hidden></div>
+      <div class="drop" id="trDrop2" style="min-height:100px"><b>Devis C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="trName2">PDF</div><input type="file" id="trFile2" accept=".pdf" hidden></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn" onclick="runTransitCompare()">🚛 Comparer les devis</button>
+    </div>
+    <div id="trSts" style="margin-top:8px"></div>
+    <div class="tbl-wrap" id="trResWrap" style="display:none;max-height:560px;overflow:auto;margin-top:12px"><table class="tbl" id="trTable"><thead></thead><tbody></tbody></table></div>
+  </div>
+  <div class="card" id="cmpResCard" style="display:none">
+    <div class="card-t">Résultat du rapprochement</div>
+    <div id="cmpKpis" style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <div class="tbl-wrap" style="max-height:560px;overflow:auto"><table class="tbl" id="cmpTable"><thead></thead><tbody></tbody></table></div>
+  </div>
+</div>
+</section>
+<section class="view" id="v-catalogue">
+  <div class="grid2" style="grid-template-columns:1.3fr 1fr;align-items:start">
+    <div>
+      <div class="drop" id="dropCat" onclick="document.getElementById('fiCat').click()">
+        <div class="drop-ic" style="background:var(--purple-bg)">🧠</div>
+        <h3>Analysez un catalogue fournisseur</h3>
+        <p>Glissez un <b>PDF</b> (catalogue, proforma, offre) ou un <b>Excel/CSV</b>.<br>L'IA extrait produits, prix unitaires, colisage — puis croise avec vos ventes,<br>vos prix d'achat locaux et calcule le <b>CRR rendu Réunion</b>.</p>
+        <div class="fmt-row"><span class="fmt">PDF (texte ou scanné)</span><span class="fmt">XLSX</span><span class="fmt">CSV</span><span class="fmt">OCR Vision IA</span></div>
+        <input type="file" id="fiCat" accept=".pdf,.xlsx,.xls,.csv">
+      </div>
+      <div class="sts" id="catSts"></div>
+      <div class="ai-think" id="catThink"><div class="spin"></div><div><div class="t1" id="catThinkT1">Lecture du document…</div><div class="t2" id="catThinkT2">Extraction des produits, prix et colisage</div></div></div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="card-t au">Méthodologie Expert Achat</div>
+      <div class="hint" style="margin-bottom:10px"><b>1 · Extraction</b> — Excel : détection auto des colonnes. PDF : extraction texte + structuration IA ; si scanné, OCR vision IA page par page.</div>
+      <div class="hint" style="margin-bottom:10px"><b>2 · Matching</b> — Chaque produit est comparé à vos ventes stations (par marque + format) et au référentiel <b>PRIX_D_ACHATS</b> (229 articles). Produit inconnu → comparaison à sa catégorie.</div>
+      <div class="hint" style="margin-bottom:10px"><b>3 · CRR rendu</b> — Prix + fret/DSG pro-rata + droits de douane + OM 25,5% + OMR 2,5% + TVA 2,1% + <b>taxe soda 2026</b> + stickering.</div>
+      <div class="hint"><b>4 · Verdict & quantité</b> — IMPORTER / NÉGOCIER / REJETER / NOUVEAU, avec quantité recommandée = ventes mensuelles × rotation cible, arrondie au carton.</div>
+    </div>
+  </div>
+
+  <div id="catResults" style="display:none">
+    <div class="kpis" id="catKpis"></div>
+    <div class="toolbar">
+      <div class="pills" id="catVerdictPills"></div>
+      <div class="search"><input class="inp" id="catSearch" placeholder="Filtrer…" oninput="renderCatTable()"></div>
+      <span class="sp"></span>
+      <button class="btn gold" onclick="sendToContainer()">🚢 Envoyer la sélection au conteneur</button>
+      <button class="btn gh" onclick="exportCat()">⬇ Export Excel</button>
+    </div>
+    <div class="tbl-wrap"><table id="catTable"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============ VUE CONTENEUR ============ -->
+<section class="view" id="v-conteneur">
+  <div class="grid2" style="grid-template-columns:1fr 1.6fr;align-items:start">
+    <div class="cgauge">
+      <div class="card-t" style="margin-bottom:10px">Conteneur 40' HC</div>
+      <svg class="cont-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs><linearGradient id="fillG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0A84FF"/><stop offset="1" stop-color="#0071E3"/></linearGradient>
+        <clipPath id="contClip"><rect x="6" y="8" width="372" height="64" rx="8"/></clipPath></defs>
+        <rect x="4" y="6" width="376" height="68" rx="10" fill="#EDEFF4" stroke="#C9CDD6" stroke-width="2"/>
+        <g clip-path="url(#contClip)"><rect id="contFill" x="6" y="8" width="0" height="64" fill="url(#fillG)" style="transition:width .8s cubic-bezier(.3,0,.2,1)"/>
+        <g stroke="#fff" stroke-opacity=".25" stroke-width="2" id="contRibs"></g></g>
+        <rect x="378" y="20" width="10" height="40" rx="2" fill="#C9CDD6"/>
+      </svg>
+      <div class="cg-row"><span class="cg-lbl">Volume</span><span class="cg-big" id="cgCbm">0 / 67 m³</span></div>
+      <div class="bar"><i id="barCbm"></i></div>
+      <div class="cg-row" style="margin-top:10px"><span class="cg-lbl">Poids</span><span class="cg-big" id="cgKg" style="font-size:16px">0 / 26 000 kg</span></div>
+      <div class="bar"><i id="barKg"></i></div>
+      <div class="grid3" style="margin-top:14px;gap:8px">
+        <div class="vm"><div class="v" id="cgVal">0 €</div><div class="l">Valeur FOB</div></div>
+        <div class="vm"><div class="v" id="cgCrr">0 €</div><div class="l">Coût rendu</div></div>
+        <div class="vm"><div class="v" id="cgMarge" style="color:var(--green-d)">0 €</div><div class="l">Marge brute est.</div></div>
+      </div>
+      <div class="vm" style="margin-top:8px;background:var(--gold-bg)"><div class="v" style="color:var(--gold-d)" id="cgGain">0 €</div><div class="l" style="color:var(--gold-d)">Économie vs achat local</div></div>
+      <button class="btn pri" style="width:100%;justify-content:center;margin-top:14px" onclick="autoFill()">✨ Remplissage auto optimal</button>
+      <button class="btn gh" style="width:100%;justify-content:center;margin-top:8px" onclick="exportPlan()">⬇ Exporter le plan de commande</button>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-t">Paramètres logistiques & fiscaux</div>
+        <div class="grid3" style="gap:10px">
+          <div class="field"><label>Fret 40' HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_fret" value="3850" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+          <div class="field"><label>Transit DSG</label><div class="iwrap"><input class="inp mono" type="number" id="p_dsg" value="1329" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+          <div class="field"><label>Stickering / unité</label><div class="iwrap"><input class="inp mono" type="number" id="p_stick" value="0.05" step="0.01" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+          <div class="field"><label>OM V395</label><div class="iwrap"><input class="inp mono" type="number" id="p_om" value="25.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+          <div class="field"><label>OM Régional</label><div class="iwrap"><input class="inp mono" type="number" id="p_omr" value="2.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+          <div class="field"><label>TVA import</label><div class="iwrap"><input class="inp mono" type="number" id="p_tva" value="2.1" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+          <div class="field"><label>DD Boissons</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_b" value="9.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+          <div class="field"><label>DD Confiserie/sec</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_c" value="5.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+          <div class="field"><label>Capacité utile</label><div class="iwrap"><input class="inp mono" type="number" id="p_cap" value="67" oninput="recalcContainer()"><span class="sfx">m³</span></div></div>
+          <div class="field"><label>Palettes euro / 40'HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_plt" value="25" oninput="recalcContainer()"><span class="sfx">plt</span></div></div>
+        </div>
+        <div class="hint" style="margin-top:10px">💧 <b>Taxe soda 2026</b> appliquée automatiquement aux boissons selon le niveau de sucre choisi par ligne : 4,07 / 21,38 / 35,07 €/hl · édulcorants 4,50 €/hl.</div>
+      </div>
+      <div class="sts inf show" id="contInfo" style="margin:0">Ajoutez des produits depuis l'onglet <b>Catalogue IA</b> ou chargez directement une proforma ici.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="toolbar">
+      <div class="card-t" style="margin:0">Plan de chargement</div>
+      <span class="sp"></span>
+      <button class="btn gh" onclick="clearContainer()">Vider</button>
+    </div>
+    <div class="tbl-wrap"><table id="contTable"><thead></thead><tbody></tbody></table></div>
+    <div class="empty" id="contEmpty"><div class="ic">🚢</div><h3>Conteneur vide</h3><p>Analysez un catalogue dans l'onglet Catalogue IA puis envoyez votre sélection ici, ou utilisez le remplissage automatique.</p></div>
+  </div>
+</section>
+
+<!-- ============ VUE VEILLE ============ -->
+<section class="view" id="v-veille">
+  <div class="card">
+    <div class="card-t p">Veille mondiale — découverte produits & fournisseurs</div>
+    <div class="toolbar" style="margin-bottom:10px">
+      <input class="inp" id="vSearch" placeholder="Ex : boissons virales TikTok Asie, snacks halal Turquie, sodas coréens 2026…" style="flex:1;min-width:260px" onkeydown="if(event.key==='Enter')launchVeille()">
+      <button class="btn pri" id="vGo" onclick="launchVeille()">🔴 Lancer la veille live</button>
+    </div>
+    <div class="toolbar" style="margin-bottom:0">
+      <div class="pills" id="vCats">
+        <button class="pill act" data-c="all">Tout</button><button class="pill" data-c="boissons">Boissons</button><button class="pill" data-c="energy">Energy</button><button class="pill" data-c="snacks">Snacks</button><button class="pill" data-c="confiserie">Confiserie</button><button class="pill" data-c="asiatique">Asiatique</button>
+      </div>
+      <span class="sp"></span>
+      <div class="pills">
+        <button class="pill act" id="vHalal" onclick="this.classList.toggle('act')">☪️ Halal prioritaire</button>
+        <button class="pill act" id="vNoUS" onclick="this.classList.toggle('act')">🚫 Exclure USA</button>
+      </div>
+    </div>
+  </div>
+  <div class="ai-think" id="vThink"><div class="spin"></div><div><div class="t1">Recherche web en cours…</div><div class="t2" id="vThinkT2">Scan des lancements produits, TikTok trends, salons & fabricants Europe/Asie</div></div></div>
+  <div class="sts" id="vSts"></div>
+  <div id="vAnalysis" style="display:none" class="card"><div class="card-t">Analyse</div><p style="font-size:13px;line-height:1.7" id="vAnalysisTxt"></p><div class="mini" id="vSources" style="margin-top:8px"></div></div>
+  <div class="vgrid" id="vResults"></div>
+  <div class="empty" id="vEmpty"><div class="ic">🌍</div><h3>Votre radar produits mondial</h3><p>L'IA scanne le web en direct : nouveaux lancements, marques émergentes, fabricants avec contacts export vérifiables — filtrés selon vos critères (Europe/Asie, halal, formats single-serve 1,20–3,50 €, hors marques déjà bien distribuées localement).</p></div>
+</section>
+
+<!-- ============ VUE RÉGLAGES ============ -->
+<section class="view" id="v-marketing">
+<style>
+/* Studio promo */
+.mkt-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.mkt-grid{grid-template-columns:1fr}}
+.mkt-form .inp{margin-bottom:8px}
+.mkt-lbl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink2);margin:10px 0 4px}
+.mkt-themes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mkt-th{height:44px;border-radius:10px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.mkt-th.act{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
+.mkt-fmt{display:flex;gap:6px}
+.mkt-fmt button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink2)}
+.mkt-fmt button.act{border-color:var(--blue);color:var(--blue);background:var(--blue-bg,#eef4ff)}
+.mkt-stage{background:repeating-conic-gradient(#f0f0f3 0 25%,#fafafc 0 50%) 0 0/22px 22px;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;align-items:center;justify-content:center;min-height:420px;overflow:hidden}
+.slogan-chip{display:inline-block;background:var(--gold-bg);border:1px solid var(--gold);color:var(--gold-d);font-size:11px;font-weight:700;padding:5px 10px;border-radius:16px;margin:3px 4px 0 0;cursor:pointer}
+.slogan-chip:hover{background:var(--gold);color:#fff}
+/* ---- POSTER ---- */
+.poster{position:relative;overflow:hidden;font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;display:flex;flex-direction:column;justify-content:space-between;flex-shrink:0}
+.po-badge{position:absolute;top:5%;right:6%;background:#fff;color:#e8112d;font-weight:900;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(8deg);box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:3}
+.po-head{position:relative;z-index:2}
+.po-brand{font-weight:900;letter-spacing:4px;opacity:.85}
+.po-hook{font-weight:900;line-height:.95;letter-spacing:-1px;text-transform:uppercase}
+.po-prod{font-weight:800;opacity:.92}
+.po-prices{display:flex;align-items:baseline;gap:4%;position:relative;z-index:2}
+.po-old{text-decoration:line-through;opacity:.55;font-weight:700}
+.po-new{font-weight:900;line-height:1}
+.po-cents{vertical-align:super}
+.po-foot{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;font-weight:700}
+.po-stations{letter-spacing:2px;font-weight:800}
+.po-period{opacity:.75}
+.po-deco{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;z-index:1}
+</style>
+<div class="wrap2">
+  <div class="mkt-grid">
+    <div class="card mkt-form">
+      <div class="card-t g">📣 Studio Promo</div>
+      <div class="mkt-lbl">Produit</div>
+      <input class="inp" id="mkProd" list="mkProdList" placeholder="Monster Energy 500ml" oninput="mkAutoFill();mkRender()">
+      <datalist id="mkProdList"></datalist>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><div class="mkt-lbl">Prix normal €</div><input class="inp" id="mkOld" type="number" step="0.05" placeholder="2.50" oninput="mkRender()"></div>
+        <div style="flex:1"><div class="mkt-lbl">Prix PROMO €</div><input class="inp" id="mkNew" type="number" step="0.05" placeholder="1.90" oninput="mkRender()"></div>
+      </div>
+      <div class="mkt-lbl">Accroche</div>
+      <input class="inp" id="mkHook" placeholder="LE PLEIN D'ÉNERGIE" oninput="mkRender()">
+      <button class="btn gh" style="width:100%;margin:4px 0 2px" onclick="mkSlogans()">✨ Générer des accroches IA</button>
+      <div id="mkSloganBox"></div>
+      <div class="mkt-lbl">Mention bas (période, condition)</div>
+      <input class="inp" id="mkPeriod" placeholder="Du 15 au 30 juin · dans la limite du stock" oninput="mkRender()">
+      <div class="mkt-lbl">Stations</div>
+      <input class="inp" id="mkStations" value="OLA · TOTAL · VITO" oninput="mkRender()">
+      <div class="mkt-lbl">Thème</div>
+      <div class="mkt-themes" id="mkThemes"></div>
+      <div class="mkt-lbl">Format</div>
+      <div class="mkt-fmt" id="mkFmts">
+        <button data-f="story" onclick="mkFmt('story')">📱 Story<br>1080×1920</button>
+        <button data-f="post" class="act" onclick="mkFmt('post')">⬛ Post<br>1080×1080</button>
+        <button data-f="tv" onclick="mkFmt('tv')">🖥 Écran TV<br>1920×1080</button>
+      </div>
+      <button class="btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#7048e8,#3b5bdb)" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn gh" style="flex:1" onclick="mkGenAI()">↻ Variante</button>
+        <button class="btn gh" style="flex:1" onclick="mkBackManual()">Modèle simple</button>
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="mkExport()">⬇ Télécharger PNG</button>
+      <div id="mkSts" style="margin-top:8px"></div>
+    </div>
+    <div>
+      <div class="mkt-stage" id="mkStage"><div id="mkPoster"></div></div>
+      <p style="font-size:11px;color:var(--ink2);margin-top:8px">Astuce : clique une accroche générée pour l'appliquer. Le PNG est exporté en pleine résolution, prêt pour WhatsApp, Insta/TikTok ou l'écran caisse.</p>
+    </div>
+  </div>
+</div>
+</section>
+<section class="view" id="v-reglages">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-t">Clé API Anthropic (pour GitHub Pages)</div>
+      <p style="font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:10px">Nécessaire pour l'<b>analyse IA des PDF</b> et la <b>veille live</b> quand l'app est hébergée sur GitHub Pages. Stockée uniquement dans votre navigateur (localStorage).</p>
+      <div class="toolbar"><input class="inp mono" type="password" id="apiKeyInp" placeholder="sk-ant-…" style="flex:1"><button class="btn pri" onclick="saveApiKey()">Enregistrer</button></div>
+      <div class="sts" id="keySts"></div>
+    </div>
+    <div class="card">
+      <div class="card-t g">Taxe soda 2026 (€/hl)</div>
+      <div class="grid3" style="gap:10px">
+        <div class="field"><label>Sucre &lt; 5g/100ml</label><input class="inp mono" type="number" id="ts_low" value="4.07" step="0.01"></div>
+        <div class="field"><label>5–8 g/100ml</label><input class="inp mono" type="number" id="ts_mid" value="21.38" step="0.01"></div>
+        <div class="field"><label>&gt; 8 g/100ml</label><input class="inp mono" type="number" id="ts_high" value="35.07" step="0.01"></div>
+      </div>
+      <div class="field" style="margin-top:10px;max-width:200px"><label>Édulcorants</label><input class="inp mono" type="number" id="ts_sweet" value="4.50" step="0.01"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-t o">Rotations cibles (mois)</div>
+      <div class="grid3" style="gap:10px">
+        <div class="field"><label>Boissons</label><input class="inp mono" type="number" id="rot_Boissons" value="3.5" step="0.5"></div>
+        <div class="field"><label>Chips / Snacks</label><input class="inp mono" type="number" id="rot_Chips" value="4" step="0.5"></div>
+        <div class="field"><label>Confiseries</label><input class="inp mono" type="number" id="rot_Confiseries" value="5" step="0.5"></div>
+        <div class="field"><label>Biscuiterie</label><input class="inp mono" type="number" id="rot_Biscuiterie" value="5" step="0.5"></div>
+        <div class="field"><label>Sec / Autre</label><input class="inp mono" type="number" id="rot_Autre" value="6" step="0.5"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-t au">Données locales</div>
+      <div class="srow"><div><b style="font-size:13px">Années de ventes sauvegardées</b><div class="mini" id="dataYearsInfo">—</div></div><button class="btn dng" onclick="wipeAll()">Tout effacer</button></div>
+      <div class="hint" style="margin-top:10px">Référentiel embarqué : <b>229 prix d'achat 2026</b> + <b>ventes stations agrégées</b>. Vos fichiers chargés enrichissent et remplacent ces références.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal" id="modalBox"></div></div>
+<script>
+/* ============================================================
+   INCA IMPORT — Suite Achat & Import (fichier unique)
+   Dashboard ventes · Catalogue IA · Conteneur · Veille
+   ============================================================ */
+'use strict';
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ---------- Référentiels embarqués ---------- */
+const PRIX_ACHATS_DB = [{"article":"ALOE VERA OKF TPF","format":"50.00 CL BOUTEILLE","puaht_recent":0.98,"date_recent":"2026-04-22","fournisseur_recent":"ASD SARL","puv_ttc":2.6,"nb_achats":33},{"article":"ARIZONA 50 TPF","format":"","puaht_recent":1.57,"date_recent":"2026-03-18","fournisseur_recent":"SIDISRUN","puv_ttc":3.2,"nb_achats":8},{"article":"BAGATELLE 5L","format":"5.00 L BOUT*","puaht_recent":1.46,"date_recent":"2024-03-30","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":3.2,"nb_achats":5},{"article":"BASIL SEED","format":"30.00 CL BOUTEILLE","puaht_recent":0.73,"date_recent":"2025-04-24","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.1,"nb_achats":11},{"article":"BIG COLA","format":"1.60 L BOUTEILLE","puaht_recent":2.18,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":3.3,"nb_achats":23},{"article":"BIG COLA","format":"60.00 CL BOUTEILLE","puaht_recent":0.96,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.7,"nb_achats":31},{"article":"BISSAP JUS ARTISANAL","format":"25.00 CL BOCAL","puaht_recent":1.21,"date_recent":"2026-03-31","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.3,"nb_achats":12},{"article":"BLACK BRUIN 250","format":"250.00 ML BTE*","puaht_recent":0.77,"date_recent":"2023-12-18","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1.9,"nb_achats":1},{"article":"BLACK BRUIN 500","format":"500.00 ML BTE*","puaht_recent":1.18,"date_recent":"2023-09-09","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"BLUE SPORT","format":"","puaht_recent":0.85,"date_recent":"2025-07-21","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2,"nb_achats":2},{"article":"BOBACO BUBBLE TEA CUP TPF","format":"330.00 ML","puaht_recent":2.9,"date_recent":"2025-08-26","fournisseur_recent":"CODISMA","puv_ttc":4.2,"nb_achats":1},{"article":"BOISSON DON SIMON","format":"1.50 L BOUT*","puaht_recent":1.75,"date_recent":"2025-09-05","fournisseur_recent":"SUPERCASH","puv_ttc":3.5,"nb_achats":5},{"article":"BOURBON PANACHE","format":"33.00 CL BOUTEILLE","puaht_recent":0.85,"date_recent":"2025-11-28","fournisseur_recent":"SUPERCASH","puv_ttc":1.6,"nb_achats":17},{"article":"BUM BUM","format":"250.00 ML BOITE","puaht_recent":1.17,"date_recent":"2026-02-26","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":19},{"article":"BUM BUM 50 CL","format":"50.00 CL BTE*","puaht_recent":1.91,"date_recent":"2026-02-26","fournisseur_recent":"CHANE HIVE","puv_ttc":3.1,"nb_achats":6},{"article":"BUM BUM POMME SS","format":"25.00 CL BTE*","puaht_recent":1.2,"date_recent":"2023-12-30","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":1},{"article":"CACOLAC","format":"20.00 CL BOUTEILLE","puaht_recent":1.89,"date_recent":"2026-04-15","fournisseur_recent":"SUPERCASH","puv_ttc":2.5,"nb_achats":35},{"article":"CAFE SWEET BLACK NOIS OKF","format":"390.00 ML BTE*","puaht_recent":1.21,"date_recent":"2024-12-10","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.3,"nb_achats":1},{"article":"CAFEMIO TPF","format":"25.00 ML BOUTEILLE","puaht_recent":1.69,"date_recent":"2024-02-21","fournisseur_recent":"LORDIS","puv_ttc":2.9,"nb_achats":2},{"article":"CAPRI SUN","format":"33.00 CL FLACON","puaht_recent":1.13,"date_recent":"2026-02-24","fournisseur_recent":"GRAND SUD PRDUCTIONS sebastien","puv_ttc":1.9,"nb_achats":18},{"article":"CAPRISONNE","format":"","puaht_recent":0.36,"date_recent":"2026-03-25","fournisseur_recent":"GRAND SUD PRDUCTIONS sebastien","puv_ttc":1,"nb_achats":18},{"article":"CARESSE CREOLE 1 L","format":"1.00 L BOUT.","puaht_recent":5.2,"date_recent":"2025-01-02","fournisseur_recent":"POINT CHR","puv_ttc":5.9,"nb_achats":2},{"article":"CHIEF MILK SHAKE","format":"","puaht_recent":2.95,"date_recent":"2026-04-15","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":4.9,"nb_achats":3},{"article":"CILAOS","format":"125.00 CL BTL","puaht_recent":0.92,"date_recent":"2026-04-10","fournisseur_recent":"CILAOS","puv_ttc":2.3,"nb_achats":38},{"article":"CILAOS","format":"50.00 CL PLAS","puaht_recent":0.49,"date_recent":"2026-04-10","fournisseur_recent":"CILAOS","puv_ttc":1.5,"nb_achats":22},{"article":"CITRO","format":"1.00 L BOUTEILLE","puaht_recent":2.62,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":3.9,"nb_achats":9},{"article":"CITRO PETILLANT TPF","format":"","puaht_recent":1.6,"date_recent":"2025-11-29","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2.5,"nb_achats":8},{"article":"CITRO TPF","format":"50.00 CL BOUT.","puaht_recent":1.63,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2.5,"nb_achats":24},{"article":"COCA COLA","format":"1.00 L BOUTEILLE","puaht_recent":1.81,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.9,"nb_achats":32},{"article":"COCA COLA","format":"1.50 L BTL","puaht_recent":2.35,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.9,"nb_achats":81},{"article":"COCA COLA","format":"50.00 CL PET","puaht_recent":1.1,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2,"nb_achats":69},{"article":"COCA COLA BLE VER","format":"","puaht_recent":0.7,"date_recent":"2025-12-08","fournisseur_recent":"RTF","puv_ttc":1.5,"nb_achats":5},{"article":"COCA COLA CANETTE","format":"33.00 CL BOITE","puaht_recent":0.94,"date_recent":"2026-04-03","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":37},{"article":"COCA COLA CHERRY/VANILLE","format":"33.00 CL","puaht_recent":0.92,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":9},{"article":"COCA COLA VERRE","format":"30.00 CL BOUTEILLE","puaht_recent":0.95,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.8,"nb_achats":44},{"article":"COCA COLA ZERO","format":"1.50 L BOUTEILLE","puaht_recent":2.22,"date_recent":"2026-04-17","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.8,"nb_achats":46},{"article":"COCA COLA ZERO","format":"50.00 CL BOUTEILLE","puaht_recent":1.1,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.1,"nb_achats":51},{"article":"COCA COLA ZERO VR","format":"","puaht_recent":0.65,"date_recent":"2025-05-27","fournisseur_recent":"RTF","puv_ttc":1.5,"nb_achats":2},{"article":"COCOMAX GRAND","format":"1.00 L BOUTEILLE","puaht_recent":2.95,"date_recent":"2025-12-05","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":4.6,"nb_achats":5},{"article":"COCOMAX PETILLANT","format":"310.00 ML","puaht_recent":0.99,"date_recent":"2026-04-15","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":1.8,"nb_achats":1},{"article":"COCOMAX PETIT","format":"50.00 CL BOUTEILLE","puaht_recent":1.49,"date_recent":"2026-03-25","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.6,"nb_achats":14},{"article":"COLORADO THE","format":"50.00 CL BOITE","puaht_recent":1.54,"date_recent":"2026-04-01","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.5,"nb_achats":2},{"article":"CONTREX","format":"","puaht_recent":1.19,"date_recent":"2024-01-31","fournisseur_recent":"RTF","puv_ttc":2.1,"nb_achats":1},{"article":"CONTREX","format":"1.00 L BOUTEILLE","puaht_recent":1.07,"date_recent":"2025-03-13","fournisseur_recent":"RTF","puv_ttc":2.1,"nb_achats":5},{"article":"COT LIMONADE TPF","format":"1.50 L PLAS","puaht_recent":1.65,"date_recent":"2026-04-13","fournisseur_recent":"CHAN OU TEUNG","puv_ttc":2.8,"nb_achats":28},{"article":"CRISTALINE CITRONNADE 1.5","format":"","puaht_recent":1.91,"date_recent":"2025-12-10","fournisseur_recent":"SIDISRUN","puv_ttc":3.5,"nb_achats":1},{"article":"CURCUMIN SHOT","format":"","puaht_recent":1.62,"date_recent":"2026-04-21","fournisseur_recent":"RTF","puv_ttc":2.2,"nb_achats":3},{"article":"DIEGO","format":"20.00 CL POCHE","puaht_recent":0.5,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":1,"nb_achats":19},{"article":"DIEGO TPF","format":"1.00 L BRICK","puaht_recent":1.98,"date_recent":"2026-04-01","fournisseur_recent":"POINT CHR","puv_ttc":2.6,"nb_achats":16},{"article":"DIEGO/REA","format":"2.00 L BRICK","puaht_recent":3.5,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":4.9,"nb_achats":32},{"article":"DYNAMALT","format":"33.00 CL BTL","puaht_recent":1.06,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.8,"nb_achats":37},{"article":"EAU AROMATISEE CRISTALINE","format":"50.00 CL BOUT 300","puaht_recent":0.88,"date_recent":"2024-01-23","fournisseur_recent":"CODISMA","puv_ttc":1.4,"nb_achats":1},{"article":"EAU AUSTRALINE","format":"","puaht_recent":0.75,"date_recent":"2025-07-17","fournisseur_recent":"POINT CHR","puv_ttc":2.2,"nb_achats":1},{"article":"EAU AUSTRALINE","format":"1.00 L BOUTEILLE","puaht_recent":0.53,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":1.6,"nb_achats":14},{"article":"EAU AUSTRALINE","format":"1.50 L BOUT.","puaht_recent":0.65,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":1.9,"nb_achats":16},{"article":"EAU AUSTRALINE","format":"5.00 L BIDON","puaht_recent":1.76,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":3,"nb_achats":7},{"article":"EAU AUSTRALINE","format":"50.00 CL BOUTEILLE","puaht_recent":0.61,"date_recent":"2026-04-17","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1,"nb_achats":11},{"article":"EAU BAGATELLE","format":"1.60 L BTL","puaht_recent":0.55,"date_recent":"2026-04-23","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.5,"nb_achats":18},{"article":"EAU EVIAN","format":"1.50 L BTL","puaht_recent":1.45,"date_recent":"2021-10-26","fournisseur_recent":"BARCODES","puv_ttc":2.3,"nb_achats":10},{"article":"EAU SAN PELLIGRINO","format":"50.00 CL BOUTEILLE","puaht_recent":0.88,"date_recent":"2025-04-10","fournisseur_recent":"SIDISRUN","puv_ttc":1.7,"nb_achats":9},{"article":"EAU VOLCANIK","format":"1.25 L BOUTEILLE","puaht_recent":1.15,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.8,"nb_achats":28},{"article":"EAU VOLCANIK","format":"50.00 CL BOUTEILLE","puaht_recent":0.66,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.5,"nb_achats":21},{"article":"EDENA","format":"1.00 L BTL","puaht_recent":0.61,"date_recent":"2026-04-03","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.6,"nb_achats":27},{"article":"EDENA","format":"1.50 L BTL","puaht_recent":0.78,"date_recent":"2026-03-12","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.9,"nb_achats":30},{"article":"EDENA","format":"5.00 L BOUTEILLE","puaht_recent":1.77,"date_recent":"2026-02-12","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":3,"nb_achats":4},{"article":"EDENA","format":"50.00 CL BTL","puaht_recent":0.65,"date_recent":"2026-04-17","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1,"nb_achats":23},{"article":"EDENA PETILLANTE","format":"1.00 L BTL","puaht_recent":0.93,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.9,"nb_achats":16},{"article":"EDENA PETILLANTE","format":"50.00 CL BTL","puaht_recent":0.63,"date_recent":"2026-04-14","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.3,"nb_achats":15},{"article":"ENERGADE","format":"500.00 ML BTL","puaht_recent":1.4,"date_recent":"2026-01-27","fournisseur_recent":"RTF","puv_ttc":2.9,"nb_achats":3},{"article":"FANTA ANANAS","format":"","puaht_recent":1.01,"date_recent":"2025-07-25","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":10},{"article":"FANTA ANANAS GR","format":"","puaht_recent":2.01,"date_recent":"2025-02-14","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.6,"nb_achats":4},{"article":"FANTA CITRON","format":"","puaht_recent":0.51,"date_recent":"2025-04-18","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1,"nb_achats":9},{"article":"FANTA ORANGE","format":"50.00 CL PLAS","puaht_recent":1.06,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":48},{"article":"FANTA ORANGE BOITE","format":"33.00 CL BTE*","puaht_recent":0.63,"date_recent":"2025-03-25","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1.7,"nb_achats":5},{"article":"FANTA ORANGE/CITRON","format":"1.50 L BOUTEILL","puaht_recent":2.44,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.6,"nb_achats":44},{"article":"FANTA PASSION","format":"1.50 L BTL","puaht_recent":2.45,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.6,"nb_achats":39},{"article":"FANTA PASSION","format":"50.00 CL PLAS","puaht_recent":1.08,"date_recent":"2026-04-10","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":50},{"article":"FISHER PANACHE","format":"33.00 CL BOUTEILLE","puaht_recent":0.78,"date_recent":"2025-11-28","fournisseur_recent":"SUPERCASH","puv_ttc":1.6,"nb_achats":23},{"article":"FREEZ MIX TPF","format":"27.50 CL BOUT.","puaht_recent":1.45,"date_recent":"2023-10-18","fournisseur_recent":"MOLLA AMODE","puv_ttc":2.7,"nb_achats":4},{"article":"FRESCHY/MOUSSY PECHE","format":"33.00 ML BOITE","puaht_recent":1.4,"date_recent":"2026-01-22","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2.5,"nb_achats":31},{"article":"FUZE TEA TPF","format":"500.00 ML BOUTEILLE","puaht_recent":1.21,"date_recent":"2022-12-15","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2,"nb_achats":9},{"article":"GATORADE","format":"","puaht_recent":1.73,"date_recent":"2024-11-12","fournisseur_recent":"RTF","puv_ttc":2.9,"nb_achats":6},{"article":"GINGER SHOT","format":"","puaht_recent":1.62,"date_recent":"2026-03-17","fournisseur_recent":"RTF","puv_ttc":2.2,"nb_achats":3},{"article":"GINI LEMON","format":"33.00 CL BOITE","puaht_recent":1.15,"date_recent":"2022-12-23","fournisseur_recent":"SUPERCASH","puv_ttc":1.9,"nb_achats":7},{"article":"HEPAR","format":"75.00 CL BOUT PLA","puaht_recent":1.44,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":2.1,"nb_achats":3},{"article":"HERBI TEA TAMARIN","format":"","puaht_recent":0.71,"date_recent":"2024-09-06","fournisseur_recent":"RTF","puv_ttc":2,"nb_achats":2},{"article":"HYPE ENERGY DRINK","format":"25.00 CL BTE*","puaht_recent":1.24,"date_recent":"2024-10-15","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2.9,"nb_achats":2},{"article":"ICE COFFE VIENNA TPF","format":"230.00 ML GOBELET","puaht_recent":1.66,"date_recent":"2026-04-15","fournisseur_recent":"SIDISRUN","puv_ttc":2.6,"nb_achats":11},{"article":"ICE TEA EXOTIQUE  LIPTON","format":"33.00 CL BOITE","puaht_recent":1.28,"date_recent":"2026-04-08","fournisseur_recent":"SUPERCASH","puv_ttc":1.9,"nb_achats":13},{"article":"ICE TEA GREEN AGRUMES","format":"50.00 CL BOUTEILL","puaht_recent":1.07,"date_recent":"2021-06-05","fournisseur_recent":"CHANE HIVE","puv_ttc":2.2,"nb_achats":4},{"article":"ICE TEA LIPTON","format":"50.00 CL PET","puaht_recent":1.45,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":2.5,"nb_achats":20},{"article":"ICE TEA LIPTONIC","format":"33.00 CL BOITE","puaht_recent":0.94,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":1.9,"nb_achats":24},{"article":"ICE TEA PECHE","format":"33.00 CL BOITE","puaht_recent":0.73,"date_recent":"2021-12-15","fournisseur_recent":"RTF","puv_ttc":1.7,"nb_achats":9},{"article":"IF COCO GM","format":"1.00 L BOUT*","puaht_recent":2.5,"date_recent":"2022-02-16","fournisseur_recent":"RTF","puv_ttc":3.9,"nb_achats":1},{"article":"IF COCO/PASTEQUE/RAISIN","format":"350.00 ML BOUT 300","puaht_recent":1.12,"date_recent":"2026-03-17","fournisseur_recent":"SOLO IMPORT","puv_ttc":1.8,"nb_achats":14},{"article":"INFUSION BIO TPF","format":"330.00 ML BRICK","puaht_recent":1.77,"date_recent":"2023-05-31","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.6,"nb_achats":1},{"article":"JOKER LE FRUIT","format":"1.00 L BRICK","puaht_recent":2.65,"date_recent":"2025-06-05","fournisseur_recent":"RTF","puv_ttc":5.6,"nb_achats":13},{"article":"JUS CARESSE CREOLE","format":"","puaht_recent":1.66,"date_recent":"2024-08-29","fournisseur_recent":"POINT CHR","puv_ttc":2.3,"nb_achats":15},{"article":"JUS FEEL MORE DIMES","format":"","puaht_recent":1.2,"date_recent":"2023-10-18","fournisseur_recent":"MOLLA AMODE","puv_ttc":2,"nb_achats":1},{"article":"JUS GRANINI","format":"25.00 CL BTL","puaht_recent":1.14,"date_recent":"2025-11-04","fournisseur_recent":"CODISMA","puv_ttc":1.9,"nb_achats":27},{"article":"JUS LOOZA TPF","format":"20.00 CL BTLLE","puaht_recent":0.73,"date_recent":"2022-05-19","fournisseur_recent":"MOLLAN","puv_ttc":1.7,"nb_achats":2},{"article":"JUS MANGO","format":"50.00 CL BOUTEILLE","puaht_recent":0.64,"date_recent":"2024-05-02","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1.7,"nb_achats":4},{"article":"JUS SPRING VALLEY","format":"33.00 CL BTE*","puaht_recent":0.9,"date_recent":"2025-05-13","fournisseur_recent":"SOLO IMPORT","puv_ttc":1.6,"nb_achats":1},{"article":"KALAO 2L TPF","format":"2.00 L BOUTEILLE","puaht_recent":2.43,"date_recent":"2021-09-01","fournisseur_recent":"POINT CHR","puv_ttc":3.5,"nb_achats":2},{"article":"KALAO TPF","format":"45.00 CL BOUTEILLE","puaht_recent":0.95,"date_recent":"2022-11-30","fournisseur_recent":"POINT CHR","puv_ttc":1.6,"nb_achats":13},{"article":"KOOL KOOL TPF","format":"","puaht_recent":0.35,"date_recent":"2024-09-06","fournisseur_recent":"RTF","puv_ttc":1.6,"nb_achats":3},{"article":"LA PATAT","format":"250.00 ML","puaht_recent":0.83,"date_recent":"2026-04-09","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1.9,"nb_achats":2},{"article":"LACTEL MAX TPF","format":"20.00 CL BRICK","puaht_recent":0.58,"date_recent":"2024-03-29","fournisseur_recent":"RTF","puv_ttc":1,"nb_achats":2},{"article":"LE COQ NO ALCOL","format":"33.00 CL BOUT*","puaht_recent":2.25,"date_recent":"2025-02-21","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":3.7,"nb_achats":5},{"article":"LEAMO LIMONADE","format":"","puaht_recent":1.89,"date_recent":"2025-03-12","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.9,"nb_achats":6},{"article":"LIMONADE COT","format":"33.00 CL BTL","puaht_recent":0.57,"date_recent":"2026-04-13","fournisseur_recent":"CHAN OU TEUNG","puv_ttc":1,"nb_achats":40},{"article":"LIMONADE COT 2L","format":"","puaht_recent":1.0,"date_recent":"2018-12-04","fournisseur_recent":"CHAN OU TEUNG","puv_ttc":2.7,"nb_achats":1},{"article":"LIMONADE COT 50 CL","format":"","puaht_recent":0.76,"date_recent":"2026-03-06","fournisseur_recent":"SUPERCASH","puv_ttc":1.6,"nb_achats":26},{"article":"LIMONADE SEGA","format":"50.00 CL BOUTEILLE","puaht_recent":0.76,"date_recent":"2026-03-12","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":1.6,"nb_achats":15},{"article":"LIMONICE TPF","format":"50.00 CL BOUTEILLE","puaht_recent":0.76,"date_recent":"2026-02-26","fournisseur_recent":"CHANE HIVE","puv_ttc":1.6,"nb_achats":8},{"article":"LIMONICE TPF 1.5","format":"","puaht_recent":1.4,"date_recent":"2026-02-26","fournisseur_recent":"CHANE HIVE","puv_ttc":2.8,"nb_achats":3},{"article":"LIPTON PASTEQUE MENTHE","format":"33.00 CL BTE*","puaht_recent":0.94,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":1.9,"nb_achats":9},{"article":"LIPTON PETILLANT PECHE","format":"33.00 CL BTE*","puaht_recent":1.14,"date_recent":"2026-04-08","fournisseur_recent":"SUPERCASH","puv_ttc":1.9,"nb_achats":5},{"article":"LIPTONIC GRD BOUT","format":"1.50 L BOUT PLA","puaht_recent":3.72,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":5.2,"nb_achats":4},{"article":"MAAZA BRIQUE 33CL","format":"33.00 CL BRICK","puaht_recent":1.36,"date_recent":"2023-11-07","fournisseur_recent":"CHANE HIVE","puv_ttc":2.2,"nb_achats":2},{"article":"MAAZA FRUIT PASSION","format":"50.00 CL BOUT PLA","puaht_recent":1.98,"date_recent":"2025-09-17","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":3},{"article":"MAAZA LETCHIS","format":"50.00 CL BOUT PLA","puaht_recent":1.69,"date_recent":"2025-02-19","fournisseur_recent":"RTF","puv_ttc":2.5,"nb_achats":1},{"article":"MAAZA MANGUE","format":"50.00 CL BOUT PLA","puaht_recent":1.79,"date_recent":"2025-12-24","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":2},{"article":"MAAZA TPF","format":"33.00 CL BOUTEILL","puaht_recent":1.67,"date_recent":"2025-05-20","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":37},{"article":"MAAZA TROPICAL","format":"50.00 CL BOUT PLA","puaht_recent":1.86,"date_recent":"2025-12-24","fournisseur_recent":"CHANE HIVE","puv_ttc":2.5,"nb_achats":3},{"article":"MAXBREWCAFE GLACE","format":"250.00 ML","puaht_recent":1.48,"date_recent":"2026-03-17","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.8,"nb_achats":1},{"article":"MAXFLY NRJ","format":"250.00 ML","puaht_recent":1.18,"date_recent":"2026-04-15","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.2,"nb_achats":1},{"article":"MAY TEA TPF","format":"","puaht_recent":2.81,"date_recent":"2022-06-28","fournisseur_recent":"SOGEREP","puv_ttc":4.2,"nb_achats":2},{"article":"MAY TEA TPF","format":"33.00 CL BOIT","puaht_recent":0.98,"date_recent":"2020-11-06","fournisseur_recent":"SOGEREP","puv_ttc":1.9,"nb_achats":2},{"article":"MIAMI SOUL","format":"250.00 ML BTE*","puaht_recent":1.24,"date_recent":"2023-04-21","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":2},{"article":"MINUTE MAID ORANGE","format":"33.00 CL BOITE","puaht_recent":1.1,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":23},{"article":"MINUTE MAID POMME","format":"33.00 CL BOITE","puaht_recent":1.1,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":26},{"article":"MINUTE MAID TROPICAL","format":"33.00 CL BOITE","puaht_recent":1.12,"date_recent":"2026-04-03","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":25},{"article":"MONSTER ENERGY","format":"50.00 CL BOITDE","puaht_recent":1.72,"date_recent":"2026-04-14","fournisseur_recent":"CODISMA","puv_ttc":3.9,"nb_achats":82},{"article":"MOUSSY FRAISE","format":"33.00 ML BOITE","puaht_recent":1.4,"date_recent":"2025-10-30","fournisseur_recent":"PHOENIX REUNION johan","puv_ttc":2.5,"nb_achats":19},{"article":"NAW JUS TAMARIN","format":"33.00 CL BOIT","puaht_recent":0.94,"date_recent":"2026-03-05","fournisseur_recent":"SODIREL","puv_ttc":1.5,"nb_achats":2},{"article":"NAW JUS TPF","format":"","puaht_recent":0.97,"date_recent":"2026-04-16","fournisseur_recent":"SODIREL","puv_ttc":1.5,"nb_achats":5},{"article":"NECTAR LES VERGERS DE MARIE","format":"","puaht_recent":2.65,"date_recent":"2024-09-02","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":3.9,"nb_achats":1},{"article":"NOYA BOISSON CHIA","format":"320.00 ML BOUT P","puaht_recent":1.6,"date_recent":"2023-05-12","fournisseur_recent":"SODIREL","puv_ttc":2.9,"nb_achats":1},{"article":"NU SMOOTHIES","format":"33.00 CL BRICK","puaht_recent":1.54,"date_recent":"2021-11-25","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.8,"nb_achats":1},{"article":"OASIS  BOITE","format":"50.00 CL BOITE","puaht_recent":0.98,"date_recent":"2021-12-28","fournisseur_recent":"SUPERCASH","puv_ttc":1.8,"nb_achats":5},{"article":"OASIS 1L","format":"1.00 L BOUTEILLE","puaht_recent":2.22,"date_recent":"2026-04-02","fournisseur_recent":"SOGEREP","puv_ttc":3.3,"nb_achats":23},{"article":"OASIS BOUTEILLE","format":"50.00 CL BOUTEILLE","puaht_recent":1.36,"date_recent":"2026-04-23","fournisseur_recent":"SOGEREP","puv_ttc":2.2,"nb_achats":35},{"article":"OASIS CANETTE TPF","format":"33.00 CL BOITE","puaht_recent":1.07,"date_recent":"2026-04-23","fournisseur_recent":"SOGEREP","puv_ttc":1.8,"nb_achats":19},{"article":"OASIS POCKET","format":"25.00 CL BOUTEILLE","puaht_recent":0.89,"date_recent":"2026-04-03","fournisseur_recent":"SOGEREP","puv_ttc":1.5,"nb_achats":13},{"article":"OASIS THE","format":"","puaht_recent":2.59,"date_recent":"2026-02-03","fournisseur_recent":"SOGEREP","puv_ttc":3.9,"nb_achats":3},{"article":"OASIS TPF BOUTEILLE","format":"2.00 L BOUTEILLE","puaht_recent":3.13,"date_recent":"2026-04-03","fournisseur_recent":"SOGEREP","puv_ttc":4.9,"nb_achats":40},{"article":"ORANGINA","format":"1.50 L PLAS","puaht_recent":2.69,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.9,"nb_achats":65},{"article":"ORANGINA","format":"50.00 CL BOUTEILLE","puaht_recent":1.24,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.3,"nb_achats":58},{"article":"ORANGINA BOULE","format":"25.00 CL PLAS","puaht_recent":1.33,"date_recent":"2026-01-21","fournisseur_recent":"SUPERCASH","puv_ttc":1.9,"nb_achats":31},{"article":"ORANGINA CANETTE","format":"33.00 CL BTE*","puaht_recent":1.18,"date_recent":"2026-03-27","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":11},{"article":"PEPSI COLA ZERO","format":"50.00 CL BOUT.","puaht_recent":0.88,"date_recent":"2024-10-11","fournisseur_recent":"CHANE HIVE","puv_ttc":2.1,"nb_achats":3},{"article":"PEPSI GRAND","format":"","puaht_recent":2.43,"date_recent":"2024-08-16","fournisseur_recent":"CHANE HIVE","puv_ttc":3.7,"nb_achats":4},{"article":"PERRIER","format":"1.00 L BTL","puaht_recent":1.22,"date_recent":"2026-03-17","fournisseur_recent":"RTF","puv_ttc":2.8,"nb_achats":32},{"article":"PERRIER","format":"20.00 CL BTL","puaht_recent":0.85,"date_recent":"2025-12-08","fournisseur_recent":"RTF","puv_ttc":1.3,"nb_achats":4},{"article":"PERRIER & JUICE","format":"25.00 CL BTE*","puaht_recent":1.26,"date_recent":"2025-07-22","fournisseur_recent":"RTF","puv_ttc":1.9,"nb_achats":12},{"article":"PERRIER CITRON","format":"","puaht_recent":1.54,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":2.9,"nb_achats":3},{"article":"PERRIER CITRON 50","format":"","puaht_recent":1.12,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":1.9,"nb_achats":3},{"article":"PERRIER NAT/CITRON","format":"33.00 CL CANETTE","puaht_recent":0.71,"date_recent":"2024-12-27","fournisseur_recent":"RTF","puv_ttc":1.7,"nb_achats":2},{"article":"PERRIER VERRE","format":"33.00 CL BOUT.","puaht_recent":0.98,"date_recent":"2026-02-19","fournisseur_recent":"RTF","puv_ttc":1.5,"nb_achats":17},{"article":"PHOENIX PANACHE","format":"33.00 CL BOUTEILLE","puaht_recent":1.04,"date_recent":"2025-11-14","fournisseur_recent":"SUPERCASH","puv_ttc":2.2,"nb_achats":16},{"article":"PREDATOR GOLD","format":"50.00 CL","puaht_recent":0.98,"date_recent":"2024-01-25","fournisseur_recent":"SIDISRUN","puv_ttc":2.5,"nb_achats":1},{"article":"REA ANANAS","format":"1.00 L BRQ","puaht_recent":2.06,"date_recent":"2024-03-13","fournisseur_recent":"POINT CHR","puv_ttc":2.9,"nb_achats":3},{"article":"REA BOCAL 1L","format":"1.00 L BOUT.","puaht_recent":2.75,"date_recent":"2023-11-16","fournisseur_recent":"POINT CHR","puv_ttc":4.1,"nb_achats":4},{"article":"REA EXOTIQUE/MULTI","format":"1.00 L BRQ","puaht_recent":2.36,"date_recent":"2025-08-15","fournisseur_recent":"POINT CHR","puv_ttc":3.3,"nb_achats":10},{"article":"REA MANGUE","format":"1.00 L BRIQUE","puaht_recent":2.15,"date_recent":"2025-03-17","fournisseur_recent":"POINT CHR","puv_ttc":2.9,"nb_achats":8},{"article":"REA ORANGE","format":"1.00 L BRQ","puaht_recent":1.95,"date_recent":"2023-11-16","fournisseur_recent":"POINT CHR","puv_ttc":2.9,"nb_achats":6},{"article":"REA PLASTIQ","format":"25.00 CL BOUTEILLE","puaht_recent":1.0,"date_recent":"2023-07-19","fournisseur_recent":"POINT CHR","puv_ttc":1.8,"nb_achats":8},{"article":"REA POMME","format":"1.00 L BRIQ","puaht_recent":2.06,"date_recent":"2024-04-03","fournisseur_recent":"POINT CHR","puv_ttc":2.9,"nb_achats":4},{"article":"REA RAISIN ROUGE","format":"1.00 L BRQ","puaht_recent":1.72,"date_recent":"2023-01-18","fournisseur_recent":"POINT CHR","puv_ttc":2.9,"nb_achats":4},{"article":"REA VERRE TPF","format":"25.00 CL BTL","puaht_recent":1.12,"date_recent":"2026-04-16","fournisseur_recent":"POINT CHR","puv_ttc":1.9,"nb_achats":31},{"article":"RED BULL SHOT","format":"","puaht_recent":1.25,"date_recent":"2026-01-06","fournisseur_recent":"RTF","puv_ttc":2.5,"nb_achats":1},{"article":"REDBULL","format":"355.00 ML BOITE","puaht_recent":2.06,"date_recent":"2023-09-26","fournisseur_recent":"SOLO IMPORT","puv_ttc":3.9,"nb_achats":4},{"article":"REDBULL TPF","format":"250.00 ML","puaht_recent":1.5,"date_recent":"2026-02-10","fournisseur_recent":"SOLO IMPORT","puv_ttc":2.9,"nb_achats":13},{"article":"RICQLES","format":"33.00 CL BOITE","puaht_recent":1.13,"date_recent":"2021-10-25","fournisseur_recent":"SUPERCASH","puv_ttc":1.9,"nb_achats":4},{"article":"SAMBO TS PARFUM","format":"33.00 CL BOITE","puaht_recent":0.88,"date_recent":"2026-04-21","fournisseur_recent":"SOLO IMPORT","puv_ttc":2,"nb_achats":27},{"article":"SAN BENEDETTO BTE TPF 33","format":"33.00 CL BTE*","puaht_recent":1.03,"date_recent":"2024-09-06","fournisseur_recent":"CHANE HIVE","puv_ttc":1.9,"nb_achats":5},{"article":"SANPELL LIMON + ARANC","format":"33.00 CL BTE*","puaht_recent":1.03,"date_recent":"2024-12-13","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":19},{"article":"SANTAL AMANDE LAIT","format":"1.00 L BRICK","puaht_recent":2.95,"date_recent":"2025-03-13","fournisseur_recent":"RTF","puv_ttc":4.9,"nb_achats":1},{"article":"SCHWEPPES AGRUM/LEMN/POM","format":"33.00 CL BOITE","puaht_recent":1.01,"date_recent":"2026-04-17","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":9},{"article":"SCHWEPPES AGRUM/POIRE/MOJITO","format":"50.00 CL BOUTEILLE","puaht_recent":1.25,"date_recent":"2026-04-17","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.1,"nb_achats":48},{"article":"SCHWEPPES COCO","format":"50.00 CL BOUTEILLE","puaht_recent":1.25,"date_recent":"2026-04-17","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.1,"nb_achats":47},{"article":"SCHWEPPES MOJITO SLIM","format":"0.33 CL CANETTE","puaht_recent":1.01,"date_recent":"2025-12-12","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":4},{"article":"SCHWEPPES TONIC","format":"25.00 ML BTL","puaht_recent":1.03,"date_recent":"2026-04-10","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.8,"nb_achats":26},{"article":"SCHWEPPES TONIC PET","format":"50.00 CL BOUT PLA","puaht_recent":1.25,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.1,"nb_achats":39},{"article":"SCHWEPPES/S.AGRUM/COCO","format":"1.50 L BTL","puaht_recent":2.55,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.9,"nb_achats":54},{"article":"SEVEN UP","format":"1.50 L BOUTEILLE","puaht_recent":2.33,"date_recent":"2024-08-16","fournisseur_recent":"CHANE HIVE","puv_ttc":3.5,"nb_achats":2},{"article":"SHAKER TPF","format":"250.00 ML BRICK","puaht_recent":0.65,"date_recent":"2025-02-05","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.2,"nb_achats":2},{"article":"SHOT BISSAP ZANDJABILA","format":"60.00 ML BOCAL","puaht_recent":1.76,"date_recent":"2026-04-23","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":3.2,"nb_achats":1},{"article":"SIPSTY BLUE HAWAI","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY COLA","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY COLA CHERRY","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY KIWI CITRON SMASH","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY LETCHIS BREEZE","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY MANGUE PECHE BELLINI","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SIPSTY PINA COLADA","format":"275.00 ML BOUT.","puaht_recent":1.3,"date_recent":"2025-02-10","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.5,"nb_achats":1},{"article":"SMOOTHIE ANANAS RAISIN","format":"500.00 ML BOUT PLA","puaht_recent":1.47,"date_recent":"2026-04-16","fournisseur_recent":"SODIREL","puv_ttc":2.5,"nb_achats":2},{"article":"SMOOTHIE FRAISE PAMPLEMOUSSRE","format":"500.00 ML BOUT PLA","puaht_recent":1.47,"date_recent":"2026-04-16","fournisseur_recent":"SODIREL","puv_ttc":2.5,"nb_achats":2},{"article":"SMOOTHIE GREEN","format":"500.00 ML BOUT PLA","puaht_recent":1.47,"date_recent":"2026-04-16","fournisseur_recent":"SODIREL","puv_ttc":2.5,"nb_achats":2},{"article":"SMOOTHIE LFW","format":"350.00 ML PET","puaht_recent":1.08,"date_recent":"2026-04-13","fournisseur_recent":"LIM FA WAN ET FILS","puv_ttc":2.5,"nb_achats":1},{"article":"SMOOTHIE MYRTILLE NAW","format":"500.00 ML BOUT PLA","puaht_recent":1.47,"date_recent":"2026-04-16","fournisseur_recent":"SODIREL","puv_ttc":2.5,"nb_achats":1},{"article":"SOJA MILK","format":"300.00 ML BOUTEILLE","puaht_recent":0.99,"date_recent":"2025-02-05","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":1.9,"nb_achats":6},{"article":"SOLPAK BERLINGOT","format":"20.00 CL","puaht_recent":0.43,"date_recent":"2022-06-29","fournisseur_recent":"SOLPAK QB","puv_ttc":1,"nb_achats":8},{"article":"SOLPAK TPF 1.5L/2L","format":"2.00 L BOUTEILLE","puaht_recent":2.56,"date_recent":"2022-06-29","fournisseur_recent":"SOLPAK QB","puv_ttc":4.1,"nb_achats":11},{"article":"SPLASH GREN/CIT/EXO","format":"1.50 L PLAS","puaht_recent":1.47,"date_recent":"2024-03-22","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.8,"nb_achats":2},{"article":"SPLASH TPF","format":"50.00 CL BLLE","puaht_recent":0.67,"date_recent":"2023-10-20","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.6,"nb_achats":4},{"article":"SPRITE","format":"1.50 L BOUTEILLE","puaht_recent":2.44,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":3.7,"nb_achats":41},{"article":"SPRITE","format":"50.00 CL BTL","puaht_recent":1.06,"date_recent":"2026-04-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":1.9,"nb_achats":38},{"article":"SPRITE CANETTE","format":"33.00 CL CANETTE","puaht_recent":0.63,"date_recent":"2025-07-21","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":1.8,"nb_achats":3},{"article":"SPRITE/FANTA VERRE","format":"","puaht_recent":0.7,"date_recent":"2025-09-12","fournisseur_recent":"RTF","puv_ttc":1.5,"nb_achats":4},{"article":"SULTAN TPF","format":"250.00 ML BOITE","puaht_recent":0.98,"date_recent":"2017-10-30","fournisseur_recent":"DIVERS FOURNISSEURS","puv_ttc":2.1,"nb_achats":3},{"article":"TENSAI THE GLACE","format":"","puaht_recent":1.84,"date_recent":"2024-08-07","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.8,"nb_achats":3},{"article":"TEZI GRAND MODELE","format":"","puaht_recent":2.27,"date_recent":"2025-08-01","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":4.5,"nb_achats":5},{"article":"TEZI TEA CITRON","format":"50.00 CL BOUT.","puaht_recent":1.13,"date_recent":"2019-09-13","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2,"nb_achats":3},{"article":"TEZI TEA LETCHI","format":"","puaht_recent":0.98,"date_recent":"2024-03-08","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2,"nb_achats":7},{"article":"TEZI TEA MANGUE","format":"","puaht_recent":1.22,"date_recent":"2024-10-11","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2,"nb_achats":9},{"article":"TEZI TEA MELON","format":"","puaht_recent":1.22,"date_recent":"2025-01-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2,"nb_achats":8},{"article":"TEZI TEA PECHE","format":"50.00 CL BOUT.","puaht_recent":1.22,"date_recent":"2025-01-24","fournisseur_recent":"BRASSERIE DE BOURBON ALIETTE SAUTRON","puv_ttc":2.5,"nb_achats":8},{"article":"THE GLACE POKKA TPF","format":"50.00 CL PET","puaht_recent":1.1,"date_recent":"2021-06-14","fournisseur_recent":"SOLO IMPORT","puv_ttc":2.5,"nb_achats":9},{"article":"THE LIPTON GREEN SLIM","format":"33.00 CL BTE*","puaht_recent":0.94,"date_recent":"2026-03-17","fournisseur_recent":"RTF","puv_ttc":1.9,"nb_achats":14},{"article":"THE POKKA","format":"1.50 L BOUTEILLE","puaht_recent":3.53,"date_recent":"2023-12-19","fournisseur_recent":"SUPERCASH","puv_ttc":4.9,"nb_achats":4},{"article":"VICHY CELESTINS","format":"1.15 L BOUTEILLE","puaht_recent":1.42,"date_recent":"2026-04-08","fournisseur_recent":"RTF","puv_ttc":2.9,"nb_achats":10},{"article":"VINUT BUBBLE TEA TPF","format":"320.00 ML BTE*","puaht_recent":1.02,"date_recent":"2025-12-10","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":2.1,"nb_achats":4},{"article":"VITTEL","format":"","puaht_recent":0.71,"date_recent":"2026-04-21","fournisseur_recent":"RTF","puv_ttc":1.4,"nb_achats":3},{"article":"VITTEL BOUCHON SPORT","format":"75.00 CL BOUT PLA","puaht_recent":0.85,"date_recent":"2025-12-08","fournisseur_recent":"RTF","puv_ttc":1.8,"nb_achats":1},{"article":"WEIDER POWER","format":"50.00 CL BOUT P","puaht_recent":1.94,"date_recent":"2023-04-20","fournisseur_recent":"DISTRI PROXI OI vincent","puv_ttc":3.7,"nb_achats":1},{"article":"XL ENERGY","format":"1.00 L BOUTEILL","puaht_recent":2.81,"date_recent":"2026-04-23","fournisseur_recent":"SOGEREP","puv_ttc":5.2,"nb_achats":13},{"article":"XL ENERGY","format":"25.00 CL CANETTE","puaht_recent":1.17,"date_recent":"2026-04-23","fournisseur_recent":"SOGEREP","puv_ttc":2.9,"nb_achats":21},{"article":"ZINGI SODA","format":"","puaht_recent":1.3,"date_recent":"2024-10-22","fournisseur_recent":"WINARUN SARL","puv_ttc":2.5,"nb_achats":2}];
+const STATION_DB = [
+  {keys:["pokka","the glace pokka","pokka ice tea"],qty:94163,pv:2.75,cat:"Boissons"},
+  {keys:["monster energy","monster "],qty:56720,pv:3.90,cat:"Boissons"},
+  {keys:["red bull 25","redbull 25","redbull 250"],qty:31385,pv:3.40,cat:"Boissons"},
+  {keys:["red bull 355","redbull 355","redbull gm"],qty:10490,pv:4.30,cat:"Boissons"},
+  {keys:["capri-sun","caprisonne","caprisun","capri sun"],qty:31808,pv:1.20,cat:"Boissons"},
+  {keys:["aloe vera"],qty:17605,pv:2.80,cat:"Boissons"},
+  {keys:["coca cola","coca-cola","coke"],qty:36065,pv:2.20,cat:"Boissons"},
+  {keys:["xl energy"],qty:13000,pv:5.80,cat:"Boissons"},
+  {keys:["sambo"],qty:20902,pv:2.00,cat:"Boissons"},
+  {keys:["protein milk"],qty:757,pv:4.30,cat:"Boissons"},
+  {keys:["m&m s","m&ms","m&m'","m&m "],qty:11921,pv:1.60,cat:"Confiseries"},
+  {keys:["kinder bueno white"],qty:1200,pv:2.00,cat:"Confiseries"},
+  {keys:["kinder bueno mini"],qty:800,pv:2.00,cat:"Confiseries"},
+  {keys:["kinder bueno"],qty:10538,pv:2.00,cat:"Confiseries"},
+  {keys:["kinder joy"],qty:3500,pv:2.30,cat:"Confiseries"},
+  {keys:["kinder country"],qty:700,pv:1.50,cat:"Confiseries"},
+  {keys:["kinder schoko"],qty:400,pv:2.00,cat:"Confiseries"},
+  {keys:["kinder surprise"],qty:1100,pv:2.30,cat:"Confiseries"},
+  {keys:["kinder tronky"],qty:300,pv:1.80,cat:"Confiseries"},
+  {keys:["bounty"],qty:5310,pv:1.60,cat:"Confiseries"},
+  {keys:["snickers"],qty:4902,pv:1.60,cat:"Confiseries"},
+  {keys:["twix"],qty:4457,pv:1.60,cat:"Confiseries"},
+  {keys:["tic tac"],qty:4071,pv:1.30,cat:"Confiseries"},
+  {keys:["mars ","mars bar"],qty:2574,pv:1.60,cat:"Confiseries"},
+  {keys:["kitkat chunky peanut","kit kat chunky peanut"],qty:1285,pv:1.90,cat:"Confiseries"},
+  {keys:["kitkat chunky","kit kat chunky"],qty:1407,pv:1.90,cat:"Confiseries"},
+  {keys:["kitkat","kit kat"],qty:1365,pv:1.60,cat:"Confiseries"},
+  {keys:["mentos"],qty:2209,pv:1.50,cat:"Confiseries"},
+  {keys:["lion peanut"],qty:1409,pv:1.50,cat:"Confiseries"},
+  {keys:["lion white"],qty:1188,pv:1.50,cat:"Confiseries"},
+  {keys:["lion"],qty:1983,pv:1.50,cat:"Confiseries"},
+  {keys:["smarties"],qty:918,pv:1.70,cat:"Confiseries"},
+  {keys:["hanuta"],qty:800,pv:2.20,cat:"Confiseries"},
+  {keys:["maltesers"],qty:1266,pv:2.20,cat:"Confiseries"},
+  {keys:["crunch"],qty:1855,pv:1.60,cat:"Confiseries"},
+  {keys:["nuts "],qty:2136,pv:1.60,cat:"Confiseries"},
+  {keys:["nutella biscuit"],qty:249,pv:8.10,cat:"Biscuiterie"},
+  {keys:["nutella b ready","nutella b-ready","nutella bready"],qty:1200,pv:5.50,cat:"Biscuiterie"},
+  {keys:["nutella 600"],qty:400,pv:18.00,cat:"Biscuiterie"},
+  {keys:["nutella 350"],qty:800,pv:12.00,cat:"Biscuiterie"},
+  {keys:["nutella 200"],qty:900,pv:8.10,cat:"Biscuiterie"},
+  {keys:["kinder crunchy cookies","kinder crunchy"],qty:960,pv:9.50,cat:"Biscuiterie"},
+  {keys:["kinderini"],qty:250,pv:5.00,cat:"Biscuiterie"},
+  {keys:["mikado"],qty:322,pv:2.50,cat:"Biscuiterie"},
+  {keys:["milka"],qty:429,pv:1.80,cat:"Biscuiterie"},
+  {keys:["oreo"],qty:500,pv:1.90,cat:"Biscuiterie"},
+  {keys:["lu granola","granola cookies"],qty:266,pv:5.60,cat:"Biscuiterie"},
+  {keys:["loacker"],qty:225,pv:2.30,cat:"Biscuiterie"},
+  {keys:["pringles"],qty:213,pv:4.20,cat:"Chips"},
+  {keys:["lay s","lay's","lays "],qty:1500,pv:2.50,cat:"Chips"},
+  {keys:["super ring"],qty:727,pv:1.60,cat:"Chips"},
+  {keys:["chicken ring"],qty:121,pv:1.60,cat:"Chips"},
+  {keys:["tuc "],qty:154,pv:2.50,cat:"Chips"},
+];
+
+/* ---------- Utils ---------- */
+const $=id=>document.getElementById(id);
+const P_DEF={p_om:25.5,p_omr:2.5,p_tva:2.1,p_dd_b:9.6,p_dd_c:5.6,p_fret:3850,p_dsg:1329,p_stick:0.05,p_cap:67,p_plt:25,soda_low:4.07,soda_mid:21.38,soda_high:35.07,soda_sweet:4.50,ts_low:4.07,ts_mid:21.38,ts_high:35.07,ts_sweet:4.50,rot_Boissons:3.5,rot_Chips:4,rot_Confiseries:5,rot_Biscuiterie:5,rot_Autre:6};
+const gP=id=>{const el=$(id);if(!el||el.value===undefined)return P_DEF[id]??0;const v=parseFloat(el.value);return isNaN(v)?(el.value===''?0:(P_DEF[id]??0)):v;};
+const f2=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const f0=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('fr-FR').format(Math.round(n));
+const fK=n=>n>=1e6?f2(n/1e6)+' M€':n>=1000?f0(n/1000)+' k€':f0(n)+' €';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function sts(id,msg,type){const e=$(id);e.innerHTML=msg;e.className='sts show '+type;}
+function hideSts(id){$(id).className='sts';}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+
+// Format → millilitres (bucket)
+function toML(s){
+  const t=String(s||'').toLowerCase().replace(',','.');
+  let m=t.match(/(\d+(?:\.\d+)?)\s*(l|litre)s?\b/); if(m)return Math.round(parseFloat(m[1])*1000);
+  m=t.match(/(\d+(?:\.\d+)?)\s*cl\b/); if(m)return Math.round(parseFloat(m[1])*10);
+  m=t.match(/(\d+(?:\.\d+)?)\s*(ml|gr?|grammes?)\b/); if(m)return Math.round(parseFloat(m[1]));
+  m=t.match(/(\d+(?:\.\d+)?)\s*(kg)\b/); if(m)return Math.round(parseFloat(m[1])*1000);
+  return 0;
+}
+const STOP=new Set(['the','le','la','les','de','du','des','et','and','with','pack','tpf','can','bottle','bouteille','boite','bte','btl','plas','pet','brick','original','classic','new','x','ml','cl','l','gr','g','kg','pcs','pc','case','carton']);
+function tokens(s){return norm(s).split(' ').filter(w=>w.length>1&&!STOP.has(w)&&!/^\d+$/.test(w));}
+
+
+
+/* ---------- Moteur CRR (rendu Réunion) ---------- */
+const SODA={none:0,low:'ts_low',mid:'ts_mid',high:'ts_high',sweet:'ts_sweet'};
+function sodaPerUnit(level,ml){
+  if(!level||level==='none'||!ml)return 0;
+  const rate=gP(SODA[level])||0; // €/hl
+  return rate*(ml/100000); // hl = 100 000 ml
+}
+function ddRate(cat){return (cat==='Boissons')?gP('p_dd_b')/100:gP('p_dd_c')/100;}
+// freightPerUnit: fret+DSG répartis au CBM réel du conteneur courant (sinon estimation)
+function calcCRR(prix,{cat='Autre',ml=0,soda='none',freightU=null}={}){
+  const om=gP('p_om')/100,omr=gP('p_omr')/100,tva=gP('p_tva')/100,stick=gP('p_stick');
+  const fu = freightU!=null?freightU:estFreightU();
+  const caf=prix+fu;
+  const dd=caf*ddRate(cat);
+  const omU=caf*om, omrU=caf*omr;
+  const sodaU=cat==='Boissons'?sodaPerUnit(soda,ml):0;
+  const tvaU=(caf+dd)*tva; // base TVA hors OM
+  return prix+fu+dd+omU+omrU+tvaU+sodaU+stick;
+}
+// Fret/unité au CBM : (fret+DSG)/capacité m³ × CBM unitaire réel ou estimé
+function freightPerUnit(p){
+  const ratePerM3=(gP('p_fret')+gP('p_dsg'))/(gP('p_cap')||67); // ≈77€/m³
+  let cbmU=0;
+  if(p&&p.cbmCase>0&&p.pcsCase>0)cbmU=p.cbmCase/p.pcsCase;           // CBM carton fourni
+  else if(p&&p.ml>0)cbmU=p.ml*1e-6*1.45;                              // volume liquide ×1.45 emballage
+  else cbmU=0.0009;                                                   // défaut snack/confiserie ~0.9L/u
+  return ratePerM3*cbmU;
+}
+function estFreightU(){return freightPerUnit(null);}
+
+/* ---------- Index ventes (référentiel + fichiers chargés) ---------- */
+let YEARS={};           // {2025:{OLA:{familles,articles,famArticles},...}}
+let AY=null, AS='all';  // année / station actives
+let salesIndex=[];      // [{key,tokens,ml,qtyYear,pv,cat,article}]
+function rebuildSalesIndex(){
+  salesIndex=[];
+  const seen={};
+  // 1) Fichiers chargés (prioritaires) — année la plus récente
+  const yrs=Object.keys(YEARS).sort();
+  const last=yrs[yrs.length-1];
+  if(last){
+    const agg={};
+    Object.keys(YEARS[last]).filter(k=>k!=='_meta').forEach(st=>{
+      (YEARS[last][st].articles||[]).forEach(a=>{
+        const tk=tokens(a.article);const ml=toML(a.article)||toML(a.format||'');
+        const key=tk.slice(0,3).join('_')+'|'+ml;
+        if(!agg[key])agg[key]={key,tokens:tk,ml,qtyYear:0,pv:0,ca:0,cat:guessCat(a.article),article:a.article,fam:a.fam||''};
+        agg[key].qtyYear+=a.qte; agg[key].ca+=a.ca;
+      });
+    });
+    Object.values(agg).forEach(e=>{e.pv=e.qtyYear>0?e.ca/e.qtyYear:0;salesIndex.push(e);seen[e.key]=1;});
+  }
+  // 2) Référentiel embarqué STATION_DB en complément
+  STATION_DB.forEach(s=>{
+    const tk=tokens(s.keys[0]);const ml=toML(s.keys.join(' '));
+    const key=tk.slice(0,3).join('_')+'|'+ml;
+    if(!seen[key])salesIndex.push({key,tokens:tk,ml,qtyYear:s.qty,pv:s.pv,cat:s.cat,article:s.keys[0].toUpperCase(),ref:true});
+  });
+}
+function guessCat(name){
+  const n=norm(name);
+  if(/energy|drink|cola|juice|jus|eau|water|tea|the |milk|lait|soda|biere|beer|limonade|smoothie|nectar|sirop|boisson|shot|red ?bull|monster|burn|tiger|fanta|sprite|pepsi|oasis|tropico|capri|powerade|gatorade|aloe|ice ?t|schweppes|canada ?dry|ginger ?ale|tonic|orangina|7 ?up|dr ?pepper|lipton|fuze|arizona|mojito|sleek|canette|33 ?cl|25 ?cl|50 ?cl|330 ?ml|250 ?ml|500 ?ml/.test(n))return'Boissons';
+  if(/chip|crisp|snack|pop ?corn|pretzel|cracker|nuts|cacahuete|tortilla|bugles|pringle/.test(n))return'Chips';
+  if(/kinder|nutella|choco|mars|snicker|twix|bounty|kitkat|mentos|tic tac|lion|m&m|maltese|smartie|haribo|gummy|candy|bonbon|caramel|fini|nerds|sucette|chewing/.test(n))return'Confiseries';
+  if(/biscuit|cookie|wafer|oreo|mikado|milka|loacker|galette|madelein|brownie|granola|gaufre|barre/.test(n))return'Biscuiterie';
+  return'Autre';
+}
+// Matching produit catalogue → ventes
+function matchSales(name,brand){
+  const tk=tokens(name+' '+(brand||''));const ml=toML(name);
+  const brandTk=tk[0]; // 1er token significatif = marque
+  let best=null,bestScore=0;
+  for(const e of salesIndex){
+    if(e.qtyYear<=0)continue;
+    if(brandTk&&!e.tokens.includes(brandTk))continue; // marque obligatoire
+    let common=0;for(const t of tk)if(e.tokens.includes(t))common++;
+    if(!common)continue;
+    let score=common/Math.max(tk.length,1);
+    if(ml&&e.ml){if(Math.abs(ml-e.ml)<=Math.max(30,ml*0.08))score+=0.45;else if(Math.abs(ml-e.ml)>ml*0.5)score-=0.3;}
+    if(score>bestScore){bestScore=score;best=e;}
+  }
+  if(bestScore<0.5)return null;
+  // Agrégation de la demande : somme des libellés caisse partageant marque + format
+  // (même produit physique enregistré sous plusieurs libellés POS)
+  let aggQty=0;const labels=[];
+  for(const e of salesIndex){
+    if(e.qtyYear<=0)continue;
+    if(brandTk&&!e.tokens.includes(brandTk))continue;
+    if(ml&&e.ml&&Math.abs(ml-e.ml)>Math.max(30,ml*0.08))continue;
+    if(!ml&&e.ml&&best.ml&&Math.abs(best.ml-e.ml)>Math.max(30,best.ml*0.08))continue;
+    aggQty+=e.qtyYear;labels.push(e.article);
+  }
+  const mlB=ml||best.ml||0;
+  return{...best,key:(brandTk||best.key)+'|'+Math.round(mlB/10)*10,qtyYear:Math.max(aggQty,best.qtyYear),aggLabels:labels.length,conf:Math.min(bestScore,1)};
+}
+// Matching → prix d'achat local
+function matchPrix(name,brand){
+  const tk=tokens(name+' '+(brand||''));const ml=toML(name);
+  const brandTk=tk[0];
+  let best=null,bestScore=0;
+  for(const r of PRIX_ACHATS_DB){
+    const rt=tokens(r.article+' '+(r.format||''));
+    if(brandTk&&!rt.includes(brandTk))continue; // marque obligatoire
+    let common=0;for(const t of tk)if(rt.includes(t))common++;
+    if(!common)continue;
+    let score=common/Math.max(tk.length,1);
+    const rml=toML(r.format)||toML(r.article);
+    if(ml&&rml){if(Math.abs(ml-rml)<=Math.max(30,ml*0.08))score+=0.5;else if(Math.abs(ml-rml)>ml*0.5)score-=0.35;}
+    if(score>bestScore){bestScore=score;best=r;}
+  }
+  return bestScore>=0.55?{...best,conf:Math.min(bestScore,1)}:null;
+}
+// Médiane catégorie (produits NOUVEAUX)
+function catMedianMonthly(cat){
+  const arr=salesIndex.filter(e=>e.cat===cat&&e.qtyYear>0).map(e=>e.qtyYear/12).sort((a,b)=>a-b);
+  if(!arr.length)return 150;
+  return arr[Math.floor(arr.length/2)];
+}
+function rotTarget(cat){return gP('rot_'+(['Boissons','Chips','Confiseries','Biscuiterie'].includes(cat)?cat:'Autre'))||4;}
+
+/* ============================================================
+   SUPABASE CONFIG — remplace les 2 valeurs ci-dessous
+   ============================================================
+   TABLE SQL À CRÉER dans Supabase → SQL Editor :
+
+   create table suite_kv (
+     id text primary key,
+     val jsonb,
+     updated_at timestamptz default now()
+   );
+
+   ============================================================ */
+const SUPA_URL = 'https://uixmsrrprgvoejsuuaat.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpeG1zcnJwcmd2b2Vqc3V1YWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNTI0MDgsImV4cCI6MjA5NjgyODQwOH0.mLnM767_JnF4KAcPIqLqkpaLbkJ17TiA2gE-PZQU9FY';
+
+/* ============================================================
+   SUPABASE HELPERS
+   ============================================================ */
+async function sbGet(key){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/suite_kv?id=eq.${encodeURIComponent(key)}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(!r.ok)return null;
+    const rows=await r.json();
+    return rows.length?rows[0].val:null;
+  }catch(e){return null;}
+}
+async function sbSet(key,val){
+  await fetch(`${SUPA_URL}/rest/v1/suite_kv`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:key,val})});
+}
+async function sbDel(key){
+  await fetch(`${SUPA_URL}/rest/v1/suite_kv?id=eq.${encodeURIComponent(key)}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+}
+async function sbList(prefix){
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/suite_kv?id=like.${encodeURIComponent(prefix+'%')}&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(!r.ok)return[];
+    return(await r.json()).map(x=>x.id);
+  }catch(e){return[];}
+}
+
+/* ============================================================
+   COMPATIBILITÉ — remplace IndexedDB + localStorage
+   ============================================================ */
+let _db=null;
+function openDB(){return Promise.resolve();}
+async function dbPut(store,obj){
+  if(store==='years')await sbSet('year:'+obj.year,obj.data);
+}
+async function dbAll(store){
+  if(store==='years'){
+    const keys=await sbList('year:');
+    const rows=await Promise.all(keys.map(async k=>{const d=await sbGet(k);return d?{year:k.replace('year:',''),data:d}:null;}));
+    return rows.filter(Boolean);
+  }
+  return[];
+}
+async function dbDel(store,key){
+  if(store==='years')await sbDel('year:'+key);
+}
+
+/* ---------- Paramètres persistants (Supabase + fallback localStorage) ---------- */
+const LS='inca_suite_';
+let _paramsCache={};
+async function loadAllParams(){
+  try{
+    const keys=await sbList('param:');
+    await Promise.all(keys.map(async k=>{const v=await sbGet(k);if(v!==null)_paramsCache[k.replace('param:','')]=v;}));
+  }catch(e){console.warn('Params load error',e);}
+}
+function loadParam(id,def){
+  const v=_paramsCache[id]!=null?_paramsCache[id]:localStorage.getItem(LS+id);
+  if(v!==null&&$(id))$(id).value=v;
+}
+function bindParams(){
+  document.querySelectorAll('input.inp[type=number],input.inp[type=password]').forEach(el=>{
+    if(!el.id)return;
+    const v=_paramsCache[el.id]!=null?_paramsCache[el.id]:localStorage.getItem(LS+el.id);
+    if(v!==null)el.value=v;
+    el.addEventListener('change',async()=>{
+      _paramsCache[el.id]=el.value;
+      localStorage.setItem(LS+el.id,el.value);
+      try{await sbSet('param:'+el.id,el.value);}catch(e){}
+    });
+  });
+}
+function apiKey(){return _paramsCache['apikey']||localStorage.getItem(LS+'apikey')||'';}
+async function saveApiKey(){
+  const k=$('apiKeyInp').value.trim();
+  if(k){
+    _paramsCache['apikey']=k;
+    localStorage.setItem(LS+'apikey',k);
+    try{await sbSet('param:apikey',k);}catch(e){}
+    sts('keySts','✅ Clé enregistrée.','ok');
+  }else{
+    delete _paramsCache['apikey'];
+    localStorage.removeItem(LS+'apikey');
+    try{await sbDel('param:apikey');}catch(e){}
+    sts('keySts','Clé supprimée.','ok');
+  }
+}
+
+
+/* ============================================================
+   VENTES — parsing & dashboard
+   ============================================================ */
+let TEMP_LOAD={};
+function detectSt(f){const n=f.toUpperCase();if(n.includes('OLA'))return'OLA';if(n.includes('TOTAL'))return'TOTAL';if(n.includes('VITO'))return'VITO';return'AUTRE';}
+function parseVentes(buf,fname){
+  try{
+    const wb=XLSX.read(buf,{type:'array'});
+    const fams=[],arts=[];let cur=null;const famArticles={};
+    wb.SheetNames.forEach(sn=>{
+      const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
+      raw.forEach(row=>{
+        const id=parseFloat(row[0]);
+        if(!isNaN(id)&&id>0&&row[1]&&typeof row[1]==='string'&&row[1].trim().length>1){
+          const fam=row[1].toString().trim();
+          const qte=parseFloat(row[2])||0,rev=parseFloat(row[3])||0,ca=parseFloat(row[4])||0,mg=parseFloat(row[6])||0;
+          if(qte>0&&ca>0)fams.push({famille:fam,qte,revient:rev,ca,marge:mg});
+          cur=fam;if(!famArticles[cur])famArticles[cur]=[];
+        }
+        const id2=parseFloat(row[11]);
+        if(!isNaN(id2)&&row[3]&&typeof row[3]==='string'&&row[3].trim().length>2){
+          const art=row[3].toString().trim();
+          const qte=parseFloat(row[4])||0,rev=parseFloat(row[5])||0,ca=parseFloat(row[6])||0,mg=parseFloat(row[8])||0;
+          if(qte>0&&ca>0){const o={article:art,qte,revient:rev,ca,marge:mg,fam:cur};arts.push(o);if(cur)famArticles[cur].push(o);}
+        }
+      });
+    });
+    const st=detectSt(fname);
+    TEMP_LOAD[st]={familles:fams,articles:arts,famArticles,fname};
+    fileUI(fname,fams.length>0?'ok':'err',fams.length,arts.length);
+    if(Object.keys(TEMP_LOAD).length)$('saveVentesBtn').style.display='block';
+  }catch(e){fileUI(fname,'err',0,0);console.error(e);}
+}
+function fileUI(name,status,fams,arts){
+  const id='fi_'+name.replace(/\W/g,'');
+  const html=`<div class="row" id="${id}" style="background:#fff;border:1px solid var(--line)"><span>${status==='ok'?'✅':'❌'}</span><span class="nm">${esc(name)}</span>${arts?`<span class="tag-match">${arts} articles</span>`:''}<span class="vl" style="font-size:11px;color:${status==='ok'?'var(--green-d)':'var(--red-d)'}">${status==='ok'?fams+' familles':'Erreur format'}</span></div>`;
+  const ex=$(id);if(ex)ex.outerHTML=html;else $('filesLoaded').insertAdjacentHTML('beforeend',html);
+}
+async function saveVentes(){
+  const yr=$('yearInput').value;
+  if(!YEARS[yr])YEARS[yr]={};
+  Object.entries(TEMP_LOAD).forEach(([st,d])=>{YEARS[yr][st]={familles:d.familles,articles:d.articles,famArticles:d.famArticles,fname:d.fname};});
+  YEARS[yr]._meta={savedAt:new Date().toISOString()};
+  await dbPut('years',{year:yr,data:YEARS[yr]});
+  TEMP_LOAD={};$('filesLoaded').innerHTML='';$('saveVentesBtn').style.display='none';$('fiVentes').value='';
+  AY=yr;rebuildSalesIndex();updateDataChip();enterDash();
+}
+function updateDataChip(){
+  const ys=Object.keys(YEARS).sort();
+  if(ys.length){$('dataChip').style.display='inline-block';$('dataChip').textContent='💾 '+ys.join(' · ');}
+  $('dataYearsInfo').textContent=ys.length?ys.map(y=>y+' ('+Object.keys(YEARS[y]).filter(k=>k!=='_meta').join('/')+')').join(' · '):'Aucune donnée chargée';
+  renderSavedYears();
+}
+function renderSavedYears(){
+  const ys=Object.keys(YEARS).sort().reverse();
+  $('savedYears').innerHTML=ys.length?'<div class="card-t g" style="margin-bottom:8px">Années sauvegardées</div>'+ys.map(y=>{
+    const sts=Object.keys(YEARS[y]).filter(k=>k!=='_meta');
+    return`<div class="row" style="background:#fff;border:1px solid var(--line)"><span class="vl" style="color:var(--green-d);font-size:14px">${y}</span><span class="nm">${sts.join(' · ')}</span><button class="btn gh" style="padding:6px 14px;font-size:11px" onclick="AY='${y}';enterDash()">Ouvrir</button><button class="btn dng" style="padding:6px 12px;font-size:11px" onclick="delYear('${y}')">✕</button></div>`;
+  }).join(''):'';
+}
+async function delYear(y){if(!confirm('Supprimer les données '+y+' ?'))return;delete YEARS[y];await dbDel('years',y);rebuildSalesIndex();updateDataChip();}
+function showVentesUpload(){$('ventesDash').style.display='none';$('ventesEmpty').style.display='block';}
+function enterDash(){
+  $('ventesEmpty').style.display='none';$('ventesDash').style.display='block';
+  // pills stations
+  $('stPills').innerHTML=['all','OLA','TOTAL','VITO'].map(s=>`<button class="pill ${AS===s?'act':''}" onclick="AS='${s}';enterDash()">${s==='all'?'Toutes stations':s}</button>`).join('');
+  const ys=Object.keys(YEARS).sort();
+  $('yrPills').innerHTML=ys.map(y=>`<button class="pill ${AY===y?'act gold':''}" onclick="AY='${y}';enterDash()">${y}</button>`).join('');
+  renderDash();
+}
+function yearData(y){
+  if(!y||!YEARS[y])return null;
+  const d=YEARS[y];const ks=Object.keys(d).filter(k=>k!=='_meta');
+  const sel=AS==='all'?ks:ks.filter(k=>k===AS);
+  const mf={},ma={};
+  sel.forEach(st=>{const dd=d[st];
+    (dd.familles||[]).forEach(r=>{if(!mf[r.famille])mf[r.famille]={famille:r.famille,qte:0,revient:0,ca:0,marge:0};const m=mf[r.famille];m.qte+=r.qte;m.revient+=r.revient;m.ca+=r.ca;m.marge+=r.marge;});
+    (dd.articles||[]).forEach(r=>{if(!ma[r.article])ma[r.article]={article:r.article,qte:0,ca:0,marge:0,fam:r.fam};const m=ma[r.article];m.qte+=r.qte;m.ca+=r.ca;m.marge+=r.marge;});
+  });
+  return{familles:Object.values(mf),articles:Object.values(ma),stations:ks,perStation:Object.fromEntries(ks.map(st=>[st,d[st]]))};
+}
+let chSt=null,chFam=null;
+const FAMCOLORS=['#0071E3','#34C759','#FF9F0A','#AF52DE','#FF3B30','#B8924A','#5AC8FA','#FF2D55','#8E8E93','#30B0C7'];
+function renderDash(){
+  const D=yearData(AY);if(!D)return;
+  const ys=Object.keys(YEARS).sort();const prevY=ys[ys.indexOf(AY)-1];
+  const P=prevY?yearData(prevY):null;
+  const tCA=D.familles.reduce((s,f)=>s+f.ca,0),tMg=D.familles.reduce((s,f)=>s+f.marge,0),tQ=D.familles.reduce((s,f)=>s+f.qte,0);
+  const pCA=P?P.familles.reduce((s,f)=>s+f.ca,0):0;
+  const delta=pCA>0?((tCA-pCA)/pCA*100):null;
+  $('kpiGrid').innerHTML=`
+    <div class="kpi"><div class="kpi-l">CA TTC ${AY}</div><div class="kpi-v">${fK(tCA)}</div>${delta!=null?`<span class="kpi-d ${delta>=0?'up':'dn'}">${delta>=0?'▲':'▼'} ${f2(Math.abs(delta))}% vs ${prevY}</span>`:`<div class="kpi-s">${AS==='all'?'3 stations':AS}</div>`}</div>
+    <div class="kpi"><div class="kpi-l">Marge brute</div><div class="kpi-v" style="color:var(--green-d)">${fK(tMg)}</div><div class="kpi-s">${f2(tCA>0?tMg/tCA*100:0)}% du CA</div></div>
+    <div class="kpi"><div class="kpi-l">Unités vendues</div><div class="kpi-v">${f0(tQ)}</div><div class="kpi-s">${f0(tQ/12)} / mois</div></div>
+    <div class="kpi"><div class="kpi-l">Articles actifs</div><div class="kpi-v">${f0(D.articles.length)}</div><div class="kpi-s">${f0(D.familles.length)} familles</div></div>
+    <div class="kpi"><div class="kpi-l">Panier marge / unité</div><div class="kpi-v" style="color:var(--gold-d)">${f2(tQ>0?tMg/tQ:0)} €</div><div class="kpi-s">indicateur mix produit</div></div>`;
+  // Top produits
+  const top=[...D.articles].sort((a,b)=>b.qte-a.qte).slice(0,15);
+  const maxQ=top[0]?.qte||1;
+  $('topProds').innerHTML=top.map((a,i)=>{
+    const pa=matchPrix(a.article,'');
+    return`<div class="row"><span class="rk">${i+1}</span><div class="nm">${esc(a.article)}<div class="psub">${esc(a.fam||'')}${pa?` · <b>PA ${f2(pa.puaht_recent)} € (${esc(pa.fournisseur_recent)})</b>`:''}</div></div><div class="b"><i style="width:${a.qte/maxQ*100}%;background:var(--blue)"></i></div><span class="vl">${f0(a.qte)}</span><span class="vl" style="color:var(--ink2);min-width:64px">${fK(a.ca)}</span></div>`;
+  }).join('');
+  // Familles
+  const fams=[...D.familles].sort((a,b)=>b.ca-a.ca).slice(0,12);
+  const maxCA=fams[0]?.ca||1;
+  $('famList').innerHTML=fams.map((f,i)=>`<div class="row"><span style="width:8px;height:8px;border-radius:3px;background:${FAMCOLORS[i%10]};flex-shrink:0"></span><span class="nm">${esc(f.famille)}</span><div class="b"><i style="width:${f.ca/maxCA*100}%;background:${FAMCOLORS[i%10]}"></i></div><span class="vl">${fK(f.ca)}</span><span class="vl" style="min-width:50px;color:${f.marge/f.ca>0.3?'var(--green-d)':'var(--amber-d)'}">${f2(f.ca>0?f.marge/f.ca*100:0)}%</span></div>`).join('');
+  // Charts
+  const stKeys=D.stations;
+  const stCA=stKeys.map(st=>{const dd=YEARS[AY][st];return(dd.familles||[]).reduce((s,f)=>s+f.ca,0);});
+  const stMg=stKeys.map(st=>{const dd=YEARS[AY][st];return(dd.familles||[]).reduce((s,f)=>s+f.marge,0);});
+  if(chSt)chSt.destroy();
+  chSt=new Chart($('chStations'),{type:'bar',data:{labels:stKeys,datasets:[{label:'CA',data:stCA,backgroundColor:'#0071E3',borderRadius:8},{label:'Marge',data:stMg,backgroundColor:'#34C759',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'-apple-system',weight:'600'},color:'#6E6E73'}}},scales:{x:{grid:{display:false},ticks:{color:'#6E6E73'}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#6E6E73',callback:v=>fK(v)}}}}});
+  if(chFam)chFam.destroy();
+  chFam=new Chart($('chFam'),{type:'doughnut',data:{labels:fams.slice(0,8).map(f=>f.famille),datasets:[{data:fams.slice(0,8).map(f=>f.ca),backgroundColor:FAMCOLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{family:'-apple-system',size:10,weight:'600'},color:'#6E6E73',boxWidth:10,boxHeight:10,borderRadius:3,usePointStyle:true}}}}});
+  renderProdSearch();
+}
+function renderProdSearch(){
+  const D=yearData(AY);if(!D)return;
+  const q=norm($('prodSearch').value);
+  let arr=D.articles;
+  if(q)arr=arr.filter(a=>norm(a.article).includes(q));
+
+  // ── REGROUPEMENT PAR PRODUIT PHYSIQUE (marque + volume normalisé) ──
+  const groups={};
+  arr.forEach(a=>{
+    const ml=toML(a.article);
+    const tk=tokens(a.article);
+    const brand=tk.slice(0,2).join('_');
+    const volBucket=ml>0?Math.round(ml/10)*10:0;
+    const gk=brand+'|'+volBucket;
+    if(!groups[gk]){
+      groups[gk]={article:a.article,qte:0,ca:0,marge:0,fam:a.fam,labels:[],ml,volBucket};
+    }
+    groups[gk].qte+=a.qte;
+    groups[gk].ca+=a.ca;
+    groups[gk].marge+=a.marge;
+    groups[gk].labels.push(a.article);
+    if(a.article.length<groups[gk].article.length)groups[gk].article=a.article;
+  });
+
+  const merged=Object.values(groups).sort((a,b)=>b.qte-a.qte).slice(0,30);
+  const rot=parseFloat($('rotSel').value)||3.5;
+
+  $('prodSearchRes').innerHTML=merged.length?merged.map(a=>{
+    const monthly=a.qte/12;
+    const reco=Math.round(monthly*rot);
+    const pa=matchPrix(a.article,'');
+    const multiLabel=a.labels.length>1
+      ? `<span style="font-size:10px;color:var(--ink3);margin-left:6px">(${a.labels.length} libellés POS)</span>`
+      : '';
+    const volLabel=a.ml>0
+      ? `<span style="font-size:10px;background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:8px;margin-left:4px">${a.ml>=1000?(a.ml/1000).toFixed(a.ml%1000===0?0:1)+'L':a.ml+'ml'}</span>`
+      : '';
+    return`<div class="row">
+      <div class="nm">
+        ${esc(a.article)}${volLabel}${multiLabel}
+        <div class="psub">${esc(a.fam||'')} · ${f0(monthly)} u/mois · marge ${f2(a.ca>0?a.marge/a.ca*100:0)}%${pa?` · <b>PA local ${f2(pa.puaht_recent)} € (${esc(pa.fournisseur_recent)})</b>`:''}</div>
+      </div>
+      <span class="vl">${f0(a.qte)} u/an</span>
+      <span class="vd imp" title="Quantité conseillée pour ${rot} mois de rotation">📦 cmd ${f0(reco)} u</span>
+    </div>`;
+  }).join(''):'<div class="empty" style="padding:24px"><p>Aucun article trouvé.</p></div>';
+}
+
+/* ============================================================
+   CATALOGUE IA — extraction, matching, verdicts
+   ============================================================ */
+let catProducts=[];let catFilter='all';
+const VERDICTS={IMPORT:{cls:'imp',ic:'✅',lbl:'IMPORTER'},NEGOCIER:{cls:'neg',ic:'🤝',lbl:'NÉGOCIER'},REJETER:{cls:'rej',ic:'⛔',lbl:'REJETER'},NOUVEAU:{cls:'new',ic:'✨',lbl:'NOUVEAU'},EQUIV:{cls:'eq',ic:'≈',lbl:'ÉQUIVALENT'}};
+
+function catThink(t1,t2){$('catThinkT1').textContent=t1;$('catThinkT2').textContent=t2;$('catThink').classList.add('show');}
+function catThinkOff(){$('catThink').classList.remove('show');}
+
+async function fileToRows(file,onThink){
+  const ext=file.name.split('.').pop().toLowerCase();
+  let rows=null;
+  if(['xlsx','xls','csv'].includes(ext)){
+    if(onThink)onThink('Lecture du fichier Excel…');
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    rows=extractFromWorkbook(wb);
+    if(!rows||rows.length<2){
+      const txt=wb.SheetNames.map(sn=>XLSX.utils.sheet_to_csv(wb.Sheets[sn])).join('\n').slice(0,60000);
+      rows=await aiExtract(txt,null);
+    }
+  }else if(ext==='pdf'){
+    if(onThink)onThink('Lecture du PDF…');
+    rows=await extractFromPDF(file);
+  }else{throw new Error('Format non supporté : '+ext);}
+  if(!rows||!rows.length)throw new Error('Aucun produit détecté dans '+file.name);
+  return rows;
+}
+async function handleCatFile(file){
+  hideSts('catSts');$('catResults').style.display='none';
+  try{
+    const rows=await fileToRows(file,m=>catThink(m,'Détection automatique des colonnes'));
+    buildCatProducts(rows,file.name);
+  }catch(e){catThinkOff();sts('catSts','❌ '+esc(e.message),'err');console.error(e);}
+}
+
+/* --- Extraction Excel heuristique --- */
+const HKEY={ // clés en espace NORMALISÉ (minuscules, sans accents ni ponctuation)
+  name:['product description','product','produit','article','description','designation','item','goods'],
+  brand:['brand','marque','producer','fabricant','manufacturer'],
+  pcsCase:['packing pcs ct','pcs ct','pcs case','pcs ctn','units case','unites carton','qte carton','pc ctn','case pack','pcs per carton','qty ctn','colisage','packing'],
+  qtyPlt:['qte plt','qty plt','plt','palettes','pallets','palette'],
+  qtyCt:['qte ct','qty ct','quantity ct','cartons'],
+  qty:['qte pcs','qty pcs','quantity pcs','quantity','quantite','pieces','pcs total','qty','qte'],
+  priceCase:['net price ct','price ct eur','price ct','prix carton','prix ct'],
+  price:['net price pcs','price pcs eur','price pcs','unit price','prix unitaire','net price','price eur','unit cost','price per unit','price','prix','pu','fob','exw'],
+  casePallet:['case pallet','cases pallet','ctn pallet','cartons palette','ctns plt','ct plt'],
+  pcsPallet:['pcs pallet','qte palette','units pallet'],
+  cbm:['cbm ctn','cbm case','cbm','m3','volume m3'],
+  weight:['gross weight','g w','gw','weight','poids','kg'],
+  ean:['gtin','ean','barcode','code barre','upc'],
+  moq:['moq','min order','minimum'],
+  format:['size','format','capacity','contenance'],
+  bbd:['bbd','dlc','expiry','best before','shelf life','ddm'],
+};
+function headerScore(vals){
+  let hits=0,map={};
+  // Passe 1 : correspondances exactes (prioritaires)
+  vals.forEach((v,j)=>{
+    const t=norm(v);if(!t)return;
+    for(const[k,keys]of Object.entries(HKEY)){
+      if(keys.some(kw=>t===kw)&&map[k]===undefined){map[k]=j;hits++;return;}
+    }
+  });
+  // Passe 2 : inclusion
+  vals.forEach((v,j)=>{
+    if(Object.values(map).includes(j))return;
+    const t=norm(v);if(!t)return;
+    for(const[k,keys]of Object.entries(HKEY)){
+      if(map[k]!==undefined)continue;
+      if(keys.some(kw=>t.includes(kw))){map[k]=j;hits++;return;}
+    }
+  });
+  return{hits,map};
+}
+function extractFromWorkbook(wb){
+  let best=null;
+  for(const sn of wb.SheetNames){
+    const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
+    for(let i=0;i<Math.min(raw.length,30);i++){
+      const{hits,map}=headerScore((raw[i]||[]).map(c=>String(c||'')));
+      if(hits>=2&&map.name!==undefined&&map.price!==undefined){
+        if(!best||hits>best.hits)best={hits,map,raw,hRow:i};
+      }
+    }
+  }
+  // Profilage de contenu si pas d'en-tête trouvé
+  if(!best){
+    for(const sn of wb.SheetNames){
+      const raw=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
+      const prof=profileColumns(raw);
+      if(prof){best={hits:1,map:prof,raw,hRow:prof._start-1};break;}
+    }
+  }
+  if(!best)return null;
+  const{map,raw,hRow}=best;const out=[];
+  for(let i=hRow+1;i<raw.length;i++){
+    const row=raw[i];if(!row)continue;
+    const name=String(row[map.name]||'').trim();
+    if(!name||name.length<2)continue;
+    const price=parseFloat(String(row[map.price]??'').replace(/[^\d.,-]/g,'').replace(',','.'));
+    if(/paleta|palette euro|sticker|naklejk|transport cost|frais/i.test(name))continue;
+    if(isNaN(price)||price<0||price>5000)continue;
+    out.push({
+      name, brand:map.brand!==undefined?String(row[map.brand]||'').trim():'',
+      price,
+      pcsCase:map.pcsCase!==undefined?parseInt(row[map.pcsCase])||0:0,
+      qty:map.qty!==undefined?parseInt(String(row[map.qty]).replace(/\s/g,''))||0:0,
+      qtyCt:map.qtyCt!==undefined?parseInt(String(row[map.qtyCt]).replace(/\s/g,''))||0:0,
+      qtyPlt:map.qtyPlt!==undefined?parseFloat(String(row[map.qtyPlt]).replace(',','.'))||0:0,
+      priceCase:map.priceCase!==undefined?parseFloat(String(row[map.priceCase]).replace(/[^\d.,-]/g,'').replace(',','.'))||0:0,
+      casePallet:map.casePallet!==undefined?parseInt(row[map.casePallet])||0:0,
+      pcsPallet:map.pcsPallet!==undefined?parseInt(row[map.pcsPallet])||0:0,
+      cbmCase:map.cbm!==undefined?parseFloat(String(row[map.cbm]).replace(',','.'))||0:0,
+      kgCase:map.weight!==undefined?parseFloat(String(row[map.weight]).replace(',','.'))||0:0,
+      ean:map.ean!==undefined?String(row[map.ean]||''):'',
+      moq:map.moq!==undefined?String(row[map.moq]||''):'',
+      format:map.format!==undefined?String(row[map.format]||''):'',
+      bbd:map.bbd!==undefined?String(row[map.bbd]||''):'',
+    });
+  }
+  // Dérivations logistiques par ligne (cohérence proforma)
+  out.forEach(r=>{
+    if(!r.pcsCase&&r.qty&&r.qtyCt)r.pcsCase=Math.round(r.qty/r.qtyCt);
+    if(!r.casePallet&&r.qtyCt&&r.qtyPlt)r.casePallet=Math.round(r.qtyCt/r.qtyPlt);
+    if(!r.pcsPallet&&r.pcsCase&&r.casePallet)r.pcsPallet=r.pcsCase*r.casePallet;
+    if((!r.price||r.price<=0)&&r.priceCase&&r.pcsCase)r.price=+(r.priceCase/r.pcsCase).toFixed(4);
+    // garde-fou : prix unitaire incohérent vs prix carton
+    if(r.priceCase&&r.pcsCase&&r.price>r.priceCase*0.8)r.price=+(r.priceCase/r.pcsCase).toFixed(4);
+  });
+  return out.length?out:null;
+}
+// Profilage : devine les colonnes par le contenu
+function profileColumns(raw){
+  const N=Math.min(raw.length,200);if(N<3)return null;
+  const cols=Math.max(...raw.slice(0,N).map(r=>r?.length||0));
+  const stats=[];
+  for(let c=0;c<cols;c++){
+    let txtLen=0,txtN=0,numN=0,decN=0,intSmall=0,vals=[];
+    for(let r=0;r<N;r++){
+      const v=raw[r]?.[c];if(v===''||v==null)continue;
+      const n=parseFloat(String(v).replace(',','.'));
+      if(!isNaN(n)&&String(v).match(/^[\d.,\s€$]+$/)){numN++;vals.push(n);if(n%1!==0)decN++;if(Number.isInteger(n)&&n>=4&&n<=60)intSmall++;}
+      else if(typeof v==='string'&&v.trim().length>2){txtN++;txtLen+=v.trim().length;}
+    }
+    stats.push({c,txtN,avgLen:txtN?txtLen/txtN:0,numN,decN,intSmall,med:vals.sort((a,b)=>a-b)[Math.floor(vals.length/2)]||0});
+  }
+  const nameCol=stats.filter(s=>s.txtN>3).sort((a,b)=>b.avgLen*b.txtN-a.avgLen*a.txtN)[0];
+  const priceCol=stats.filter(s=>s.decN>2&&s.med>0.05&&s.med<100).sort((a,b)=>b.decN-a.decN)[0];
+  if(!nameCol||!priceCol)return null;
+  const caseCol=stats.filter(s=>s.intSmall>3&&s.c!==priceCol.c).sort((a,b)=>b.intSmall-a.intSmall)[0];
+  return{name:nameCol.c,price:priceCol.c,pcsCase:caseCol?.c,_start:1};
+}
+
+/* --- Extraction PDF (texte → IA / scanné → vision IA) --- */
+async function pdfToText(file,maxPages=30){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let fullText='';
+  const nP=Math.min(pdf.numPages,maxPages);
+  for(let p=1;p<=nP;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const lines={};
+    tc.items.forEach(it=>{const y=Math.round(it.transform[5]);(lines[y]=lines[y]||[]).push({x:it.transform[4],s:it.str});});
+    const pageTxt=Object.keys(lines).sort((a,b)=>b-a).map(y=>lines[y].sort((a,b)=>a.x-b.x).map(o=>o.s).join(' | ')).join('\n');
+    fullText+='\n=== PAGE '+p+' ===\n'+pageTxt;
+  }
+  return{fullText,pdf,nP};
+}
+async function extractFromPDF(file){
+  catThink('Ouverture du PDF…','Analyse de la structure du document');
+  const{fullText,pdf,nP}=await pdfToText(file);
+  const meaningful=fullText.replace(/[\s|=]/g,'').length;
+  if(meaningful>300){
+    catThink('Structuration IA du catalogue…','L\'IA identifie produits, prix unitaires et colisage ('+nP+' pages)');
+    return await aiExtract(fullText.slice(0,150000),null);
+  }
+  // Scanné → OCR vision page par page
+  catThink('PDF scanné détecté — OCR Vision IA…','Rendu des pages en images haute résolution');
+  const images=[];
+  for(let p=1;p<=Math.min(pdf.numPages,12);p++){
+    const page=await pdf.getPage(p);
+    const vp=page.getViewport({scale:1.8});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+    await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    images.push(cv.toDataURL('image/jpeg',0.82).split(',')[1]);
+  }
+  return await aiExtract(null,images);
+}
+
+/* --- Appel API Claude (extraction structurée) --- */
+async function claudeCall(body){
+  const headers={'Content-Type':'application/json'};
+  const k=apiKey();
+  if(k){headers['x-api-key']=k;headers['anthropic-version']='2023-06-01';headers['anthropic-dangerous-direct-browser-access']='true';}
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body:JSON.stringify(body)});
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message||'Erreur API'+(k?'':' — ajoutez votre clé API dans ⚙️ Réglages pour utiliser l\'IA sur GitHub Pages'));
+  return data;
+}
+function extractJSON(data){
+  let raw='';(data.content||[]).forEach(b=>{if(b.type==='text')raw+=b.text;});
+  raw=raw.replace(/```json|```/g,'').trim();
+  const a=raw.indexOf('['),o=raw.indexOf('{');
+  const start=(a>=0&&(o<0||a<o))?a:o;
+  const end=(start===a)?raw.lastIndexOf(']')+1:raw.lastIndexOf('}')+1;
+  return JSON.parse(raw.slice(start,end));
+}
+const EXTRACT_PROMPT=`Tu es un expert achat import FMCG. Analyse ce catalogue/proforma fournisseur et extrais CHAQUE produit vendable.
+RAISONNE sur les prix : si un prix est au carton, divise par le colisage pour obtenir le prix UNITAIRE (1 pièce consommateur). Détecte la devise (convertis en EUR si USD: ×0.92, PLN: ×0.23, GBP: ×1.17). Ignore lignes de titre, totaux, conditions.
+Réponds UNIQUEMENT en JSON valide (pas de markdown) :
+[{"name":"nom complet produit avec format (ex: Monster Energy 500ml)","brand":"marque","price":0.85,"currencyNote":"EUR unitaire","pcsCase":24,"casePallet":0,"pcsPallet":0,"cbmCase":0,"kgCase":0,"ean":"","moq":"","format":"500ml","bbd":""}]
+Règles: price = prix UNITAIRE EUR (nombre). pcsCase = unités par carton (0 si inconnu). Mets 0/"" si inconnu, n'invente JAMAIS de prix.`;
+async function aiExtract(text,images){
+  let content;
+  if(images){
+    content=images.map(img=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:img}}));
+    content.push({type:'text',text:EXTRACT_PROMPT+'\n\nVoici les pages scannées du catalogue. Lis attentivement chaque tableau.'});
+  }else{
+    content=EXTRACT_PROMPT+'\n\n=== DOCUMENT ===\n'+text;
+  }
+  const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:16000,messages:[{role:'user',content}]});
+  const arr=extractJSON(data);
+  if(!Array.isArray(arr))throw new Error('Réponse IA invalide');
+  return arr.filter(r=>r.name&&r.price>0).map(r=>({...r,_ai:true}));
+}
+
+/* --- Construction des fiches produits + verdicts --- */
+function buildCatProducts(rows,fname){
+  catThink('Croisement Expert Achat…','Matching ventes, prix locaux, CRR, quantités recommandées');
+  catProducts=rows.map((r,i)=>{
+    const cat=guessCat(r.name+' '+(r.brand||''));
+    const ml=toML(r.name)||toML(r.format||'');
+    const sm=matchSales(r.name,r.brand);
+    const pm=matchPrix(r.name,r.brand);
+    // taxe soda auto : boisson → high par défaut si energy/cola/soda, low si eau/the
+    let soda='none';
+    if(cat==='Boissons'){
+      const n=norm(r.name);
+      if(/eau|water(?! ?melon)/.test(n))soda='none';
+      else if(/zero|sugar ?free|sans sucre|light|diet/.test(n))soda='sweet';
+      else if(/energy|cola|soda|fanta|sprite|limonade|fruit|red ?bull|monster|burn|tiger|pepsi|oasis|tropico/.test(n))soda='high';
+      else soda='mid';
+    }
+    const p={id:i,name:r.name,brand:r.brand||'',price:r.price,
+      pcsCase:r.pcsCase||0,casePallet:r.casePallet||0,pcsPallet:r.pcsPallet||(r.casePallet&&r.pcsCase?r.casePallet*r.pcsCase:0),
+      cbmCase:r.cbmCase||0,kgCase:r.kgCase||0,ean:r.ean||'',moq:r.moq||'',bbd:r.bbd||'',
+      cat,ml,soda,_ai:!!r._ai,
+      sales:sm,prixLocal:pm,qty:r.qty||0};
+    computeVerdict(p);
+    return p;
+  });
+  // Répartition de la demande : N variantes matchées sur la même entrée ventes → reco/N
+  const byKey={};
+  catProducts.forEach(p=>{if(p.sales){(byKey[p.sales.key]=byKey[p.sales.key]||[]).push(p);}});
+  Object.values(byKey).forEach(grp=>{
+    if(grp.length>1)grp.forEach(p=>{
+      p.monthly=p.monthly/grp.length;
+      let reco=p.monthly*rotTarget(p.cat);
+      if(p.pcsCase>1)reco=Math.ceil(reco/p.pcsCase)*p.pcsCase;
+      p.recoQty=Math.round(reco);
+      p._shared=grp.length;
+    });
+  });
+  catThinkOff();
+  const matched=catProducts.filter(p=>p.sales).length, mpx=catProducts.filter(p=>p.prixLocal).length;
+  const imp=catProducts.filter(p=>p.verdict==='IMPORT').length;
+  sts('catSts',`✅ <b>${catProducts.length} produits</b> extraits de ${esc(fname)} · ${matched} matchés ventes · ${mpx} matchés prix locaux · <b style="color:var(--green-d)">${imp} opportunités d'import</b>`,'ok');
+  $('catResults').style.display='block';
+  renderCatKpis();renderCatPills();renderCatTable();
+  $('catResults').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function computeVerdict(p){
+  const crr=calcCRR(p.price,{cat:p.cat,ml:p.ml,soda:p.soda,freightU:freightPerUnit(p)});
+  p.crr=crr;
+  p.gainEur=p.prixLocal?p.prixLocal.puaht_recent-crr:null;
+  p.gainPct=p.prixLocal&&p.prixLocal.puaht_recent>0?(p.gainEur/p.prixLocal.puaht_recent*100):null;
+  p.pv=p.sales?.pv||p.prixLocal?.puv_ttc||null;
+  p.margePct=p.pv?(p.pv/1.085-crr)/(p.pv/1.085)*100:null; // PV HT approx (TVA locale 8.5%)
+  const monthly=(p.sales?p.sales.qtyYear/12:0)/(p._shared||1);
+  p.monthly=monthly;
+  const rot=rotTarget(p.cat);
+  if(p.sales){
+    let reco=monthly*rot;
+    if(p.pcsCase>1)reco=Math.ceil(reco/p.pcsCase)*p.pcsCase;
+    p.recoQty=Math.round(reco);
+    if(p.gainPct!=null){
+      if(p.gainPct>5)p.verdict='IMPORT';
+      else if(p.gainPct>=-5)p.verdict='NEGOCIER';
+      else p.verdict='REJETER';
+    }else{
+      p.verdict=(p.margePct!=null&&p.margePct>30)?'IMPORT':'NEGOCIER';
+    }
+  }else if(p.prixLocal&&p.gainPct!=null){
+    // Pas d'historique ventes mais PA local connu → verdict sur le gain, qté prudente
+    const medP=catMedianMonthly(p.cat);
+    let recoP=medP*0.5*rot;
+    if(p.pcsCase>1)recoP=Math.ceil(recoP/p.pcsCase)*p.pcsCase;
+    p.recoQty=Math.round(recoP);
+    if(p.gainPct>5)p.verdict='IMPORT';
+    else if(p.gainPct>=-5)p.verdict='NEGOCIER';
+    else p.verdict='REJETER';
+  }else{
+    // NOUVEAU : test prudent basé médiane catégorie
+    const med=catMedianMonthly(p.cat);
+    let reco=med*0.5*rot; // hypothèse prudente 50% de la médiane
+    if(p.pcsCase>1)reco=Math.ceil(reco/p.pcsCase)*p.pcsCase;
+    p.recoQty=Math.round(reco);
+    p.verdict='NOUVEAU';
+    if(p.margePct!=null&&p.margePct<20)p.verdict='REJETER';
+  }
+  // score 0-100
+  const dS=monthly>0?Math.min(monthly/3000,1):0.15;
+  const mS=p.margePct!=null?Math.min(Math.max(p.margePct,0)/55,1):0.3;
+  const gS=p.gainPct!=null?Math.min(Math.max(p.gainPct,0)/40,1):(p.verdict==='NOUVEAU'?0.4:0);
+  p.score=Math.round((dS*0.45+mS*0.3+gS*0.25)*100);
+}
+function renderCatKpis(){
+  const n=catProducts.length;
+  const imp=catProducts.filter(p=>p.verdict==='IMPORT'),neg=catProducts.filter(p=>p.verdict==='NEGOCIER'),rej=catProducts.filter(p=>p.verdict==='REJETER'),nov=catProducts.filter(p=>p.verdict==='NOUVEAU');
+  const bestGain=imp.reduce((s,p)=>s+(p.gainEur||0)*(p.recoQty||0),0);
+  $('catKpis').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Produits analysés</div><div class="kpi-v">${n}</div><div class="kpi-s">${catProducts.filter(p=>p._ai).length?'extraction IA':'extraction auto'}</div></div>
+    <div class="kpi"><div class="kpi-l">✅ À importer</div><div class="kpi-v" style="color:var(--green-d)">${imp.length}</div><div class="kpi-s">gain vs achat local &gt; 5%</div></div>
+    <div class="kpi"><div class="kpi-l">✨ Nouveautés</div><div class="kpi-v" style="color:var(--purple)">${nov.length}</div><div class="kpi-s">absents de vos ventes</div></div>
+    <div class="kpi"><div class="kpi-l">🤝 À négocier</div><div class="kpi-v" style="color:var(--amber-d)">${neg.length}</div><div class="kpi-s">écart ±5%</div></div>
+    <div class="kpi"><div class="kpi-l">⛔ À rejeter</div><div class="kpi-v" style="color:var(--red-d)">${rej.length}</div><div class="kpi-s">plus cher rendu qu'en local</div></div>
+    <div class="kpi"><div class="kpi-l">💎 Économie potentielle</div><div class="kpi-v" style="color:var(--gold-d)">${fK(bestGain)}</div><div class="kpi-s">sur qtés recommandées</div></div>`;
+}
+function renderCatPills(){
+  const counts={all:catProducts.length};
+  ['IMPORT','NOUVEAU','NEGOCIER','REJETER'].forEach(v=>counts[v]=catProducts.filter(p=>p.verdict===v).length);
+  $('catVerdictPills').innerHTML=[['all','Tous'],['IMPORT','✅ Importer'],['NOUVEAU','✨ Nouveau'],['NEGOCIER','🤝 Négocier'],['REJETER','⛔ Rejeter']].map(([k,l])=>`<button class="pill ${catFilter===k?'act':''}" onclick="catFilter='${k}';renderCatPills();renderCatTable()">${l} <span style="opacity:.6">${counts[k]||0}</span></button>`).join('');
+}
+let catSort={col:'score',dir:-1};
+function renderCatTable(){
+  const q=norm($('catSearch').value);
+  let arr=catProducts.filter(p=>(catFilter==='all'||p.verdict===catFilter)&&(!q||norm(p.name+' '+p.brand).includes(q)));
+  arr.sort((a,b)=>{const va=a[catSort.col]??-1e9,vb=b[catSort.col]??-1e9;return(va>vb?1:va<vb?-1:0)*catSort.dir;});
+  const TH=[['score','Score'],['name','Produit'],['price','Prix FOB'],['crr','CRR rendu'],['prix_local','PA local'],['gainPct','Gain'],['monthly','Ventes/mois'],['margePct','Marge'],['recoQty','Qté reco'],['verdict','Verdict'],['qty','Commande']];
+  $('catTable').querySelector('thead').innerHTML='<tr>'+TH.map(([c,l])=>`<th class="${['price','crr','prix_local','gainPct','monthly','margePct','recoQty','qty'].includes(c)?'num':''}" onclick="catSort={col:'${c==='prix_local'?'gainPct':c}',dir:catSort.col==='${c}'?-catSort.dir:-1};renderCatTable()">${l}</th>`).join('')+'</tr>';
+  $('catTable').querySelector('tbody').innerHTML=arr.map(p=>{
+    const V=VERDICTS[p.verdict];
+    const sodaSel=p.cat==='Boissons'?`<select class="inp" style="padding:3px 6px;font-size:10px;width:auto;border-radius:7px" onchange="catProducts[${p.id}].soda=this.value;computeVerdict(catProducts[${p.id}]);renderCatKpis();renderCatTable()">${[['none','sans taxe'],['low','sucre &lt;5g'],['mid','5–8g'],['high','&gt;8g'],['sweet','édulc.']].map(([v,l])=>`<option value="${v}" ${p.soda===v?'selected':''}>${l}</option>`).join('')}</select>`:'';
+    return`<tr>
+      <td class="num"><b style="color:${p.score>=70?'var(--green-d)':p.score>=45?'var(--amber-d)':'var(--ink3)'}">${p.score}</b></td>
+      <td><div class="pname">${esc(p.name)} ${p._ai?'<span class="tag-ai">IA</span>':''}</div><div class="psub">${esc(p.brand)} · ${p.cat}${p.ml?' · '+p.ml+' ml':''}${p.pcsCase?' · ctn ×'+p.pcsCase:''} ${sodaSel}</div>${p.sales?`<div class="psub">↳ <b>${esc(p.sales.article)}</b> (match ${Math.round(p.sales.conf*100)}%)</div>`:''}</td>
+      <td class="num">${f2(p.price)} €</td>
+      <td class="num"><b>${f2(p.crr)} €</b></td>
+      <td class="num"><input class="qty-inp" type="number" step="0.01" min="0" style="width:74px" value="${p.prixLocal?(+p.prixLocal.puaht_recent).toFixed(2):''}" placeholder="—" onchange="setPA(${p.id},this.value)"><div class="mini">${p.prixLocal?esc(p.prixLocal.fournisseur_recent||'')+(p.prixLocal._edit?' ✏️':''):''}</div></td>
+      <td class="num" style="color:${p.gainPct>5?'var(--green-d)':p.gainPct<-5?'var(--red-d)':'var(--amber-d)'}">${p.gainPct!=null?(p.gainPct>0?'+':'')+f2(p.gainPct)+'%':'—'}</td>
+      <td class="num">${p.monthly?f0(p.monthly):'—'}</td>
+      <td class="num" style="color:${p.margePct>35?'var(--green-d)':p.margePct>20?'var(--amber-d)':'var(--red-d)'}">${p.margePct!=null?f2(p.margePct)+'%':'—'}</td>
+      <td class="num"><b>${p.recoQty?f0(p.recoQty):'—'}</b></td>
+      <td><span class="vd ${V.cls}">${V.ic} ${V.lbl}</span></td>
+      <td class="num"><input class="qty-inp" type="number" min="0" value="${p.qty||''}" placeholder="${p.recoQty||0}" onchange="catProducts[${p.id}].qty=parseInt(this.value)||0"></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--ink2)">Aucun produit dans ce filtre.</td></tr>';
+}
+// Édition manuelle du PA local (prix d'achat variable) → recalcul gain/verdict/score
+function setPA(id,val){
+  const p=catProducts[id];const v=parseFloat(val);
+  if(!isNaN(v)&&v>0){
+    if(p.prixLocal)Object.assign(p.prixLocal,{puaht_recent:v,_edit:true});
+    else p.prixLocal={article:'(saisie manuelle)',puaht_recent:v,fournisseur_recent:'manuel',_edit:true};
+  }else if(p.prixLocal&&p.prixLocal._edit&&!p.prixLocal.article)p.prixLocal=null;
+  computeVerdict(p);
+  renderCatKpis();renderCatPills();renderCatTable();
+}
+function exportCat(){
+  const rows=catProducts.map(p=>({Produit:p.name,Marque:p.brand,Catégorie:p.cat,'Prix FOB €':p.price,'CRR rendu €':+p.crr.toFixed(3),'PA local €':p.prixLocal?.puaht_recent??'','Fournisseur local':p.prixLocal?.fournisseur_recent??'','Gain %':p.gainPct!=null?+p.gainPct.toFixed(1):'','Ventes/mois':Math.round(p.monthly||0),'Marge %':p.margePct!=null?+p.margePct.toFixed(1):'','Qté recommandée':p.recoQty,'Qté commandée':p.qty||0,Verdict:p.verdict,Score:p.score}));
+  const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Analyse');
+  XLSX.writeFile(wb,'INCA_analyse_catalogue.xlsx');
+}
+</script>
+<script>
+/* ============================================================
+   CONTENEUR 40' HC
+   ============================================================ */
+let contItems=[]; // {id,name,brand,cat,ml,soda,price,pcsCase,cbmCase,kgCase,qty,prixLocal,sales,monthly,recoQty}
+// CBM/carton par défaut si inconnu (estimations terrain FMCG)
+function defCbmCase(p){
+  if(p.cbmCase>0)return p.cbmCase;
+  if(p.cat==='Boissons'){if(p.ml>=1000)return 0.018;if(p.ml>=400)return 0.014;return 0.010;}
+  if(p.cat==='Chips')return 0.045;
+  if(p.cat==='Confiseries')return 0.016;
+  if(p.cat==='Biscuiterie')return 0.020;
+  return 0.020;
+}
+function defKgCase(p){
+  if(p.kgCase>0)return p.kgCase;
+  const u=p.pcsCase||24;
+  if(p.cat==='Boissons')return Math.min((p.ml||330)/1000*u*1.12,30);
+  return Math.min(u*0.25,18); // snack/confiserie ≈250g/u max 18kg/ctn
+}
+// Palettes occupées par un produit (modèle 40'HC = p_plt palettes euro)
+function slotM3(){return (gP('p_cap')||67)/(gP('p_plt')||25);}
+function palettesOf(p,cases){
+  if(p.casePallet>0)return cases/p.casePallet;
+  if(p.pcsPallet>0&&p.pcsCase>0)return cases*p.pcsCase/p.pcsPallet;
+  return cases*defCbmCase(p)/slotM3(); // estimation volumique
+}
+function containerUnits(){return contItems.reduce((s,p)=>s+(p.qty||0),0);}
+function sendToContainer(){
+  const sel=catProducts.filter(p=>(p.qty||0)>0||((p.verdict==='IMPORT')&&p.recoQty>0));
+  if(!sel.length){sts('catSts','⚠️ Aucune ligne sélectionnée : saisissez une quantité ou laissez les verdicts ✅ IMPORTER (quantités recommandées appliquées).','warn');return;}
+  sel.forEach(p=>{
+    const qty=p.qty||p.recoQty;
+    const ex=contItems.find(c=>c.name===p.name&&c.brand===p.brand);
+    if(ex)ex.qty=qty;else contItems.push({...p,qty});
+  });
+  $('dotCont').classList.add('on');
+  switchView('conteneur');recalcContainer();
+}
+function clearContainer(){if(contItems.length&&!confirm('Vider le conteneur ?'))return;contItems=[];$('dotCont').classList.remove('on');recalcContainer();}
+function rmContItem(i){contItems.splice(i,1);recalcContainer();}
+function updContQty(i,v){contItems[i].qty=Math.max(0,parseInt(v)||0);recalcContainer();}
+function recalcContainer(){
+  const cap=gP('p_cap')||67,capKg=26000;
+  let cbm=0,kg=0,fob=0,plt=0;
+  contItems.forEach(p=>{
+    const u=p.pcsCase||1;const cases=Math.ceil((p.qty||0)/u);
+    p._cases=cases;p._plt=palettesOf(p,cases);p._cbm=p._plt*slotM3();p._kg=cases*defKgCase(p);
+    cbm+=p._cbm;kg+=p._kg;fob+=(p.qty||0)*p.price;plt+=p._plt;
+  });
+  // fret au taux €/m³ (cohérent Catalogue IA) — coût marginal réel par CBM occupé
+  const fretTot=gP('p_fret')+gP('p_dsg');
+  const rateM3=fretTot/(gP('p_cap')||67);
+  let crrTot=0,margeTot=0,gainTot=0;
+  contItems.forEach(p=>{
+    const freightU=(p.qty>0)?(rateM3*p._cbm)/p.qty:0;
+    p._crr=calcCRR(p.price,{cat:p.cat,ml:p.ml,soda:p.soda,freightU});
+    p._crrTot=p._crr*(p.qty||0);
+    crrTot+=p._crrTot;
+    const pv=p.pv||p.sales?.pv||p.prixLocal?.puv_ttc;
+    if(pv)margeTot+=(pv/1.085-p._crr)*(p.qty||0);
+    if(p.prixLocal)gainTot+=(p.prixLocal.puaht_recent-p._crr)*(p.qty||0);
+  });
+  // gauge
+  const pct=Math.min(cbm/cap*100,100);
+  $('contFill').setAttribute('width',372*pct/100);
+  const ribs=$('contRibs');ribs.innerHTML='';for(let x=30;x<372*pct/100;x+=28)ribs.innerHTML+=`<line x1="${x}" y1="8" x2="${x}" y2="72"/>`;
+  $('cgCbm').textContent=f2(cbm)+' / '+cap+' m³';
+  const bc=$('barCbm');bc.style.width=pct+'%';bc.className=pct>97?'full':pct>85?'warn':'';
+  const pk=Math.min(kg/capKg*100,100);
+  $('cgKg').textContent=f0(kg)+' / 26 000 kg';
+  const bk=$('barKg');bk.style.width=pk+'%';bk.className=pk>97?'full':pk>85?'warn':'';
+  $('cgVal').textContent=fK(fob);$('cgCrr').textContent=fK(crrTot);$('cgMarge').textContent=fK(margeTot);$('cgGain').textContent=(gainTot>=0?'+':'')+fK(gainTot);
+  $('contInfo').innerHTML=contItems.length?`<b>${contItems.length} références</b> · ${f0(containerUnits())} unités · ${f0(contItems.reduce((s,p)=>s+p._cases,0))} cartons · <b>${f2(plt)} / ${gP('p_plt')||25} palettes</b> · remplissage <b>${f2(pct)}%</b>${pct>100?' ⚠️ dépassement':pct<80&&contItems.length?' — il reste de la place, pensez au groupage':''}`:'Ajoutez des produits depuis l\'onglet <b>Catalogue IA</b>.';
+  renderContTable();
+}
+function contGroupKey(p){
+  if(p.sales&&p.sales.key&&p.sales.key.includes('|'))return p.sales.key;
+  const tk=tokens(p.name);return (tk[0]||p.name)+'|'+Math.round((p.ml||0)/10)*10;
+}
+let contOpen={}; // groupes dépliés
+function renderContTable(){
+  $('contEmpty').style.display=contItems.length?'none':'block';
+  const T=$('contTable');
+  T.querySelector('thead').innerHTML=contItems.length?'<tr><th>Produit</th><th class="num">Prix FOB</th><th class="num">Qté</th><th class="num">Cartons</th><th class="num">Palettes</th><th class="num">m³</th><th class="num">CRR/u</th><th class="num">Coût total</th><th class="num">Gain vs local</th><th></th></tr>':'';
+  // Groupes marque+format
+  const groups={};const order=[];
+  contItems.forEach((p,i)=>{
+    const k=contGroupKey(p);
+    if(!groups[k]){groups[k]={items:[],label:null};order.push(k);}
+    groups[k].items.push({p,i});
+  });
+  const rowHTML=({p,i},child)=>{
+    const gain=p.prixLocal?(p.prixLocal.puaht_recent-p._crr)*(p.qty||0):null;
+    return`<tr${child?' style="background:#fafbff"':''}>
+      <td style="${child?'padding-left:34px':''}"><div class="pname"${child?' style="font-weight:600;font-size:12px"':''}>${esc(p.name)}</div><div class="psub">${esc(p.brand)} · ${p.cat}${p.monthly?` · ${f0(p.monthly)} u/mois → rotation ${p.monthly>0?f2((p.qty||0)/p.monthly):'—'} mois`:''}</div></td>
+      <td class="num">${f2(p.price)} €</td>
+      <td class="num"><input class="qty-inp" type="number" min="0" value="${p.qty||0}" onchange="updContQty(${i},this.value)"></td>
+      <td class="num">${f0(p._cases)}${p.pcsCase?`<div class="mini">×${p.pcsCase}/ctn</div>`:''}</td>
+      <td class="num">${f2(p._plt)}${p.casePallet?`<div class="mini">${p.casePallet} ctn/plt</div>`:'<div class="mini">est.</div>'}</td>
+      <td class="num">${f2(p._cbm)}</td>
+      <td class="num"><b>${f2(p._crr)} €</b></td>
+      <td class="num">${fK(p._crrTot)}</td>
+      <td class="num" style="color:${gain>0?'var(--green-d)':gain<0?'var(--red-d)':'var(--ink3)'}">${gain!=null?(gain>0?'+':'')+f0(gain)+' €':'—'}</td>
+      <td><button class="btn dng" style="padding:5px 10px;font-size:11px" onclick="rmContItem(${i})">✕</button></td>
+    </tr>`;
+  };
+  let html='';
+  let T_qty=0,T_cases=0,T_plt=0,T_cbm=0,T_cost=0,T_gain=0;
+  order.forEach(k=>{
+    const g=groups[k].items;
+    // Totaux groupe
+    const s={qty:0,cases:0,plt:0,cbm:0,cost:0,gain:0,monthly:0};
+    g.forEach(({p})=>{s.qty+=p.qty||0;s.cases+=p._cases;s.plt+=p._plt;s.cbm+=p._cbm;s.cost+=p._crrTot;s.monthly+=p.monthly||0;
+      if(p.prixLocal)s.gain+=(p.prixLocal.puaht_recent-p._crr)*(p.qty||0);});
+    T_qty+=s.qty;T_cases+=s.cases;T_plt+=s.plt;T_cbm+=s.cbm;T_cost+=s.cost;T_gain+=s.gain;
+    if(g.length===1){html+=rowHTML(g[0],false);return;}
+    // En-tête de groupe dépliable
+    const open=!!contOpen[k];
+    const brand=g[0].p.name.split(/\s+/).slice(0,2).join(' ');
+    const ml=g[0].p.ml?g[0].p.ml+' ml':'';
+    html+=`<tr style="background:var(--gold-bg);cursor:pointer" onclick="contOpen['${k}']=!contOpen['${k}'];renderContTable()">
+      <td><div class="pname">${open?'▾':'▸'} ${esc(brand)} ${ml} <span style="font-weight:600;color:var(--ink2)">· ${g.length} variantes</span></div><div class="psub">${s.monthly?f0(s.monthly)+' u/mois groupe → rotation '+f2(s.qty/s.monthly)+' mois':''}</div></td>
+      <td class="num">—</td>
+      <td class="num"><b>${f0(s.qty)}</b></td>
+      <td class="num"><b>${f0(s.cases)}</b></td>
+      <td class="num"><b>${f2(s.plt)}</b></td>
+      <td class="num"><b>${f2(s.cbm)}</b></td>
+      <td class="num">—</td>
+      <td class="num"><b>${fK(s.cost)}</b></td>
+      <td class="num" style="color:${s.gain>0?'var(--green-d)':s.gain<0?'var(--red-d)':'var(--ink3)'}"><b>${s.gain?(s.gain>0?'+':'')+f0(s.gain)+' €':'—'}</b></td>
+      <td></td>
+    </tr>`;
+    if(open)g.forEach(it=>html+=rowHTML(it,true));
+  });
+  // Ligne TOTAL générale
+  if(contItems.length)html+=`<tr style="background:var(--navy);color:#fff;font-weight:800">
+    <td>TOTAL CONTENEUR</td><td class="num">—</td>
+    <td class="num">${f0(T_qty)}</td><td class="num">${f0(T_cases)}</td>
+    <td class="num">${f2(T_plt)}</td><td class="num">${f2(T_cbm)}</td><td class="num">—</td>
+    <td class="num">${fK(T_cost)}</td>
+    <td class="num" style="color:#7CE3A8">${T_gain?(T_gain>0?'+':'')+f0(T_gain)+' €':'—'}</td><td></td>
+  </tr>`;
+  T.querySelector('tbody').innerHTML=html;
+}
+// Remplissage auto : trie par score, remplit jusqu'à la capacité
+function autoFill(){
+  let pool=contItems.length?contItems:catProducts.filter(p=>['IMPORT','NOUVEAU'].includes(p.verdict)&&p.recoQty>0).map(p=>({...p,qty:0}));
+  if(!pool.length){alert('Analysez d\'abord un catalogue (onglet Catalogue IA).');return;}
+  pool.sort((a,b)=>b.score-a.score);
+  const cap=gP('p_plt')||25; // capacité en palettes
+  const vol=p=>palettesOf(p,Math.ceil((p.qty||0)/(p.pcsCase||1)));
+  // Pass 1 : quantités reco (rotation cible)
+  let cbm=0;
+  pool.forEach(p=>{
+    const u=p.pcsCase||1;const cases=Math.ceil((p.recoQty||u)/u);
+    p.qty=cases*u;cbm+=palettesOf(p,cases);
+  });
+  // Pass 2 : si conteneur sous-rempli, on scale les quantités proportionnellement
+  // à la demande, plafonné à 2.5× la rotation cible (évite le surstock)
+  if(cbm>0&&cbm<cap){
+    const MAXR=2.5;
+    for(let iter=0;iter<6&&cbm<cap*0.98;iter++){
+      const scale=cap/cbm;let newCbm=0;
+      pool.forEach(p=>{
+        const u=p.pcsCase||1;
+        const maxQty=p.monthly>0?Math.ceil(p.monthly*rotTarget(p.cat)*MAXR/u)*u:p.qty;
+        let q=Math.ceil(p.qty*scale/u)*u;
+        if(q>maxQty)q=maxQty;
+        p.qty=q;newCbm+=palettesOf(p,Math.ceil(q/u));
+      });
+      if(Math.abs(newCbm-cbm)<0.5){cbm=newCbm;break;}
+      cbm=newCbm;
+    }
+  }
+  // Pass 3 : si dépassement, on réduit par score croissant
+  if(cbm>cap){
+    pool.slice().sort((a,b)=>a.score-b.score).forEach(p=>{
+      if(cbm<=cap)return;const u=p.pcsCase||1;
+      while(p.qty>0&&cbm>cap){p.qty-=u;cbm-=palettesOf(p,1);}
+    });
+  }
+  contItems=pool.filter(p=>p.qty>0);
+  $('dotCont').classList.add('on');
+  recalcContainer();
+}
+function exportPlan(){
+  if(!contItems.length){alert('Conteneur vide.');return;}
+  const rows=contItems.map(p=>({Produit:p.name,Marque:p.brand,Catégorie:p.cat,'Qté unités':p.qty,Cartons:p._cases,'m³':+p._cbm.toFixed(3),'Prix FOB €':p.price,'Valeur FOB €':+(p.qty*p.price).toFixed(2),'CRR/u €':+p._crr.toFixed(3),'Coût rendu total €':+p._crrTot.toFixed(2),'PA local €':p.prixLocal?.puaht_recent??'','Gain vs local €':p.prixLocal?+((p.prixLocal.puaht_recent-p._crr)*p.qty).toFixed(2):''}));
+  rows.push({},{Produit:'PARAMÈTRES'},{Produit:'Fret 40HC',Marque:gP('p_fret')+' €'},{Produit:'Transit DSG',Marque:gP('p_dsg')+' €'},{Produit:'OM V395',Marque:gP('p_om')+'%'},{Produit:'OM Régional',Marque:gP('p_omr')+'%'},{Produit:'TVA import',Marque:gP('p_tva')+'%'});
+  const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Plan conteneur');
+  XLSX.writeFile(wb,'INCA_plan_conteneur_40HC.xlsx');
+}
+
+/* ============================================================
+   VEILLE MONDIALE IA
+   ============================================================ */
+let vCat='all';
+document.querySelectorAll('#vCats .pill').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#vCats .pill').forEach(x=>x.classList.remove('act'));b.classList.add('act');vCat=b.dataset.c;}));
+const FLAGS={france:'🇫🇷',pologne:'🇵🇱',poland:'🇵🇱',allemagne:'🇩🇪',germany:'🇩🇪',italie:'🇮🇹',italy:'🇮🇹',espagne:'🇪🇸',spain:'🇪🇸',turquie:'🇹🇷',turkey:'🇹🇷','pays-bas':'🇳🇱',netherlands:'🇳🇱',belgique:'🇧🇪',lituanie:'🇱🇹',lithuania:'🇱🇹','corée':'🇰🇷',korea:'🇰🇷',japon:'🇯🇵',japan:'🇯🇵',vietnam:'🇻🇳',thailande:'🇹🇭',thailand:'🇹🇭',malaisie:'🇲🇾',malaysia:'🇲🇾',chine:'🇨🇳',china:'🇨🇳',uae:'🇦🇪',emirats:'🇦🇪',uk:'🇬🇧',autriche:'🇦🇹'};
+function flag(c){const n=norm(c);for(const[k,f]of Object.entries(FLAGS))if(n.includes(k))return f;return'🌍';}
+function buildVeillePrompt(){
+  const q=$('vSearch').value.trim();
+  const halal=$('vHalal').classList.contains('act');
+  const noUS=$('vNoUS').classList.contains('act');
+  const today=new Date().toISOString().slice(0,10);
+  const cats={all:'toutes catégories FMCG stations-service',boissons:'boissons (sodas, jus, thés, eaux fonctionnelles)',energy:'energy drinks & boissons fonctionnelles',snacks:'chips & snacks salés',confiserie:'confiserie & chocolat',asiatique:'produits asiatiques (K-food, bubble tea, snacks)'};
+  const topSold=salesIndex.filter(e=>e.qtyYear>0).sort((a,b)=>b.qtyYear-a.qtyYear).slice(0,25).map(e=>e.article).join(', ');
+  return`Tu es l'expert sourcing d'INCA IMPORT, centrale d'achat à La Réunion (974) approvisionnant 3 stations-service (clientèle 15-40 ans, TikTok-driven, forte communauté musulmane, formats single-serve, prix vente cible 1,20–3,50 €). Import par conteneur 40' via Fos-sur-Mer→Le Port (22j) ou Asie. ${noUS?'EXCLUS le sourcing USA (trop loin/cher). Préfère Europe et Asie.':''}
+PRODUITS DÉJÀ VENDUS (ne pas proposer les mêmes marques mainstream) : ${topSold}.
+Marques à éviter (déjà bien distribuées localement) : Coca-Cola, Fanta, Sprite, Oasis, Orangina, Schweppes, Lipton, Red Bull, Monster (sauf nouveaux formats/saveurs introuvables).
+═══ MISSION ═══
+RECHERCHE: "${q||'nouvelles marques FMCG émergentes 2026 Europe Asie export'}"
+CATÉGORIE: ${cats[vCat]}
+${halal?'HALAL: certification halal = atout majeur, à signaler.':''}
+Utilise la recherche web pour trouver 6 produits RÉELS et RÉCENTS (lancements 2025-2026, marques émergentes, viraux TikTok naissants, salons SIAL/Anuga/THAIFEX). Pour CHAQUE produit identifie le FABRICANT réel (pas un revendeur), pays, ville, port de départ, et un contact export (email/site/LinkedIn) — contactConfidence: verified|likely|guess. N'invente JAMAIS de contact: si inconnu mets "" et baisse la confiance.
+Critères de notation: score global fit Réunion 0-100, logistiqueScore (facilité import 974), tendanceScore (momentum), noveltyScore (100=inconnu local).
+Réponds UNIQUEMENT en JSON valide sans markdown:
+{"searchDate":"${today}","sources":["site1.com","site2.com"],"analysis":"3-4 phrases: ce que tu as trouvé d'original et pourquoi ça colle aux stations Réunion.","products":[{"nom":"Nom produit + format","marque":"Marque","categorie":"Catégorie courte","origine":"Pays fabrication","villeFabricant":"Ville","portDepart":"Port","annee_lancement":"2025","score":82,"logistiqueScore":85,"tendanceScore":78,"noveltyScore":90,"pourquoi":"Pourquoi pertinent pour stations Réunion, preuves concrètes récentes.","tags":["Nouveauté 2026","Halal","TikTok"],"prixAchatEst":"€0.45 – €0.60","pvSuggere":"€2.00 – €2.50","margeEst":"45%","fabricant":"Nom fabricant","fabricantSite":"site.com","contactPersonne":"Nom + rôle ou vide","contactEmail":"export@... ou vide","contactConfidence":"verified","noteDistribution":"Comment acheter: direct usine / grossiste UE / MOQ estimé","accentColor":"#0071E3"}]}
+accentColors en rotation: #0071E3,#34C759,#FF9F0A,#AF52DE,#FF3B30,#B8924A`;
+}
+async function launchVeille(){
+  const btn=$('vGo');btn.disabled=true;
+  $('vEmpty').style.display='none';$('vResults').innerHTML='';$('vAnalysis').style.display='none';hideSts('vSts');
+  $('vThink').classList.add('show');
+  const steps=['Scan des lancements produits 2025-2026…','Analyse des tendances TikTok food…','Recherche fabricants & contacts export…','Vérification logistique Europe/Asie → Réunion…','Notation et structuration des résultats…'];
+  let si=0;const iv=setInterval(()=>{$('vThinkT2').textContent=steps[si%steps.length];si++;},3500);
+  try{
+    const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:8000,tools:[{type:'web_search_20250305',name:'web_search',max_uses:8}],messages:[{role:'user',content:buildVeillePrompt()}]});
+    const parsed=extractJSON(data);
+    clearInterval(iv);$('vThink').classList.remove('show');
+    renderVeille(parsed);
+  }catch(e){
+    clearInterval(iv);$('vThink').classList.remove('show');$('vEmpty').style.display='block';
+    sts('vSts','❌ '+esc(e.message),'err');
+  }
+  btn.disabled=false;
+}
+function renderVeille(d){
+  if(d.analysis){$('vAnalysis').style.display='block';$('vAnalysisTxt').textContent=d.analysis;$('vSources').textContent=d.sources?'Sources : '+d.sources.join(' · '):'';}
+  const prods=d.products||[];
+  $('vResults').innerHTML=prods.map((p,i)=>{
+    const col=p.accentColor||'#0071E3';
+    const sc=p.score>=75?'vs-h':p.score>=50?'vs-m':'vs-l';
+    const tags=(p.tags||[]).map(t=>{let c='vtag';if(/halal/i.test(t))c+=' halal';else if(/tiktok|viral|hot|épicé/i.test(t))c+=' hot';else if(/nouveau|2025|2026/i.test(t))c+=' new';return`<span class="${c}">${esc(t)}</span>`;}).join('');
+    let contact='';
+    if(p.contactPersonne)contact+=`👤 <b>${esc(p.contactPersonne)}</b><br>`;
+    if(p.contactEmail)contact+=`📧 <a href="mailto:${esc(p.contactEmail)}">${esc(p.contactEmail)}</a><br>`;
+    if(p.fabricantSite)contact+=`🌐 <a href="https://${esc(String(p.fabricantSite).replace(/^https?:\/\//,''))}" target="_blank" rel="noopener">${esc(String(p.fabricantSite).replace(/^https?:\/\//,''))}</a><br>`;
+    contact+=`<span class="mini">Confiance contact : ${esc(p.contactConfidence||'à vérifier')} · ${esc(p.noteDistribution||'')}</span>`;
+    return`<div class="vcard" style="animation-delay:${i*.07}s">
+      <div class="acc" style="background:linear-gradient(90deg,${col},${col}66)"></div>
+      <div class="vscore ${sc}">${p.score}</div>
+      <span class="vcat" style="background:${col}15;color:${col}">${esc(p.categorie)}${p.annee_lancement?' · '+esc(p.annee_lancement):''}</span>
+      <div class="vname">${esc(p.nom)}</div>
+      <div class="vbrand">${flag(p.origine)} ${esc(p.marque)} · ${esc(p.origine)}${p.villeFabricant?' · '+esc(p.villeFabricant):''}${p.portDepart?' · 🚢 '+esc(p.portDepart):''}</div>
+      <div class="vtags">${tags}</div>
+      <div class="vwhy" style="border-color:${col}">${esc(p.pourquoi)}</div>
+      <div class="vmeter">
+        <div class="vm"><div class="v">${p.tendanceScore??'—'}</div><div class="l">Tendance</div></div>
+        <div class="vm"><div class="v">${p.logistiqueScore??'—'}</div><div class="l">Logistique</div></div>
+        <div class="vm"><div class="v">${p.noveltyScore??'—'}</div><div class="l">Nouveauté</div></div>
+      </div>
+      <div class="vprices">
+        <div class="vp"><div class="l">Achat est.</div><div class="v">${esc(p.prixAchatEst||'—')}</div></div>
+        <div class="vp"><div class="l">PV suggéré</div><div class="v">${esc(p.pvSuggere||'—')}</div></div>
+        <div class="vp"><div class="l">Marge est.</div><div class="v" style="color:var(--green-d)">${esc(p.margeEst||'—')}</div></div>
+      </div>
+      <div class="vcontact"><b>🏭 ${esc(p.fabricant||p.marque)}</b><br>${contact}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   NAVIGATION & INIT
+   ============================================================ */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('act'));
+  $('v-'+v).classList.add('act');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v===v));
+  if(v==='marketing')setTimeout(mkRender,50);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.v)));
+
+// Drag & drop
+function bindDrop(zone,input,handler){
+  ['dragover','dragenter'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('over');}));
+  zone.addEventListener('drop',e=>handler(e.dataTransfer.files));
+  input.addEventListener('change',e=>handler(e.target.files));
+}
+bindDrop($('dropVentes'),$('fiVentes'),files=>{[...files].forEach(f=>{const r=new FileReader();r.onload=e=>parseVentes(e.target.result,f.name);r.readAsArrayBuffer(f);});});
+bindDrop($('dropCat'),$('fiCat'),files=>{if(files[0])handleCatFile(files[0]);});
+
+async function wipeAll(){
+  if(!confirm('Effacer toutes les données (ventes, paramètres, clé API) ?'))return;
+  const ys=Object.keys(YEARS);
+  for(const y of ys)await dbDel('years',y);
+  YEARS={};
+  // Supprimer aussi les paramètres Supabase
+  try{
+    const keys=await sbList('param:');
+    await Promise.all(keys.map(k=>sbDel(k)));
+  }catch(e){}
+  Object.keys(localStorage).filter(k=>k.startsWith(LS)).forEach(k=>localStorage.removeItem(k));
+  _paramsCache={};
+  location.reload();
+}
+
+let mkAIHtml=null; // poster généré par l'IA (HTML brut)
+async function mkGenAI(){
+  const v=mkVals();const[W,H]=MK_FMT[mkFormat];const t=MK_THEMES.find(x=>x.id===mkTheme);
+  if(!v.neu&&!v.old){sts('mkSts','Renseigne au moins un prix.','err');return;}
+  sts('mkSts','🎨 L\'IA dessine ta pub… (10-20s)','load');
+  try{
+    const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:
+`Tu es un directeur artistique senior spécialisé retail/FMCG. Crée une PUBLICITÉ PROMO ultra vendeuse, moderne et premium (niveau agence, pas "généré par IA") en HTML+CSS inline UNIQUEMENT.
+
+BRIEF:
+- Annonceur: INCA IMPORT (distributeur, La Réunion) — stations ${v.stations}
+- Produit: ${v.prod}
+- ${v.old&&v.neu?`Prix barré ${v.old.toFixed(2)}€ → PRIX PROMO ${v.neu.toFixed(2)}€ (-${v.pct}%)`:`Prix: ${(v.neu||v.old).toFixed(2)}€`}
+- Accroche souhaitée: "${v.hook}" (tu peux l'améliorer)
+- Mention légale bas: "${v.period}"
+- Ambiance couleur: ${t.n} (dominante ${t.id==='flash'?'rouge énergique':t.id==='inca'?'navy/or premium':t.id==='trop'?'tropicale verte/soleil':'nuit néon'})
+- Cible: 15-40 ans, Réunion, codes réseaux sociaux
+
+DIRECTION ARTISTIQUE EXIGÉE:
+- Typographie XXL ultra-bold pour le prix (le héros visuel, min 25% de la hauteur), chiffres avec € intégré stylé
+- Composition dynamique: diagonales, formes géométriques découpées (clip-path), cercles de glow, dégradés riches multi-stops
+- Badge promo percutant (étoile/cercle/étiquette rotée) si réduction
+- Profondeur: ombres portées colorées, layering, léger grain via repeating-linear-gradient subtil
+- Nom produit traité graphiquement (lettres serrées, uppercase, éventuel contour)
+- Footer pro discret: INCA IMPORT + stations + mention
+- AUCUNE image externe, AUCUN <script>, AUCUNE police externe (utilise 'Plus Jakarta Sans',sans-serif déjà chargée)
+
+CONTRAINTES TECHNIQUES STRICTES:
+- UN SEUL <div> racine avec style="width:${W}px;height:${H}px;position:relative;overflow:hidden;..."
+- Tout en styles inline ou via éléments imbriqués stylés inline
+- Texte 100% en français
+Réponds UNIQUEMENT avec le code HTML, sans backticks ni explication.`}]});
+    let raw='';(data.content||[]).forEach(b=>{if(b.type==='text')raw+=b.text;});
+    raw=raw.replace(/```html|```/g,'').trim();
+    const i=raw.indexOf('<div');if(i<0)throw new Error('HTML non reçu');
+    raw=raw.slice(i,raw.lastIndexOf('</div>')+6);
+    if(/<script/i.test(raw))throw new Error('script refusé');
+    mkAIHtml=raw;
+    mkRender();
+    sts('mkSts','✅ Pub générée. ↻ pour une variante, ou modifie les champs puis régénère.','ok');
+  }catch(e){sts('mkSts','❌ '+e.message+(apiKey()?'':' — ajoute ta clé API dans ⚙️'),'err');}
+}
+function mkBackManual(){mkAIHtml=null;mkRender();}
+
+/* ================== OPPORTUNITÉS D'IMPORT ================== */
+const SUPPLIERS=[
+ {n:'BBG Poland',c:'mohamed.yahya@bb-g.pl',tags:['monster','coca','red bull','fanta','sprite','schweppes','lipton','pepsi','7up','canada','energy','soda','oasis','tropico'],cats:['Boissons']},
+ {n:'Dabex Poland',c:'export@dabex.pl',tags:['kinder','nutella','haribo','mars','snickers','twix','kitkat','milka','oreo','mentos','pringles','lays','chips'],cats:['Confiseries','Biscuiterie','Chips','Boissons']},
+ {n:'MPT Stanro Poland',c:'export@stanro.eu',tags:['coca','fanta','monster','red bull','chips','biscuit'],cats:['Boissons','Chips','Confiseries']},
+ {n:'Aleo Drinks Lituanie',c:'indre@aleodrinks.eu',tags:['energy','aloe','okf','ice tea','vitamine','water'],cats:['Boissons']},
+ {n:'Candy Market France',c:'contact@candymarket.fr',tags:['bonbon','haribo','fini','candy','sucette','chewing','gum'],cats:['Confiseries']},
+ {n:'Delidrinks France',c:'contact@delidrinks.com',tags:['premium','jus','bio','limonade','ginger'],cats:['Boissons']},
+ {n:'FMCG Viet',c:'inquiry@fmcg-viet.com',tags:['aloe','coco','coconut','asian','okf','sting','pocari','jus'],cats:['Boissons','Autre']},
+ {n:'G&G FMCG',c:'info@ggfmcg.com',tags:['asian','noodle','snack','coco'],cats:['Boissons','Chips','Autre']},
+];
+function suggestSuppliers(name,cat){
+  const n=norm(name);
+  return SUPPLIERS.filter(s=>s.cats.includes(cat)&&(s.tags.some(t=>n.includes(t))||s.cats[0]===cat))
+    .sort((a,b)=>b.tags.filter(t=>n.includes(t)).length-a.tags.filter(t=>n.includes(t)).length)
+    .slice(0,2);
+}
+// FOB max pour conserver minGain de marge vs PA local : CRR = (FOB+f)·K + soda + stick
+function fobMax(paLocal,p,minGain=0.05){
+  const dd=ddRate(p.cat),om=gP('p_om')/100,omr=gP('p_omr')/100,tva=gP('p_tva')/100;
+  const K=1+dd+om+omr+tva*(1+dd);
+  const sodaU=(p.cat==='Boissons')?sodaPerUnit(p.soda||'mid',p.ml||330):0;
+  const f=freightPerUnit(p);
+  return Math.max(0,(paLocal*(1-minGain)-sodaU-gP('p_stick'))/K-f);
+}
+function renderOpps(){
+  if(!salesIndex.length){alert('Chargez d\'abord vos fichiers de ventes.');return;}
+  // Agrégat par marque+format (dédup variantes) via matchSales sur soi-même
+  const seen={},opps=[];
+  salesIndex.slice().sort((a,b)=>b.qtyYear-a.qtyYear).slice(0,300).forEach(e=>{
+    if(e.qtyYear<=0)return;
+    const m=matchSales(e.article);if(!m)return;
+    if(seen[m.key])return;seen[m.key]=1;
+    const pm=matchPrix(e.article);
+    if(!pm)return; // besoin du PA pour évaluer
+    const pa=+pm.puaht_recent;
+    const cat=guessCat(e.article);
+    const p={cat,ml:m.ml||toML(e.article)||330,soda:cat==='Boissons'?'mid':'none',pcsCase:24};
+    const fmax=fobMax(pa,p);
+    const enjeu=m.qtyYear*pa; // budget achat annuel
+    opps.push({name:e.article,cat,qtyYear:m.qtyYear,pa,fournLocal:pm.fournisseur_recent||'',fmax,enjeu,sup:suggestSuppliers(e.article,cat)});
+  });
+  opps.sort((a,b)=>b.enjeu-a.enjeu);
+  const top=opps.slice(0,40);
+  const T=$('oppTable');
+  T.querySelector('thead').innerHTML='<tr><th>#</th><th>Produit (libellé caisse)</th><th class="num">Ventes/an</th><th class="num">PA local</th><th class="num">Budget/an</th><th class="num">FOB max (gain ≥5%)</th><th>Fournisseurs suggérés</th></tr>';
+  T.querySelector('tbody').innerHTML=top.map((o,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><div class="pname">${esc(o.name)}</div><div class="psub">${o.cat} · ${esc(o.fournLocal)}</div></td>
+    <td class="num"><b>${f0(o.qtyYear)}</b></td>
+    <td class="num">${f2(o.pa)} €</td>
+    <td class="num"><b>${fK(o.enjeu)}</b></td>
+    <td class="num" style="color:var(--green-d)"><b>≤ ${f2(o.fmax)} €</b></td>
+    <td>${o.sup.map(s=>`<div style="font-size:11px"><b>${s.n}</b> <span class="mini">${s.c}</span></div>`).join('')||'<span class="mini">—</span>'}</td>
+  </tr>`).join('');
+}
+
+/* ================== COMPARATEUR DE CATALOGUES ================== */
+let cmpCats=[null,null,null];
+function bindCmp(){
+  for(let i=0;i<3;i++){
+    const z=$('cmpDrop'+i),f=$('cmpFile'+i);
+    z.addEventListener('click',()=>f.click());
+    bindDrop(z,f,async files=>{
+      const file=files&&files[0];if(!file)return;
+      sts('cmpSts','📥 Lecture de '+file.name+'…','load');
+      try{
+        const rows=await fileToRows(file);
+        cmpCats[i]={name:file.name.replace(/\.[^.]+$/,''),rows};
+        $('cmpName'+i).textContent=file.name+' · '+rows.length+' produits ✓';
+        sts('cmpSts','✅ '+file.name+' chargé ('+rows.length+' produits).','ok');
+      }catch(e){sts('cmpSts','❌ '+e.message,'err');}
+    });
+  }
+  // Devis transitaires
+  for(let i=0;i<3;i++){
+    const z=$('trDrop'+i),f=$('trFile'+i);
+    z.addEventListener('click',()=>f.click());
+    bindDrop(z,f,files=>{
+      const file=files&&files[0];if(!file)return;
+      trQuotes[i]={file,name:file.name,data:null};
+      $('trName'+i).textContent=file.name+' ✓';
+      sts('trSts','📄 '+file.name+' prêt. Clique "Comparer les devis".','ok');
+    });
+  }
+}
+
+/* ===== Comparateur devis transitaires ===== */
+let trQuotes=[null,null,null];
+async function trParse(q){
+  const{fullText}=await pdfToText(q.file,8);
+  const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:
+`Voici le texte d'une cotation de transitaire maritime (import conteneur vers La Réunion). Extrais les données en JSON strict.
+
+TEXTE:
+${fullText.slice(0,30000)}
+
+Réponds UNIQUEMENT ce JSON (null si absent):
+{"transitaire":"nom du transitaire","compagnie":"compagnie maritime","conteneur":"type ex 40HC","incoterm":"","origine":"port/lieu de départ","transit_jours":0,"validite":"date",
+"fret_forfait":0,
+"frais_fixes":[{"label":"Débarquement","montant":0}],
+"total_frais_transitaire":0,
+"om_estime":0,"omr_estime":0,"tva_estimee":0,
+"assurance":0,"commentaire":"particularités importantes en 1 phrase"}
+Règles: fret_forfait = le forfait fret maritime principal. frais_fixes = TOUTES les autres lignes de prestation (débarquement, BL, douane, CIP, dossier, livraison, TSM, crédit d'enlèvement…) HORS octroi de mer, TVA et assurance. total_frais_transitaire = fret_forfait + somme frais_fixes. Montants en euros (nombres).`}]});
+  return extractJSON(data);
+}
+async function runTransitCompare(){
+  const qs=trQuotes.filter(Boolean);
+  if(qs.length<2){sts('trSts','Charge au moins 2 devis PDF.','err');return;}
+  if(!apiKey()){sts('trSts','Clé API requise (⚙️ Réglages) pour lire les devis.','err');return;}
+  sts('trSts','🤖 Extraction des devis ('+qs.length+')…','load');
+  try{
+    for(const q of qs){if(!q.data){sts('trSts','🤖 Lecture de '+q.name+'…','load');q.data=await trParse(q);}}
+  }catch(e){sts('trSts','❌ '+e.message,'err');return;}
+  // Rendu comparatif
+  const ds=qs.map(q=>q.data);
+  const best=Math.min(...ds.map(d=>+d.total_frais_transitaire||1e9));
+  const allLabels=[...new Set(ds.flatMap(d=>(d.frais_fixes||[]).map(f=>f.label)))];
+  const rows=[
+    ['Compagnie / Conteneur',...ds.map(d=>esc((d.compagnie||'—')+' · '+(d.conteneur||'')))],
+    ['Origine · Incoterm',...ds.map(d=>esc((d.origine||'—')+' · '+(d.incoterm||'')))],
+    ['Transit',...ds.map(d=>d.transit_jours?d.transit_jours+' jours':'—')],
+    ['Validité',...ds.map(d=>esc(d.validite||'—'))],
+    ['<b>Forfait fret maritime</b>',...ds.map(d=>f0(d.fret_forfait||0)+' €')],
+    ...allLabels.map(l=>[esc(l),...ds.map(d=>{const f=(d.frais_fixes||[]).find(x=>x.label===l);return f?f0(f.montant)+' €':'—';})]),
+    ['<b>TOTAL FRAIS TRANSITAIRE</b>',...ds.map(d=>{const t=+d.total_frais_transitaire||0;return`<b style="color:${t===best?'var(--green-d)':'var(--ink)'}">${f0(t)} €${t===best?' 🏆':''}</b>`;})],
+    ['€ / m³ (67 m³)',...ds.map(d=>f2((+d.total_frais_transitaire||0)/(gP('p_cap')||67))+' €')],
+    ['Assurance (option)',...ds.map(d=>d.assurance?f0(d.assurance)+' €':'—')],
+    ['OM estimé (info)',...ds.map(d=>d.om_estime?f0(d.om_estime)+' €':'—')],
+    ['Remarques',...ds.map(d=>`<span class="mini">${esc(d.commentaire||'')}</span>`)],
+  ];
+  const T=$('trTable');
+  T.querySelector('thead').innerHTML='<tr><th></th>'+ds.map(d=>`<th class="num">${esc(d.transitaire||'Devis')}</th>`).join('')+'</tr>';
+  T.querySelector('tbody').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td>'+r.slice(1).map(c=>`<td class="num">${c}</td>`).join('')+'</tr>').join('');
+  $('trResWrap').style.display='block';
+  const ecart=Math.max(...ds.map(d=>+d.total_frais_transitaire||0))-best;
+  sts('trSts','✅ Comparaison terminée — écart max '+f0(ecart)+' € sur les frais transitaire.','ok');
+}
+function cmpMatchScore(a,b){
+  const ta=tokens(a.name),tb=tokens(b.name);
+  if(ta[0]!==tb[0])return 0; // marque obligatoire
+  let common=0;for(const t of ta)if(tb.includes(t))common++;
+  let s=common/Math.max(ta.length,tb.length);
+  const ma=toML(a.name),mb=toML(b.name);
+  if(ma&&mb){if(Math.abs(ma-mb)<=Math.max(30,ma*0.08))s+=0.35;else return 0;}
+  return s;
+}
+let cmpResult=[];
+function runCompare(){
+  const cats=cmpCats.filter(Boolean);
+  if(cats.length<2){sts('cmpSts','Charge au moins 2 catalogues.','err');return;}
+  const used=cats.map(()=>new Set());
+  const rowsOf=ci=>cats[ci].rows;
+  cmpResult=[];
+  // base = catalogue avec le plus de produits
+  const order=cats.map((c,i)=>i).sort((a,b)=>rowsOf(b).length-rowsOf(a).length);
+  const base=order[0];
+  rowsOf(base).forEach((r,ri)=>{
+    const entry={name:r.name,ml:toML(r.name),prices:Array(cats.length).fill(null)};
+    entry.prices[base]={p:r.price,n:r.name};used[base].add(ri);
+    order.slice(1).forEach(ci=>{
+      let best=-1,bs=0.55;
+      rowsOf(ci).forEach((r2,j)=>{if(used[ci].has(j))return;const s=cmpMatchScore(r,r2);if(s>bs){bs=s;best=j;}});
+      if(best>=0){entry.prices[ci]={p:rowsOf(ci)[best].price,n:rowsOf(ci)[best].name,s:bs};used[ci].add(best);}
+    });
+    cmpResult.push(entry);
+  });
+  // produits présents uniquement dans les autres catalogues
+  order.slice(1).forEach(ci=>{
+    rowsOf(ci).forEach((r,j)=>{
+      if(used[ci].has(j))return;
+      const e={name:r.name,ml:toML(r.name),prices:Array(cats.length).fill(null)};
+      e.prices[ci]={p:r.price,n:r.name};cmpResult.push(e);
+    });
+  });
+  // enrichissement PA local + tri par écart décroissant
+  cmpResult.forEach(e=>{
+    const pm=matchPrix(e.name);e.pa=pm?+pm.puaht_recent:null;
+    const ps=e.prices.filter(Boolean).map(x=>x.p);
+    e.min=Math.min(...ps);e.max=Math.max(...ps);
+    e.nb=ps.length;e.ecart=e.nb>1?(e.max-e.min)/e.max:0;
+  });
+  cmpResult.sort((a,b)=>(b.nb-a.nb)||(b.ecart-a.ecart));
+  renderCompare(cats);
+}
+function renderCompare(cats){
+  $('cmpResCard').style.display='block';
+  const both=cmpResult.filter(e=>e.nb>1).length;
+  $('cmpKpis').innerHTML=`
+    <div><div class="kpi-v">${cmpResult.length}</div><div class="kpi-l">produits au total</div></div>
+    <div><div class="kpi-v" style="color:var(--blue)">${both}</div><div class="kpi-l">rapprochés (≥2 catalogues)</div></div>
+    <div><div class="kpi-v" style="color:var(--green-d)">${cmpResult.filter(e=>e.nb>1&&e.ecart>0.05).length}</div><div class="kpi-l">écarts > 5%</div></div>`;
+  const T=$('cmpTable');
+  T.querySelector('thead').innerHTML='<tr><th>Produit</th>'+cats.map(c=>`<th class="num">${esc(c.name.slice(0,18))}</th>`).join('')+'<th class="num">Meilleur</th><th class="num">Écart</th><th class="num">PA local</th></tr>';
+  T.querySelector('tbody').innerHTML=cmpResult.slice(0,400).map(e=>{
+    const cells=e.prices.map(x=>{
+      if(!x)return'<td class="num" style="color:var(--ink3)">—</td>';
+      const best=x.p===e.min&&e.nb>1;
+      return`<td class="num" style="${best?'color:var(--green-d);font-weight:800':''}">${f2(x.p)} €${x.n&&norm(x.n)!==norm(e.name)?`<div class="mini">${esc(x.n.slice(0,28))}</div>`:''}</td>`;
+    }).join('');
+    return`<tr><td><div class="pname">${esc(e.name)}</div></td>${cells}
+      <td class="num"><b>${f2(e.min)} €</b></td>
+      <td class="num" style="color:${e.ecart>0.05?'var(--orange-d,#e8590c)':'var(--ink3)'}">${e.nb>1?f0(e.ecart*100)+'%':'—'}</td>
+      <td class="num">${e.pa?f2(e.pa)+' €':'—'}</td></tr>`;
+  }).join('');
+}
+function exportCompare(){
+  if(!cmpResult.length){sts('cmpSts','Lance d\'abord une comparaison.','err');return;}
+  const cats=cmpCats.filter(Boolean);
+  const data=cmpResult.map(e=>{
+    const o={Produit:e.name};
+    cats.forEach((c,i)=>o[c.name.slice(0,25)]=e.prices[i]?e.prices[i].p:'');
+    o['Meilleur prix']=e.min;o['Écart %']=e.nb>1?Math.round(e.ecart*100):'';o['PA local']=e.pa||'';
+    return o;
+  });
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Comparatif');
+  XLSX.writeFile(wb,'INCA_Comparatif_Catalogues.xlsx');
+}
+
+/* ================== STUDIO PROMO ================== */
+const MK_THEMES=[
+ {id:'flash',n:'FLASH',bg:'linear-gradient(160deg,#e8112d 0%,#b00020 60%,#7a0015 100%)',txt:'#fff',acc:'#ffd400',badge:'#fff',badgeTxt:'#e8112d',deco:['#ffd400','#ff5a36']},
+ {id:'inca',n:'INCA',bg:'linear-gradient(160deg,#1A2744 0%,#243a6b 55%,#B8924A 160%)',txt:'#fff',acc:'#B8924A',badge:'#B8924A',badgeTxt:'#1A2744',deco:['#B8924A','#3b5bdb']},
+ {id:'trop',n:'TROPICAL',bg:'linear-gradient(160deg,#0ca678 0%,#087f5b 55%,#f59f00 170%)',txt:'#fff',acc:'#ffe066',badge:'#ffe066',badgeTxt:'#087f5b',deco:['#ffe066','#63e6be']},
+ {id:'neon',n:'NUIT',bg:'linear-gradient(160deg,#0b0d17 0%,#1b1e3a 60%,#0b0d17 100%)',txt:'#fff',acc:'#00e5ff',badge:'#00e5ff',badgeTxt:'#0b0d17',deco:['#00e5ff','#7048e8']}
+];
+const MK_FMT={story:[1080,1920],post:[1080,1080],tv:[1920,1080]};
+let mkTheme='flash',mkFormat='post';
+function mkInit(){
+  $('mkThemes').innerHTML=MK_THEMES.map(t=>`<div class="mkt-th ${mkTheme===t.id?'act':''}" style="background:${t.bg}" onclick="mkTheme='${t.id}';mkInit();mkRender()">${t.n}</div>`).join('');
+  // datalist produits depuis ventes + référentiel
+  const names=new Set();
+  salesIndex.slice().sort((a,b)=>b.qtyYear-a.qtyYear).slice(0,150).forEach(e=>names.add(e.article));
+  PRIX_ACHATS_DB.forEach(r=>names.add(r.article));
+  $('mkProdList').innerHTML=[...names].slice(0,400).map(n=>`<option value="${esc(n)}">`).join('');
+}
+function mkAutoFill(){
+  // pré-remplit le prix normal depuis PV connu
+  const n=$('mkProd').value;if(!n)return;
+  const s=matchSales(n);const pv=s?.pv;
+  if(pv&&!$('mkOld').value)$('mkOld').value=(+pv).toFixed(2);
+}
+function mkFmt(f){mkFormat=f;mkAIHtml=null;document.querySelectorAll('#mkFmts button').forEach(b=>b.classList.toggle('act',b.dataset.f===f));mkRender();}
+function mkVals(){
+  const old=parseFloat($('mkOld').value)||0,neu=parseFloat($('mkNew').value)||0;
+  const pct=(old>0&&neu>0&&neu<old)?Math.round((1-neu/old)*100):0;
+  return{prod:$('mkProd').value||'VOTRE PRODUIT',hook:$('mkHook').value||'PRIX CHOC',old,neu,pct,
+    period:$('mkPeriod').value||'Offre limitée · dans la limite du stock',stations:$('mkStations').value||'OLA · TOTAL · VITO'};
+}
+function mkPrice(v){
+  if(!v)return'';
+  const[e,c]=v.toFixed(2).split('.');
+  return`${e}<span class="po-cents" style="font-size:.45em">€${c}</span>`;
+}
+function mkPosterHTML(scale){
+  const t=MK_THEMES.find(x=>x.id===mkTheme),[W,H]=MK_FMT[mkFormat],v=mkVals();
+  const u=Math.min(W,H)/100; // unité responsive
+  return`<div class="poster" style="width:${W}px;height:${H}px;background:${t.bg};color:${t.txt};padding:${u*7}px;${scale?`transform:scale(${scale});transform-origin:top left;`:''}">
+    <div class="po-deco" style="width:${u*60}px;height:${u*60}px;background:${t.deco[0]};top:-${u*20}px;left:-${u*18}px;opacity:.25"></div>
+    <div class="po-deco" style="width:${u*44}px;height:${u*44}px;background:${t.deco[1]};bottom:-${u*14}px;right:-${u*10}px;opacity:.22"></div>
+    ${v.pct?`<div class="po-badge" style="width:${u*22}px;height:${u*22}px;background:${t.badge};color:${t.badgeTxt}"><span style="font-size:${u*7.5}px">-${v.pct}%</span><span style="font-size:${u*2.6}px;letter-spacing:1px">PROMO</span></div>`:''}
+    <div class="po-head">
+      <div class="po-brand" style="font-size:${u*3}px;color:${t.acc}">INCA IMPORT</div>
+      <div class="po-hook" style="font-size:${u*10.5}px;margin-top:${u*2}px">${esc(v.hook)}</div>
+      <div class="po-prod" style="font-size:${u*5}px;margin-top:${u*2.5}px">${esc(v.prod)}</div>
+    </div>
+    <div class="po-prices">
+      ${(v.old&&v.neu)?`<div class="po-old" style="font-size:${u*7}px">${mkPrice(v.old)}</div>`:''}
+      <div class="po-new" style="font-size:${u*20}px;color:${t.acc};text-shadow:0 ${u}px ${u*3}px rgba(0,0,0,.35)">${mkPrice(v.neu||v.old)||''}</div>
+    </div>
+    <div class="po-foot" style="font-size:${u*2.9}px">
+      <div class="po-stations" style="color:${t.acc}">${esc(v.stations)}</div>
+      <div class="po-period">${esc(v.period)}</div>
+    </div>
+  </div>`;
+}
+function mkRender(){
+  const[W,H]=MK_FMT[mkFormat];
+  const stage=$('mkStage');
+  const avail=Math.min(stage.clientWidth-44||620,640);
+  const scale=Math.min(avail/W,520/H);
+  if(mkAIHtml){
+    $('mkPoster').innerHTML=`<div style="transform:scale(${scale});transform-origin:top left">${mkAIHtml}</div>`;
+  }else{
+    $('mkPoster').innerHTML=mkPosterHTML(scale);
+  }
+  $('mkPoster').style.width=(W*scale)+'px';$('mkPoster').style.height=(H*scale)+'px';
+}
+async function mkSlogans(){
+  const v=mkVals();
+  sts('mkSts','🤖 Génération des accroches…','load');
+  const fallback=['PRIX CHOC','ÇA DÉCOIFFE','LE BON PLAN','FONCE !','OFFRE DE OUF','À SAISIR','MOINS CHER ICI','LE DEAL DU MOMENT'];
+  let hooks=fallback;
+  try{
+    const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Tu écris des accroches publicitaires pour des stations-service à La Réunion (cible 15-40 ans, ton fun TikTok, français/créole léger accepté). Produit en promo: "${v.prod}"${v.pct?', -'+v.pct+'%':''}${v.neu?', prix '+v.neu.toFixed(2)+'€':''}. Donne 6 accroches très courtes (2 à 5 mots, MAJUSCULES, percutantes, sans emoji). Réponds UNIQUEMENT en JSON: ["...","..."]`}]});
+    hooks=extractJSON(data);
+  }catch(e){sts('mkSts','⚠️ IA indisponible ('+e.message.slice(0,60)+') — accroches locales proposées.','err');}
+  $('mkSloganBox').innerHTML=hooks.slice(0,8).map(h=>`<span class="slogan-chip" onclick="$('mkHook').value=this.textContent;mkRender()">${esc(h)}</span>`).join('');
+  if(hooks!==fallback)sts('mkSts','✅ Clique une accroche pour l\'appliquer.','ok');
+}
+async function mkExport(){
+  sts('mkSts','📸 Export en cours…','load');
+  const[W,H]=MK_FMT[mkFormat];
+  const tmp=document.createElement('div');
+  tmp.style.cssText='position:fixed;left:-99999px;top:0';
+  tmp.innerHTML=mkAIHtml||mkPosterHTML(null);
+  document.body.appendChild(tmp);
+  try{
+    const canvas=await html2canvas(tmp.firstElementChild,{width:W,height:H,scale:1,backgroundColor:null});
+    const a=document.createElement('a');
+    a.download=`PROMO_${(mkVals().prod||'produit').replace(/\W+/g,'_').slice(0,30)}_${mkFormat}.png`;
+    a.href=canvas.toDataURL('image/png');a.click();
+    sts('mkSts','✅ PNG téléchargé ('+W+'×'+H+').','ok');
+  }catch(e){sts('mkSts','❌ Export impossible: '+e.message,'err');}
+  tmp.remove();
+}
+
+(async function init(){
+  // Indicateur de chargement
+  const bar=document.createElement('div');
+  bar.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0071E3,#34C759);z-index:9999;';
+  document.body.prepend(bar);
+
+  // Charger les paramètres depuis Supabase (puis les données ventes)
+  await loadAllParams();
+  await openDB();
+  const saved=await dbAll('years');
+  saved.forEach(r=>YEARS[r.year]=r.data);
+  rebuildSalesIndex();
+  bindParams();
+  $('refChip').textContent=PRIX_ACHATS_DB.length+' prix réf. · '+salesIndex.length+' produits suivis';
+  if(apiKey())$('apiKeyInp').value='••••••••••••';
+  updateDataChip();
+  const ys=Object.keys(YEARS).sort();
+  if(ys.length){AY=ys[ys.length-1];enterDash();}
+  recalcContainer();
+  mkInit();mkRender();bindCmp();
+
+  bar.style.opacity='0';
+  setTimeout(()=>bar.remove(),500);
+})();
+</script>
+</body>
+</html>
