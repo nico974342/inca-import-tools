@@ -525,11 +525,11 @@ tbody tr:hover{background:var(--card2)}
       </div>
       <button class="btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#7048e8,#3b5bdb)" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
       <div class="mkt-lbl">Photo produit (optionnel)</div>
-<div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
-  <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
-  <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
-</div>
-<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#0071E3,#34C759)" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
+      <div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
+        <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
+        <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#0071E3,#34C759)" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn gh" style="flex:1" onclick="mkGenAI()">↻ Variante</button>
         <button class="btn gh" style="flex:1" onclick="mkBackManual()">Modèle simple</button>
@@ -1751,6 +1751,18 @@ async function wipeAll(){
 }
 
 let mkAIHtml=null; // poster généré par l'IA (HTML brut)
+let mkPhotoBase64=null;
+const FAL_PROXY='https://inca-fal-proxy.vercel.app/api/generate-image';
+
+function mkPhotoUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    mkPhotoBase64=ev.target.result;
+    document.getElementById('mkPhotoPreview').innerHTML='<img src="'+mkPhotoBase64+'" style="max-height:60px;max-width:100%;border-radius:6px">';
+  };
+  reader.readAsDataURL(file);
+}
 async function mkGenAI(){
   const v=mkVals();const[W,H]=MK_FMT[mkFormat];const t=MK_THEMES.find(x=>x.id===mkTheme);
   if(!v.neu&&!v.old){sts('mkSts','Renseigne au moins un prix.','err');return;}
@@ -1793,26 +1805,18 @@ Réponds UNIQUEMENT avec le code HTML, sans backticks ni explication.`}]});
   }catch(e){sts('mkSts','❌ '+e.message+(apiKey()?'':' — ajoute ta clé API dans ⚙️'),'err');}
 }
 function mkBackManual(){mkAIHtml=null;mkRender();}
-  const FAL_PROXY = "https://inca-fal-proxy.vercel.app/api/generate-image";
-let mkPhotoBase64 = null;
-
-function mkPhotoUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    mkPhotoBase64 = reader.result;
-    $('mkPhotoPreview').innerHTML = `<img src="${mkPhotoBase64}" style="max-width:100%;max-height:90px;border-radius:8px">`;
-  };
-  reader.readAsDataURL(file);
-}
 
 async function mkGenAIPhoto() {
   if (!mkPhotoBase64) { sts('mkSts', '⚠️ Upload une photo produit d\'abord.', 'err'); return; }
   const v = mkVals();
+  const t = MK_THEMES.find(x => x.id === mkTheme);
   sts('mkSts', '📸 Génération du visuel photo-réaliste… (10-20s)', 'load');
   try {
-    const prompt = `Professional product photography of ${v.prod}, studio lighting, premium background, commercial advertising style, high detail, 4k quality, centered composition`;
+    const ambiance = mkTheme === 'flash' ? 'vibrant red and orange dynamic energy, bold colorful gradient background, dramatic lighting' :
+                      mkTheme === 'inca' ? 'premium navy and gold background, elegant studio lighting, luxury feel' :
+                      mkTheme === 'trop' ? 'tropical green and orange gradient, fresh vibrant summer vibe, splash of color' :
+                      'neon cyan and purple glow, night club energy, futuristic dynamic lighting';
+    const prompt = `Professional commercial advertising photography of this exact product, ${ambiance}, dynamic dramatic studio lighting, splash effects, vibrant saturated colors, high-end FMCG advertising style, sharp focus on product, 4k commercial quality, eye-catching composition`;
     const res = await fetch(FAL_PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1824,12 +1828,28 @@ async function mkGenAIPhoto() {
     });
     const data = await res.json();
     if (!data.images || !data.images[0]) throw new Error(data.error || 'Pas d\'image reçue');
-    mkAIHtml = `<div style="width:${MK_FMT[mkFormat][0]}px;height:${MK_FMT[mkFormat][1]}px;background:url('${data.images[0].url}') center/cover;position:relative">
-      <div style="position:absolute;bottom:5%;left:5%;right:5%;background:rgba(0,0,0,.6);color:#fff;padding:16px;border-radius:12px;font-weight:800">
-        <div style="font-size:14px;opacity:.8">${esc(v.prod)}</div>
-        <div style="font-size:32px">${mkPrice(v.neu||v.old)}</div>
-      </div>
-    </div>`;
+    const W = MK_FMT[mkFormat][0];
+    const H = MK_FMT[mkFormat][1];
+    let badgeHtml = '';
+    if (v.pct) {
+      badgeHtml = '<div style="position:absolute;top:5%;right:6%;background:' + t.badge + ';color:' + t.badgeTxt + ';width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;transform:rotate(8deg);box-shadow:0 10px 30px rgba(0,0,0,.4)"><span style="font-size:26px">-' + v.pct + '%</span><span style="font-size:10px;letter-spacing:1px">PROMO</span></div>';
+    }
+    let priceHtml = '';
+    if (v.old && v.neu) {
+      priceHtml = '<span style="text-decoration:line-through;opacity:.6;font-size:22px">' + mkPrice(v.old) + '</span>';
+    }
+    mkAIHtml = '<div style="width:' + W + 'px;height:' + H + 'px;background:url(\'' + data.images[0].url + '\') center/cover;position:relative;font-family:\'Plus Jakarta Sans\',sans-serif">' +
+      badgeHtml +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:5% 6% 6%;color:#fff">' +
+        '<div style="font-size:13px;letter-spacing:2px;opacity:.8;font-weight:700">INCA IMPORT</div>' +
+        '<div style="font-size:20px;font-weight:800;margin:4px 0">' + esc(v.prod) + '</div>' +
+        '<div style="display:flex;align-items:baseline;gap:10px">' +
+          priceHtml +
+          '<span style="font-size:48px;font-weight:900;color:' + t.acc + '">' + mkPrice(v.neu || v.old) + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;opacity:.75;margin-top:6px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
+      '</div>' +
+    '</div>';
     mkRender();
     sts('mkSts', '✅ Visuel généré avec FLUX.', 'ok');
   } catch (e) {
