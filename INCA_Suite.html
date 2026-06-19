@@ -524,6 +524,12 @@ tbody tr:hover{background:var(--card2)}
         <button data-f="tv" onclick="mkFmt('tv')">🖥 Écran TV<br>1920×1080</button>
       </div>
       <button class="btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#7048e8,#3b5bdb)" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
+      <div class="mkt-lbl">Photo produit (optionnel)</div>
+<div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
+  <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
+  <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
+</div>
+<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#0071E3,#34C759)" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn gh" style="flex:1" onclick="mkGenAI()">↻ Variante</button>
         <button class="btn gh" style="flex:1" onclick="mkBackManual()">Modèle simple</button>
