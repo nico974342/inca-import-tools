@@ -1830,7 +1830,7 @@ async function mkGenAIPhoto() {
   sts('mkSts', '📸 Génération du visuel photo-réaliste… (10-20s)', 'load');
   try {
     const ambiance = CATEGORY_AMBIANCE[mkCategory];
-    const prompt = 'Professional commercial advertising photography of this exact product, ' + ambiance + ', sharp focus on product, high-end FMCG advertising style, 4k commercial quality, eye-catching composition, leave clear empty space at top and bottom for text overlay';
+    const prompt = 'Keep this exact product completely unchanged - identical colors, label, design, packaging. Do not alter the product. Place it in this realistic environment: ' + ambiance + '. Shot like a real professional photograph with a real camera, natural authentic lighting, realistic depth of field, photorealistic, NOT a digital illustration, NOT oversaturated, NOT an obviously AI-generated look, avoid plastic/glossy artificial rendering, looks like genuine commercial product photography, leave clear empty space at top and bottom for text overlay.';
     const res = await fetch(FAL_PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1849,15 +1849,15 @@ async function mkGenAIPhoto() {
       priceHtml = '<span style="text-decoration:line-through;opacity:.6;font-size:22px;color:#fff">' + mkPrice(v.old) + '</span>';
     }
     mkAIHtml = '<div style="width:' + W + 'px;height:' + H + 'px;background:url(\'' + data.images[0].url + '\') center/cover;position:relative;font-family:\'Plus Jakarta Sans\',sans-serif">' +
-      '<img src="' + LOGO_URL + '" style="position:absolute;top:6%;left:6%;height:36px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))">' +
+      '<div style="position:absolute;top:5%;left:5%;background:rgba(255,255,255,.92);padding:8px 16px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2)"><img src="' + LOGO_URL + '" style="height:28px;display:block"></div>' +
       badgeHtml +
-      '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:8% 6% 7%;color:#fff">' +
-        '<div style="font-size:20px;font-weight:800;margin:4px 0">' + esc(v.prod) + '</div>' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:#c45b18;padding:6% 6% 7%;color:#fff">' +
+        '<div style="font-size:20px;font-weight:800;margin:0 0 4px">' + esc(v.prod) + '</div>' +
         '<div style="display:flex;align-items:baseline;gap:10px">' +
           priceHtml +
-          '<span style="font-size:48px;font-weight:900;color:#e8915a">' + mkPrice(v.neu || v.old) + '</span>' +
+          '<span style="font-size:48px;font-weight:900;color:#fff">' + mkPrice(v.neu || v.old) + '</span>' +
         '</div>' +
-        '<div style="font-size:11px;opacity:.75;margin-top:6px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
+        '<div style="font-size:11px;opacity:.85;margin-top:6px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
       '</div>' +
     '</div>';
     mkRender();
