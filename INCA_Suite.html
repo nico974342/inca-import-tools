@@ -524,6 +524,12 @@ tbody tr:hover{background:var(--card2)}
         <button data-f="tv" onclick="mkFmt('tv')">🖥 Écran TV<br>1920×1080</button>
       </div>
       <button class="btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#7048e8,#3b5bdb)" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
+      <div class="mkt-lbl">Ambiance produit</div>
+      <div class="pills" id="mkCatPills">
+        <div class="pill act" data-c="sport" onclick="mkCat('sport')">🌴 Sport & Santé</div>
+        <div class="pill" data-c="energy" onclick="mkCat('energy')">⚡ Energy</div>
+        <div class="pill" data-c="snack" onclick="mkCat('snack')">🍫 Snack & Gourmand</div>
+      </div>
       <div class="mkt-lbl">Photo produit (optionnel)</div>
       <div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
         <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
@@ -1806,25 +1812,29 @@ Réponds UNIQUEMENT avec le code HTML, sans backticks ni explication.`}]});
 }
 function mkBackManual(){mkAIHtml=null;mkRender();}
 
+let mkCategory = 'sport';
+function mkCat(c) {
+  mkCategory = c;
+  document.querySelectorAll('#mkCatPills .pill').forEach(p => p.classList.toggle('act', p.dataset.c === c));
+}
+const CATEGORY_AMBIANCE = {
+  sport: 'bright natural sunlight, tropical Réunion island atmosphere, soft blurred green palm leaves and ocean blue tones in background, healthy active lifestyle feel, clean fresh bright mood, warm terracotta orange (#c45b18) color accents, summer vibe',
+  energy: 'warm amber and terracotta orange tones (#c45b18 brand color), dynamic studio lighting, subtle motion energy, bold but elegant not aggressive',
+  snack: 'warm cozy gourmet atmosphere, soft natural lighting, appetizing warm terracotta tones, inviting mood'
+};
+const LOGO_URL = 'https://nico974342.github.io/inca-import-tools/INCA-Import-horizontal-transparent.png';
+
 async function mkGenAIPhoto() {
   if (!mkPhotoBase64) { sts('mkSts', '⚠️ Upload une photo produit d\'abord.', 'err'); return; }
   const v = mkVals();
-  const t = MK_THEMES.find(x => x.id === mkTheme);
   sts('mkSts', '📸 Génération du visuel photo-réaliste… (10-20s)', 'load');
   try {
-    const ambiance = mkTheme === 'flash' ? 'vibrant red and orange dynamic energy, bold colorful gradient background, dramatic lighting' :
-                      mkTheme === 'inca' ? 'premium navy and gold background, elegant studio lighting, luxury feel' :
-                      mkTheme === 'trop' ? 'tropical green and orange gradient, fresh vibrant summer vibe, splash of color' :
-                      'neon cyan and purple glow, night club energy, futuristic dynamic lighting';
-    const prompt = `Professional commercial advertising photography of this exact product, ${ambiance}, dynamic dramatic studio lighting, splash effects, vibrant saturated colors, high-end FMCG advertising style, sharp focus on product, 4k commercial quality, eye-catching composition`;
+    const ambiance = CATEGORY_AMBIANCE[mkCategory];
+    const prompt = 'Professional commercial advertising photography of this exact product, ' + ambiance + ', sharp focus on product, high-end FMCG advertising style, 4k commercial quality, eye-catching composition, leave clear empty space at top and bottom for text overlay';
     const res = await fetch(FAL_PROXY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'fal-ai/flux-pro/kontext',
-        prompt: prompt,
-        image_url: mkPhotoBase64
-      })
+      body: JSON.stringify({ model: 'fal-ai/flux-pro/kontext', prompt: prompt, image_url: mkPhotoBase64 })
     });
     const data = await res.json();
     if (!data.images || !data.images[0]) throw new Error(data.error || 'Pas d\'image reçue');
@@ -1832,26 +1842,26 @@ async function mkGenAIPhoto() {
     const H = MK_FMT[mkFormat][1];
     let badgeHtml = '';
     if (v.pct) {
-      badgeHtml = '<div style="position:absolute;top:5%;right:6%;background:' + t.badge + ';color:' + t.badgeTxt + ';width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;transform:rotate(8deg);box-shadow:0 10px 30px rgba(0,0,0,.4)"><span style="font-size:26px">-' + v.pct + '%</span><span style="font-size:10px;letter-spacing:1px">PROMO</span></div>';
+      badgeHtml = '<div style="position:absolute;top:6%;right:6%;background:#c45b18;color:#fff;width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;transform:rotate(8deg);box-shadow:0 10px 30px rgba(0,0,0,.4)"><span style="font-size:26px">-' + v.pct + '%</span><span style="font-size:10px;letter-spacing:1px">PROMO</span></div>';
     }
     let priceHtml = '';
     if (v.old && v.neu) {
-      priceHtml = '<span style="text-decoration:line-through;opacity:.6;font-size:22px">' + mkPrice(v.old) + '</span>';
+      priceHtml = '<span style="text-decoration:line-through;opacity:.6;font-size:22px;color:#fff">' + mkPrice(v.old) + '</span>';
     }
     mkAIHtml = '<div style="width:' + W + 'px;height:' + H + 'px;background:url(\'' + data.images[0].url + '\') center/cover;position:relative;font-family:\'Plus Jakarta Sans\',sans-serif">' +
+      '<img src="' + LOGO_URL + '" style="position:absolute;top:6%;left:6%;height:36px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))">' +
       badgeHtml +
-      '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:5% 6% 6%;color:#fff">' +
-        '<div style="font-size:13px;letter-spacing:2px;opacity:.8;font-weight:700">INCA IMPORT</div>' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:8% 6% 7%;color:#fff">' +
         '<div style="font-size:20px;font-weight:800;margin:4px 0">' + esc(v.prod) + '</div>' +
         '<div style="display:flex;align-items:baseline;gap:10px">' +
           priceHtml +
-          '<span style="font-size:48px;font-weight:900;color:' + t.acc + '">' + mkPrice(v.neu || v.old) + '</span>' +
+          '<span style="font-size:48px;font-weight:900;color:#e8915a">' + mkPrice(v.neu || v.old) + '</span>' +
         '</div>' +
         '<div style="font-size:11px;opacity:.75;margin-top:6px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
       '</div>' +
     '</div>';
     mkRender();
-    sts('mkSts', '✅ Visuel généré avec FLUX.', 'ok');
+    sts('mkSts', '✅ Visuel généré.', 'ok');
   } catch (e) {
     sts('mkSts', '❌ ' + e.message, 'err');
   }
