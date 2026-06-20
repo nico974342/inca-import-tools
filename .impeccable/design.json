@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-20T00:00:00.000Z",
+  "title": "Design System: INCA Suite",
+  "extensions": {
+    "colorMeta": {
+      "navy-deep":      { "role": "primary",  "displayName": "Bleu Marine Profond",     "canonical": "#0f1f5c", "tonalRamp": ["#040818", "#08102e", "#0f1f5c", "#1e3a8a", "#2d55c0", "#3b5bdb", "#6b8aeb", "#c5d2f8"] },
+      "blue-commerce":  { "role": "primary",  "displayName": "Bleu Commerce",           "canonical": "#3b5bdb", "tonalRamp": ["#080f2d", "#121d50", "#1e2d7a", "#2b41a5", "#3b5bdb", "#6b8aeb", "#9ab0f5", "#eef2ff"] },
+      "green-action":   { "role": "secondary","displayName": "Vert Action",             "canonical": "#0ca678", "tonalRamp": ["#012b1f", "#024737", "#076350", "#0a856b", "#0ca678", "#3dc49a", "#7ddcba", "#e6fcf5"] },
+      "orange-alert":   { "role": "tertiary", "displayName": "Orange Alerte",           "canonical": "#e8590c", "tonalRamp": ["#3a1002", "#6b2004", "#9b3408", "#c8470c", "#e8590c", "#f07a3c", "#f5a47a", "#fff4e6"] },
+      "amber-caution":  { "role": "tertiary", "displayName": "Ambre Prudence",          "canonical": "#e67700", "tonalRamp": ["#3a1e00", "#6b3800", "#9b5200", "#c86b00", "#e67700", "#f0a030", "#f5c870", "#fff8e1"] },
+      "purple-badge":   { "role": "tertiary", "displayName": "Violet Badge",            "canonical": "#7048e8", "tonalRamp": ["#1a0a3d", "#2e1470", "#4620a8", "#5b30d0", "#7048e8", "#9472f0", "#bba4f5", "#f3f0ff"] },
+      "teal-info":      { "role": "tertiary", "displayName": "Teal Info",               "canonical": "#0891b2", "tonalRamp": ["#012830", "#044d5c", "#077090", "#0891b2", "#22b0d0", "#60cce0", "#a0e4f0", "#ecfeff"] },
+      "red-danger":     { "role": "tertiary", "displayName": "Rouge Danger",            "canonical": "#e03131", "tonalRamp": ["#3d0808", "#6b1010", "#9b1c1c", "#c42525", "#e03131", "#eb6b6b", "#f4a8a8", "#fff5f5"] },
+      "surface-bg":     { "role": "neutral",  "displayName": "Surface Fond Lavande",    "canonical": "#f0f4ff", "tonalRamp": ["#c8d4f8", "#d4defa", "#dce6fb", "#e4ecfc", "#eaf1fd", "#eef4fe", "#f4f7ff", "#f0f4ff"] },
+      "ink":            { "role": "neutral",  "displayName": "Encre Profonde",          "canonical": "#0f172a", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"] }
+    },
+    "typographyMeta": {
+      "display":   { "displayName": "Display", "purpose": "Titre principal du header — une occurrence par page." },
+      "title":     { "displayName": "Title",   "purpose": "Titres featured cards et sections majeures." },
+      "body":      { "displayName": "Body",    "purpose": "Descriptions, contenu tableau, sous-titres. Max 520px." },
+      "label":     { "displayName": "Label",   "purpose": "Section labels, en-têtes colonnes, KPI sublabels. Toujours uppercase." },
+      "data-mono": { "displayName": "Data Mono", "purpose": "Valeurs calculées exclusivement : CRR, totaux, volumes." }
+    },
+    "shadows": [
+      { "name": "card-rest",  "value": "0 1px 4px rgba(59,91,219,.08), 0 8px 24px rgba(59,91,219,.07)",  "purpose": "Toutes les cartes et widgets au repos." },
+      { "name": "card-hover", "value": "0 4px 20px rgba(59,91,219,.15), 0 12px 40px rgba(59,91,219,.1)", "purpose": "Cartes cliquables au survol." },
+      { "name": "btn-blue",   "value": "0 4px 14px rgba(59,91,219,.35)",                                  "purpose": "Bouton primaire bleu au repos." },
+      { "name": "btn-green",  "value": "0 3px 10px rgba(12,166,120,.3)",                                  "purpose": "Bouton success vert au repos." }
+    ],
+    "motion": [
+      { "name": "card-lift",    "value": "transform: translateY(-3px); transition: all .22s",  "purpose": "Élévation au hover des tool cards." },
+      { "name": "card-lift-sm", "value": "transform: translateY(-2px); transition: all .25s",  "purpose": "Élévation au hover des featured cards." },
+      { "name": "btn-scale",    "value": "transform: scale(1.03); transition: all .2s",         "purpose": "Scale au hover des boutons primaires." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "640px", "purpose": "Grille 1 colonne, featured card 1 colonne, stats header recentrés." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA d'ouverture d'outil ou action principale. Gradient bleu, scale au hover.",
+      "html": "<button class=\"ds-btn-primary\">Ouvrir INCA Suite →</button>",
+      "css": ".ds-btn-primary { background: linear-gradient(135deg, #3b5bdb, #4c6ef5); color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59,91,219,.35); transition: transform .2s, box-shadow .2s; display: inline-flex; align-items: center; gap: 8px; } .ds-btn-primary:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(59,91,219,.45); } .ds-btn-primary:focus-visible { outline: 3px solid #4c6ef5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Success Button",
+      "kind": "button",
+      "refersTo": "button-success",
+      "description": "Actions stock : ouvrir, saisir, gérer. Gradient vert.",
+      "html": "<a class=\"ds-btn-success\">Gérer le stock →</a>",
+      "css": ".ds-btn-success { background: linear-gradient(135deg, #0ca678, #0d9e72); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; box-shadow: 0 3px 10px rgba(12,166,120,.3); transition: transform .2s, box-shadow .2s; display: inline-flex; align-items: center; gap: 6px; } .ds-btn-success:hover { transform: scale(1.02); box-shadow: 0 5px 16px rgba(12,166,120,.4); } .ds-btn-success:focus-visible { outline: 3px solid #0ca678; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Action secondaire — export CSV, alternative à un bouton success. Contour vert.",
+      "html": "<button class=\"ds-btn-ghost\">⬇ CSV Pennylane</button>",
+      "css": ".ds-btn-ghost { background: #fff; color: #0ca678; border: 1.5px solid #0ca678; padding: 9px 16px; border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s; } .ds-btn-ghost:hover { background: #e6fcf5; } .ds-btn-ghost:focus-visible { outline: 3px solid #0ca678; outline-offset: 2px; }"
+    },
+    {
+      "name": "Tool Card",
+      "kind": "card",
+      "refersTo": "card-tool",
+      "description": "Carte de la grille d'outils. Icône colorée, titre, description, tags, flèche → bleue au hover.",
+      "html": "<a class=\"ds-tool-card\"><div class=\"ds-tool-top\"><div class=\"ds-tool-ico ds-ic-blue\">📋</div><span class=\"ds-tool-status ds-st-stable\">Stable</span></div><div><div class=\"ds-tool-title\">CRR Batch</div><div class=\"ds-tool-desc\">Importez une offre fournisseur Excel et obtenez le coût de revient rendu La Possession.</div></div><div class=\"ds-tool-footer\"><div class=\"ds-tool-tags\"><span class=\"ds-ttag ds-tt-blue\">Import Excel</span><span class=\"ds-ttag ds-tt-blue\">CRR auto</span></div><div class=\"ds-tool-arrow\">→</div></div></a>",
+      "css": ".ds-tool-card { background: #fff; border: 1px solid #e2e8f8; border-radius: 16px; padding: 24px; box-shadow: 0 1px 4px rgba(59,91,219,.08), 0 8px 24px rgba(59,91,219,.07); transition: box-shadow .22s, transform .22s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; width: 300px; } .ds-tool-card:hover { box-shadow: 0 4px 20px rgba(59,91,219,.15), 0 12px 40px rgba(59,91,219,.1); transform: translateY(-3px); } .ds-tool-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; } .ds-tool-ico { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; } .ds-ic-blue { background: #eef2ff; } .ds-ic-green { background: #e6fcf5; } .ds-ic-orange { background: #fff4e6; } .ds-ic-purple { background: #f3f0ff; } .ds-ic-teal { background: #ecfeff; } .ds-tool-status { font-size: 9px; font-weight: 700; letter-spacing: .5px; padding: 3px 9px; border-radius: 20px; } .ds-st-stable { background: #eef2ff; color: #3b5bdb; } .ds-st-new { background: linear-gradient(135deg,#d3fae8,#a5f3d3); color: #065f46; } .ds-st-beta { background: #fff8e1; color: #e67700; } .ds-tool-title { font-size: 16px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 4px; } .ds-tool-desc { font-size: 12px; color: #64748b; line-height: 1.55; } .ds-tool-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #e2e8f8; } .ds-tool-tags { display: flex; gap: 4px; flex-wrap: wrap; } .ds-ttag { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; } .ds-tt-blue { background: #eef2ff; color: #3b5bdb; } .ds-tt-green { background: #e6fcf5; color: #0ca678; } .ds-tt-orange { background: #fff4e6; color: #e8590c; } .ds-tt-purple { background: #f3f0ff; color: #7048e8; } .ds-tt-teal { background: #ecfeff; color: #0891b2; } .ds-tool-arrow { width: 32px; height: 32px; border-radius: 8px; background: #f0f4ff; border: 1px solid #e2e8f8; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: background .2s, border-color .2s, color .2s; } .ds-tool-card:hover .ds-tool-arrow { background: #3b5bdb; border-color: #3b5bdb; color: #fff; }"
+    },
+    {
+      "name": "KPI Card",
+      "kind": "card",
+      "refersTo": "card-tool",
+      "description": "Métrique clé avec valeur monospace et label uppercase. Couleur sémantique sur la valeur.",
+      "html": "<div style=\"display:flex;gap:12px\"><div class=\"ds-kpi ds-kpi-blue\"><div class=\"ds-kpi-v\">247</div><div class=\"ds-kpi-l\">Références</div></div><div class=\"ds-kpi ds-kpi-green\"><div class=\"ds-kpi-v\">1 842</div><div class=\"ds-kpi-l\">Unités dispo</div></div><div class=\"ds-kpi ds-kpi-orange\"><div class=\"ds-kpi-v\">3</div><div class=\"ds-kpi-l\">DLC &lt;60j</div></div></div>",
+      "css": ".ds-kpi { flex: 1; min-width: 110px; background: #f0f4ff; border: 1px solid #e2e8f8; border-radius: 12px; padding: 14px 16px; } .ds-kpi-v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: #0f172a; } .ds-kpi-blue .ds-kpi-v { color: #3b5bdb; } .ds-kpi-green .ds-kpi-v { color: #0ca678; } .ds-kpi-orange .ds-kpi-v { color: #e67700; } .ds-kpi-red .ds-kpi-v { color: #e03131; } .ds-kpi-l { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #64748b; margin-top: 3px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "chip-status",
+      "description": "Badge sémantique pour tableaux et cartes. Couleur déterminée par l'état métier uniquement.",
+      "html": "<div style=\"display:flex;gap:6px\"><span class=\"ds-badge ds-badge-green\">✅ OK</span><span class=\"ds-badge ds-badge-orange\">⚠️ Réappro</span><span class=\"ds-badge ds-badge-red\">❌ Périmé</span><span class=\"ds-badge ds-badge-gray\">Épuisé</span></div>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; } .ds-badge-green { background: #e6fcf5; color: #0ca678; } .ds-badge-red { background: #fff5f5; color: #e03131; } .ds-badge-orange { background: #fff8e1; color: #e67700; } .ds-badge-blue { background: #eef2ff; color: #3b5bdb; } .ds-badge-gray { background: #f0f4ff; color: #64748b; border: 1px solid #e2e8f8; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Tableau de Bord du Cargo",
+    "overview": "INCA Suite est un instrument de navigation professionnelle, pas une vitrine. Chaque pixel sert la décision : le coût de revient d'un article, le stock restant d'un lot, le score d'un produit fournisseur. L'interface emprunte son vocabulaire visuel au monde du fret maritime — bleus profonds, données monospaces, densité sans lourdeur.\n\nLe registre est délibérément interne et professionnel. L'utilisateur sait ce qu'il cherche ; l'interface l'y amène sans cérémonies. La densité est une fonctionnalité, pas un défaut.\n\nCe système rejette le Dashboard BI clinquant et le SaaS générique. INCA Suite opère à La Réunion avec des taux de taxe locaux, des transitaires nommés, un entrepôt précis — l'interface reflète cette spécificité.",
+    "keyCharacteristics": [
+      "Fond bleu-lavande #f0f4ff — professionnel sans agressivité",
+      "Header dégradé marine profond comme ancrage visuel fort",
+      "Ombres teintées bleues — jamais neutres",
+      "JetBrains Mono exclusivement pour les valeurs calculées",
+      "Accents sémantiques stricts : vert action, orange vigilance, rouge urgence",
+      "Densité assumée : tableaux et KPIs lisibles vite"
+    ],
+    "rules": [
+      { "name": "La Règle du Sémantique Strict", "body": "Les couleurs d'accent (vert, orange, rouge, violet, teal) ne sont jamais décoratives. Chaque occurrence signale un état métier précis.", "section": "colors" },
+      { "name": "La Règle de l'Ombre Bleue", "body": "Les ombres portées sont teintées bleu rgba(59,91,219,...) — jamais grises ou noires sur ce fond lavande.", "section": "elevation" },
+      { "name": "La Règle du Mono Calculé", "body": "JetBrains Mono n'apparaît que sur des valeurs sorties d'un calcul ou d'une base de données. Un chiffre tapé à la main reste en Plus Jakarta Sans.", "section": "typography" },
+      { "name": "La Règle de l'Élévation Responsive", "body": "Les ombres sont présentes au repos et s'amplifient à l'état actif. Une carte cliquable a toujours une ombre au repos.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do utiliser JetBrains Mono exclusivement pour les valeurs calculées (CRR, totaux, volumes).",
+      "Do teinter toutes les ombres en bleu rgba(59,91,219,...) — jamais neutres.",
+      "Do réserver chaque couleur d'accent à son état sémantique strict.",
+      "Do utiliser transform: translateY(-2 à -3px) + amplification d'ombre pour les cartes cliquables au hover.",
+      "Do afficher les chiffres avec leur unité : €, u, j, %, k€ — jamais un nombre seul.",
+      "Do laisser le texte corps à max 520px et line-height 1.6."
+    ],
+    "donts": [
+      "Don't reproduire l'esthétique Dashboard BI clinquant : pas de fond sombre saturé, pas de hero-metric avec gradient glow, pas de glassmorphisme décoratif.",
+      "Don't reproduire l'esthétique SaaS générique (Notion/Linear/Vercel) — l'outil est local et spécifique.",
+      "Don't utiliser les couleurs d'accent de façon décorative.",
+      "Don't ajouter des ombres neutres grises ou noires.",
+      "Don't utiliser border-left ou border-right > 1px comme accent coloré — la barre de couleur va en haut, jamais latérale.",
+      "Don't multiplier les section labels uppercase entre chaque composant.",
+      "Don't utiliser un gradient de texte (background-clip: text).",
+      "Don't faire des grilles de cards identiques sans variation de gabarit."
+    ]
+  }
+}

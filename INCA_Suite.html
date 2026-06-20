@@ -5,31 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INCA IMPORT — Suite Achat & Import</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%231A2744'/><path d='M50 18 L58 42 L82 50 L58 58 L50 82 L42 58 L18 50 L42 42 Z' fill='%23B8924A'/></svg>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F5F5F7;--card:#FFFFFF;--card2:#FAFAFC;
-  --ink:#1D1D1F;--ink2:#6E6E73;--ink3:#AEAEB2;
+  --bg:#f0f4ff;--card:#FFFFFF;--card2:#FAFAFC;
+  --ink:#1D1D1F;--ink2:#6E6E73;--ink3:#707070;
   --line:rgba(0,0,0,.07);--line2:rgba(0,0,0,.12);
-  --blue:#0071E3;--blue2:#0A84FF;--blue-bg:#EAF3FE;
+  --blue:#3b5bdb;--blue2:#4c6ef5;--blue-bg:#eef2ff;
   --green:#34C759;--green-d:#1E8E3E;--green-bg:#E8F8EC;
   --amber:#FF9F0A;--amber-d:#C77700;--amber-bg:#FFF4E0;
   --red:#FF3B30;--red-d:#D70015;--red-bg:#FFEBEA;
   --purple:#AF52DE;--purple-bg:#F6EDFC;
   --navy:#1A2744;--gold:#B8924A;--gold-d:#96743A;--gold-bg:#F7F0E4;
-  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Inter,Roboto,sans-serif;
-  --mono:ui-monospace,'SF Mono','Cascadia Code','JetBrains Mono',Menlo,monospace;
+  --sans:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Code',Menlo,monospace;
   --r:14px;--r2:18px;
   --sh:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.06);
   --sh2:0 2px 6px rgba(0,0,0,.06),0 16px 40px rgba(0,0,0,.10);
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased}
-::selection{background:rgba(0,113,227,.18)}
+::selection{background:rgba(59,91,219,.18)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===== Header (frosted glass) ===== */
@@ -43,8 +42,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14p
 .brand-sub{font-size:10px;color:var(--ink2);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-top:-1px}
 /* Segmented nav */
 .seg{display:flex;background:rgba(118,118,128,.10);border-radius:12px;padding:3px;gap:2px;margin:0 auto}
-.seg button{border:none;background:transparent;padding:7px 16px;border-radius:9px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.seg button{border:none;background:transparent;padding:7px 16px;border-radius:9px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:6px;white-space:nowrap;min-height:44px}
 .seg button:hover{color:var(--ink)}
+.seg button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .seg button.act{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .seg .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:none}
 .seg .dot.on{display:block}
@@ -62,8 +62,6 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh);padding:20px;margin-bottom:16px;transition:box-shadow .3s}
 .card:hover{box-shadow:var(--sh2)}
 .card-t{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.card-t::before{content:'';width:4px;height:14px;border-radius:2px;background:var(--blue)}
-.card-t.g::before{background:var(--green)}.card-t.o::before{background:var(--amber)}.card-t.p::before{background:var(--purple)}.card-t.au::before{background:var(--gold)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:16px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px 18px;box-shadow:var(--sh);animation:kpi-in .5s cubic-bezier(.3,0,.2,1) both}
 .kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}.kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.25s}
@@ -79,18 +77,20 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 @media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
 
 /* ===== Buttons / inputs ===== */
-.btn{border:none;border-radius:12px;padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn{border:none;border-radius:12px;padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;min-height:44px}
 .btn:active{transform:scale(.97)}
-.btn.pri{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(0,113,227,.3)}
-.btn.pri:hover{background:#0077ED;box-shadow:0 4px 16px rgba(0,113,227,.4)}
-.btn.go{background:linear-gradient(180deg,#3DDC68,#2DB84F);color:#fff;box-shadow:0 2px 10px rgba(52,199,89,.35)}
-.btn.gold{background:linear-gradient(180deg,#C9A45C,var(--gold));color:#fff;box-shadow:0 2px 10px rgba(184,146,74,.35)}
+.btn.pri{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(59,91,219,.3)}
+.btn.pri:hover{background:#3451c7;box-shadow:0 4px 16px rgba(59,91,219,.4)}
+.btn.go{background:var(--green);color:#fff;box-shadow:0 2px 10px rgba(52,199,89,.35)}
+.btn.go:hover{background:var(--green-d)}
+.btn.gold{background:var(--gold);color:#fff;box-shadow:0 2px 10px rgba(184,146,74,.35)}
+.btn.gold:hover{background:var(--gold-d)}
 .btn.gh{background:rgba(118,118,128,.10);color:var(--ink)}
 .btn.gh:hover{background:rgba(118,118,128,.18)}
 .btn.dng{background:var(--red-bg);color:var(--red-d)}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .inp,select.inp{background:#fff;border:1.5px solid var(--line2);border-radius:11px;padding:9px 13px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);outline:none;transition:border .2s,box-shadow .2s;width:100%}
-.inp:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(59,91,219,.12)}
 .inp.mono{font-family:var(--mono)}
 .field label{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);margin-bottom:5px}
 .iwrap{position:relative}
@@ -98,7 +98,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 
 /* pills */
 .pills{display:flex;gap:8px;flex-wrap:wrap}
-.pill{padding:7px 16px;border-radius:20px;border:1.5px solid var(--line2);background:#fff;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--sans)}
+.pill{padding:7px 16px;border-radius:20px;border:1.5px solid var(--line2);background:#fff;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--sans);min-height:44px;display:inline-flex;align-items:center}
 .pill:hover{border-color:var(--blue)}
 .pill.act{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
 .pill.act.gold{border-color:var(--gold);color:var(--gold-d);background:var(--gold-bg)}
@@ -138,13 +138,13 @@ tbody tr:hover{background:var(--card2)}
 .mini{font-size:10px;color:var(--ink3)}
 
 /* container gauge — signature */
-.cgauge{background:linear-gradient(180deg,#FDFDFE,#F4F6FA);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;box-shadow:var(--sh)}
+.cgauge{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:18px 20px;box-shadow:var(--sh)}
 .cont-svg{width:100%;height:84px}
 .cg-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
 .cg-big{font-family:var(--mono);font-size:22px;font-weight:800;letter-spacing:-.5px}
 .cg-lbl{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2)}
 .bar{height:8px;border-radius:5px;background:rgba(118,118,128,.12);overflow:hidden;margin-top:6px}
-.bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--blue2),var(--blue));transition:width .7s cubic-bezier(.3,0,.2,1)}
+.bar i{display:block;height:100%;width:100%;border-radius:5px;background:linear-gradient(90deg,var(--blue2),var(--blue));transform:scaleX(0);transform-origin:left center;transition:transform .7s cubic-bezier(.3,0,.2,1)}
 .bar i.warn{background:linear-gradient(90deg,var(--amber),#FF8A00)}
 .bar i.full{background:linear-gradient(90deg,var(--red),#FF6B5E)}
 
@@ -160,6 +160,7 @@ tbody tr:hover{background:var(--card2)}
 
 /* status banners */
 .sts{border-radius:12px;padding:11px 15px;font-size:12px;font-weight:600;line-height:1.6;margin:12px 0;display:none}
+[role="status"]{display:none}
 .sts.show{display:block;animation:vfade .3s}
 .sts.ok{background:var(--green-bg);color:var(--green-d)}
 .sts.err{background:var(--red-bg);color:var(--red-d)}
@@ -167,9 +168,9 @@ tbody tr:hover{background:var(--card2)}
 .sts.warn{background:var(--amber-bg);color:var(--amber-d)}
 
 /* AI thinking */
-.ai-think{display:none;align-items:center;gap:14px;background:linear-gradient(120deg,#EFF5FF,#F6F0FF);border:1px solid rgba(0,113,227,.15);border-radius:var(--r2);padding:18px 22px;margin:14px 0}
+.ai-think{display:none;align-items:center;gap:14px;background:var(--blue-bg);border:1px solid rgba(59,91,219,.15);border-radius:var(--r2);padding:18px 22px;margin:14px 0}
 .ai-think.show{display:flex}
-.spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(0,113,227,.18);border-top-color:var(--blue);animation:rot 1s linear infinite;flex-shrink:0}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(59,91,219,.18);border-top-color:var(--blue);animation:rot 1s linear infinite;flex-shrink:0}
 @keyframes rot{to{transform:rotate(360deg)}}
 .ai-think .t1{font-weight:800;font-size:13px}
 .ai-think .t2{font-size:11px;color:var(--ink2);margin-top:2px}
@@ -183,7 +184,7 @@ tbody tr:hover{background:var(--card2)}
 .vcat{font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:14px;display:inline-block;width:fit-content}
 .vname{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.25;padding-right:48px}
 .vbrand{font-size:11px;color:var(--ink2);font-weight:600}
-.vwhy{font-size:12px;line-height:1.55;color:#3A3A3C;background:var(--card2);border-left:3px solid var(--blue);border-radius:8px;padding:10px 12px}
+.vwhy{font-size:12px;line-height:1.55;color:var(--ink);background:var(--blue-bg);border:1px solid rgba(59,91,219,.18);border-radius:8px;padding:10px 12px}
 .vmeter{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .vm{background:var(--card2);border-radius:10px;padding:8px;text-align:center}
 .vm .v{font-family:var(--mono);font-weight:800;font-size:14px}
@@ -227,6 +228,11 @@ tbody tr:hover{background:var(--card2)}
   main{padding:14px}
   .hdr-r{display:none}
 }
+@media(max-width:480px){
+  .seg{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex-shrink:0;padding:7px 12px}
+}
 </style>
 </head>
 <body>
@@ -236,14 +242,14 @@ tbody tr:hover{background:var(--card2)}
     <div class="brand-mark"><svg viewBox="0 0 100 100"><path d="M50 12 L60 40 L88 50 L60 60 L50 88 L40 60 L12 50 L40 40 Z" fill="#B8924A"/></svg></div>
     <div><div class="brand-name">INCA <span>IMPORT</span></div><div class="brand-sub">Suite Achat & Import · Réunion</div></div>
   </div>
-  <nav class="seg" id="nav">
-    <button data-v="ventes" class="act">📊 Ventes</button>
-    <button data-v="catalogue">🧠 Catalogue IA</button>
-    <button data-v="conteneur">🚢 Conteneur <span class="dot" id="dotCont"></span></button>
-    <button data-v="veille">🌍 Veille</button>
-    <button data-v="compare">⚖️ Comparateur</button>
-    <button data-v="marketing">📣 Promo</button>
-    <button data-v="reglages">⚙️</button>
+  <nav class="seg" id="nav" role="tablist" aria-label="Navigation principale">
+    <button data-v="ventes" class="act" role="tab" aria-selected="true" aria-controls="v-ventes">📊 Ventes</button>
+    <button data-v="catalogue" role="tab" aria-selected="false" aria-controls="v-catalogue">🧠 Catalogue IA</button>
+    <button data-v="conteneur" role="tab" aria-selected="false" aria-controls="v-conteneur">🚢 Conteneur <span class="dot" id="dotCont"></span></button>
+    <button data-v="veille" role="tab" aria-selected="false" aria-controls="v-veille">🌍 Veille</button>
+    <button data-v="compare" role="tab" aria-selected="false" aria-controls="v-compare">⚖️ Comparateur</button>
+    <button data-v="marketing" role="tab" aria-selected="false" aria-controls="v-marketing">📣 Promo</button>
+    <button data-v="reglages" role="tab" aria-selected="false" aria-controls="v-reglages" aria-label="Réglages">⚙️</button>
   </nav>
   <div class="hdr-r">
     <span class="chip gold" id="refChip">229 prix réf.</span>
@@ -256,14 +262,14 @@ tbody tr:hover{background:var(--card2)}
 <!-- ============ VUE VENTES ============ -->
 <section class="view act" id="v-ventes">
   <div id="ventesEmpty">
-    <div class="drop" id="dropVentes" onclick="document.getElementById('fiVentes').click()">
+    <div class="drop" id="dropVentes" role="button" tabindex="0" aria-label="Charger les fichiers de ventes" onclick="document.getElementById('fiVentes').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fiVentes').click()}">
       <div class="drop-ic">📊</div>
       <h3>Chargez vos fichiers de ventes</h3>
       <p>Glissez les fichiers <b>VENTES_PAR_FAMILLES</b> (OLA · TOTAL · VITO) d'une même année.<br>Les données sont sauvegardées localement — rechargez chaque année une seule fois.</p>
       <div class="fmt-row"><span class="fmt">XLSX</span><span class="fmt">XLS</span><span class="fmt">Multi-stations</span><span class="fmt">Multi-années</span></div>
       <div style="margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px">
         <span class="cg-lbl">Année des fichiers</span>
-        <input type="number" class="inp mono" id="yearInput" value="2025" style="width:120px;text-align:center;font-size:17px" onclick="event.stopPropagation()">
+        <input type="number" class="inp mono" id="yearInput" aria-label="Année des fichiers de ventes" value="2025" style="width:120px;text-align:center;font-size:17px" onclick="event.stopPropagation()">
       </div>
       <input type="file" id="fiVentes" multiple accept=".xlsx,.xls">
     </div>
@@ -295,7 +301,7 @@ tbody tr:hover{background:var(--card2)}
     </div>
     <div class="card">
       <div class="card-t au">Recherche produit & rotation</div>
-      <div class="toolbar"><div class="search" style="flex:1"><input class="inp" id="prodSearch" placeholder="Rechercher un article vendu (ex: monster, pokka, oasis…)" oninput="renderProdSearch()"></div></div>
+      <div class="toolbar"><div class="search" style="flex:1"><input class="inp" id="prodSearch" aria-label="Rechercher un article vendu" placeholder="Rechercher un article vendu (ex: monster, pokka, oasis…)" oninput="renderProdSearch()"></div></div>
       <div id="prodSearchRes"></div>
     </div>
   </div>
@@ -348,14 +354,14 @@ tbody tr:hover{background:var(--card2)}
 <section class="view" id="v-catalogue">
   <div class="grid2" style="grid-template-columns:1.3fr 1fr;align-items:start">
     <div>
-      <div class="drop" id="dropCat" onclick="document.getElementById('fiCat').click()">
+      <div class="drop" id="dropCat" role="button" tabindex="0" aria-label="Charger un catalogue fournisseur" onclick="document.getElementById('fiCat').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fiCat').click()}">
         <div class="drop-ic" style="background:var(--purple-bg)">🧠</div>
         <h3>Analysez un catalogue fournisseur</h3>
         <p>Glissez un <b>PDF</b> (catalogue, proforma, offre) ou un <b>Excel/CSV</b>.<br>L'IA extrait produits, prix unitaires, colisage — puis croise avec vos ventes,<br>vos prix d'achat locaux et calcule le <b>CRR rendu Réunion</b>.</p>
         <div class="fmt-row"><span class="fmt">PDF (texte ou scanné)</span><span class="fmt">XLSX</span><span class="fmt">CSV</span><span class="fmt">OCR Vision IA</span></div>
         <input type="file" id="fiCat" accept=".pdf,.xlsx,.xls,.csv">
       </div>
-      <div class="sts" id="catSts"></div>
+      <div class="sts" id="catSts" aria-live="polite"></div>
       <div class="ai-think" id="catThink"><div class="spin"></div><div><div class="t1" id="catThinkT1">Lecture du document…</div><div class="t2" id="catThinkT2">Extraction des produits, prix et colisage</div></div></div>
     </div>
     <div class="card" style="margin:0">
@@ -371,7 +377,7 @@ tbody tr:hover{background:var(--card2)}
     <div class="kpis" id="catKpis"></div>
     <div class="toolbar">
       <div class="pills" id="catVerdictPills"></div>
-      <div class="search"><input class="inp" id="catSearch" placeholder="Filtrer…" oninput="renderCatTable()"></div>
+      <div class="search"><input class="inp" id="catSearch" aria-label="Filtrer le catalogue" placeholder="Filtrer…" oninput="renderCatTable()"></div>
       <span class="sp"></span>
       <button class="btn gold" onclick="sendToContainer()">🚢 Envoyer la sélection au conteneur</button>
       <button class="btn gh" onclick="exportCat()">⬇ Export Excel</button>
@@ -386,7 +392,7 @@ tbody tr:hover{background:var(--card2)}
     <div class="cgauge">
       <div class="card-t" style="margin-bottom:10px">Conteneur 40' HC</div>
       <svg class="cont-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
-        <defs><linearGradient id="fillG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0A84FF"/><stop offset="1" stop-color="#0071E3"/></linearGradient>
+        <defs><linearGradient id="fillG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#3b5bdb"/></linearGradient>
         <clipPath id="contClip"><rect x="6" y="8" width="372" height="64" rx="8"/></clipPath></defs>
         <rect x="4" y="6" width="376" height="68" rx="10" fill="#EDEFF4" stroke="#C9CDD6" stroke-width="2"/>
         <g clip-path="url(#contClip)"><rect id="contFill" x="6" y="8" width="0" height="64" fill="url(#fillG)" style="transition:width .8s cubic-bezier(.3,0,.2,1)"/>
@@ -442,7 +448,7 @@ tbody tr:hover{background:var(--card2)}
   <div class="card">
     <div class="card-t p">Veille mondiale — découverte produits & fournisseurs</div>
     <div class="toolbar" style="margin-bottom:10px">
-      <input class="inp" id="vSearch" placeholder="Ex : boissons virales TikTok Asie, snacks halal Turquie, sodas coréens 2026…" style="flex:1;min-width:260px" onkeydown="if(event.key==='Enter')launchVeille()">
+      <input class="inp" id="vSearch" aria-label="Rechercher des produits pour la veille" placeholder="Ex : boissons virales TikTok Asie, snacks halal Turquie, sodas coréens 2026…" style="flex:1;min-width:260px" onkeydown="if(event.key==='Enter')launchVeille()">
       <button class="btn pri" id="vGo" onclick="launchVeille()">🔴 Lancer la veille live</button>
     </div>
     <div class="toolbar" style="margin-bottom:0">
@@ -457,7 +463,7 @@ tbody tr:hover{background:var(--card2)}
     </div>
   </div>
   <div class="ai-think" id="vThink"><div class="spin"></div><div><div class="t1">Recherche web en cours…</div><div class="t2" id="vThinkT2">Scan des lancements produits, TikTok trends, salons & fabricants Europe/Asie</div></div></div>
-  <div class="sts" id="vSts"></div>
+  <div class="sts" id="vSts" aria-live="polite"></div>
   <div id="vAnalysis" style="display:none" class="card"><div class="card-t">Analyse</div><p style="font-size:13px;line-height:1.7" id="vAnalysisTxt"></p><div class="mini" id="vSources" style="margin-top:8px"></div></div>
   <div class="vgrid" id="vResults"></div>
   <div class="empty" id="vEmpty"><div class="ic">🌍</div><h3>Votre radar produits mondial</h3><p>L'IA scanne le web en direct : nouveaux lancements, marques émergentes, fabricants avec contacts export vérifiables — filtrés selon vos critères (Europe/Asie, halal, formats single-serve 1,20–3,50 €, hors marques déjà bien distribuées localement).</p></div>
@@ -475,7 +481,7 @@ tbody tr:hover{background:var(--card2)}
 .mkt-th{height:44px;border-radius:10px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
 .mkt-th.act{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
 .mkt-fmt{display:flex;gap:6px}
-.mkt-fmt button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink2)}
+.mkt-fmt button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink2);min-height:44px}
 .mkt-fmt button.act{border-color:var(--blue);color:var(--blue);background:var(--blue-bg,#eef4ff)}
 .mkt-stage{background:repeating-conic-gradient(#f0f0f3 0 25%,#fafafc 0 50%) 0 0/22px 22px;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;align-items:center;justify-content:center;min-height:420px;overflow:hidden}
 .slogan-chip{display:inline-block;background:var(--gold-bg);border:1px solid var(--gold);color:var(--gold-d);font-size:11px;font-weight:700;padding:5px 10px;border-radius:16px;margin:3px 4px 0 0;cursor:pointer}
@@ -523,7 +529,7 @@ tbody tr:hover{background:var(--card2)}
         <button data-f="post" class="act" onclick="mkFmt('post')">⬛ Post<br>1080×1080</button>
         <button data-f="tv" onclick="mkFmt('tv')">🖥 Écran TV<br>1920×1080</button>
       </div>
-      <button class="btn" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#7048e8,#3b5bdb)" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
+      <button class="btn" style="width:100%;margin-top:14px;background:var(--purple);color:#fff" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
       <div class="mkt-lbl">Ambiance produit</div>
       <div class="pills" id="mkCatPills">
         <div class="pill act" data-c="sport" onclick="mkCat('sport')">🌴 Sport & Santé</div>
@@ -537,11 +543,11 @@ tbody tr:hover{background:var(--card2)}
         <div class="pill" data-s="hand" onclick="mkScene('hand')">🤚 Tenu en main</div>
       </div>
       <div class="mkt-lbl">Photo produit (optionnel)</div>
-      <div class="drop" id="mkPhotoDrop" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()">
+      <div class="drop" id="mkPhotoDrop" role="button" tabindex="0" aria-label="Charger une photo du produit" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();$('mkPhotoFile').click()}">
         <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
         <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
       </div>
-      <button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#0071E3,#34C759)" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
+      <button class="btn" style="width:100%;margin-top:8px;background:var(--purple);color:#fff" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn gh" style="flex:1" onclick="mkGenAI()">↻ Variante</button>
         <button class="btn gh" style="flex:1" onclick="mkBackManual()">Modèle simple</button>
@@ -561,8 +567,8 @@ tbody tr:hover{background:var(--card2)}
     <div class="card">
       <div class="card-t">Clé API Anthropic (pour GitHub Pages)</div>
       <p style="font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:10px">Nécessaire pour l'<b>analyse IA des PDF</b> et la <b>veille live</b> quand l'app est hébergée sur GitHub Pages. Stockée uniquement dans votre navigateur (localStorage).</p>
-      <div class="toolbar"><input class="inp mono" type="password" id="apiKeyInp" placeholder="sk-ant-…" style="flex:1"><button class="btn pri" onclick="saveApiKey()">Enregistrer</button></div>
-      <div class="sts" id="keySts"></div>
+      <div class="toolbar"><input class="inp mono" type="password" id="apiKeyInp" aria-label="Clé API Anthropic" placeholder="sk-ant-…" style="flex:1"><button class="btn pri" onclick="saveApiKey()">Enregistrer</button></div>
+      <div class="sts" id="keySts" aria-live="polite"></div>
     </div>
     <div class="card">
       <div class="card-t g">Taxe soda 2026 (€/hl)</div>
@@ -595,6 +601,10 @@ tbody tr:hover{background:var(--card2)}
 
 </main>
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)this.classList.remove('show')"><div class="modal" id="modalBox"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 /* ============================================================
    INCA IMPORT — Suite Achat & Import (fichier unique)
@@ -991,7 +1001,7 @@ function yearData(y){
   return{familles:Object.values(mf),articles:Object.values(ma),stations:ks,perStation:Object.fromEntries(ks.map(st=>[st,d[st]]))};
 }
 let chSt=null,chFam=null;
-const FAMCOLORS=['#0071E3','#34C759','#FF9F0A','#AF52DE','#FF3B30','#B8924A','#5AC8FA','#FF2D55','#8E8E93','#30B0C7'];
+const FAMCOLORS=['#3b5bdb','#34C759','#FF9F0A','#AF52DE','#FF3B30','#B8924A','#4c6ef5','#FF2D55','#8E8E93','#30B0C7'];
 function renderDash(){
   const D=yearData(AY);if(!D)return;
   const ys=Object.keys(YEARS).sort();const prevY=ys[ys.indexOf(AY)-1];
@@ -1021,9 +1031,9 @@ function renderDash(){
   const stCA=stKeys.map(st=>{const dd=YEARS[AY][st];return(dd.familles||[]).reduce((s,f)=>s+f.ca,0);});
   const stMg=stKeys.map(st=>{const dd=YEARS[AY][st];return(dd.familles||[]).reduce((s,f)=>s+f.marge,0);});
   if(chSt)chSt.destroy();
-  chSt=new Chart($('chStations'),{type:'bar',data:{labels:stKeys,datasets:[{label:'CA',data:stCA,backgroundColor:'#0071E3',borderRadius:8},{label:'Marge',data:stMg,backgroundColor:'#34C759',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'-apple-system',weight:'600'},color:'#6E6E73'}}},scales:{x:{grid:{display:false},ticks:{color:'#6E6E73'}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#6E6E73',callback:v=>fK(v)}}}}});
+  chSt=new Chart($('chStations'),{type:'bar',data:{labels:stKeys,datasets:[{label:'CA',data:stCA,backgroundColor:'#3b5bdb',borderRadius:8},{label:'Marge',data:stMg,backgroundColor:'#34C759',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans, system-ui',weight:'600'},color:'#6E6E73'}}},scales:{x:{grid:{display:false},ticks:{color:'#6E6E73'}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#6E6E73',callback:v=>fK(v)}}}}});
   if(chFam)chFam.destroy();
-  chFam=new Chart($('chFam'),{type:'doughnut',data:{labels:fams.slice(0,8).map(f=>f.famille),datasets:[{data:fams.slice(0,8).map(f=>f.ca),backgroundColor:FAMCOLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{family:'-apple-system',size:10,weight:'600'},color:'#6E6E73',boxWidth:10,boxHeight:10,borderRadius:3,usePointStyle:true}}}}});
+  chFam=new Chart($('chFam'),{type:'doughnut',data:{labels:fams.slice(0,8).map(f=>f.famille),datasets:[{data:fams.slice(0,8).map(f=>f.ca),backgroundColor:FAMCOLORS,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans, system-ui',size:10,weight:'600'},color:'#6E6E73',boxWidth:10,boxHeight:10,borderRadius:3,usePointStyle:true}}}}});
   renderProdSearch();
 }
 function renderProdSearch(){
@@ -1519,10 +1529,10 @@ function recalcContainer(){
   $('contFill').setAttribute('width',372*pct/100);
   const ribs=$('contRibs');ribs.innerHTML='';for(let x=30;x<372*pct/100;x+=28)ribs.innerHTML+=`<line x1="${x}" y1="8" x2="${x}" y2="72"/>`;
   $('cgCbm').textContent=f2(cbm)+' / '+cap+' m³';
-  const bc=$('barCbm');bc.style.width=pct+'%';bc.className=pct>97?'full':pct>85?'warn':'';
+  const bc=$('barCbm');bc.style.transform='scaleX('+(pct/100)+')';bc.className=pct>97?'full':pct>85?'warn':'';
   const pk=Math.min(kg/capKg*100,100);
   $('cgKg').textContent=f0(kg)+' / 26 000 kg';
-  const bk=$('barKg');bk.style.width=pk+'%';bk.className=pk>97?'full':pk>85?'warn':'';
+  const bk=$('barKg');bk.style.transform='scaleX('+(pk/100)+')';bk.className=pk>97?'full':pk>85?'warn':'';
   $('cgVal').textContent=fK(fob);$('cgCrr').textContent=fK(crrTot);$('cgMarge').textContent=fK(margeTot);$('cgGain').textContent=(gainTot>=0?'+':'')+fK(gainTot);
   $('contInfo').innerHTML=contItems.length?`<b>${contItems.length} références</b> · ${f0(containerUnits())} unités · ${f0(contItems.reduce((s,p)=>s+p._cases,0))} cartons · <b>${f2(plt)} / ${gP('p_plt')||25} palettes</b> · remplissage <b>${f2(pct)}%</b>${pct>100?' ⚠️ dépassement':pct<80&&contItems.length?' — il reste de la place, pensez au groupage':''}`:'Ajoutez des produits depuis l\'onglet <b>Catalogue IA</b>.';
   renderContTable();
@@ -1670,8 +1680,8 @@ ${halal?'HALAL: certification halal = atout majeur, à signaler.':''}
 Utilise la recherche web pour trouver 6 produits RÉELS et RÉCENTS (lancements 2025-2026, marques émergentes, viraux TikTok naissants, salons SIAL/Anuga/THAIFEX). Pour CHAQUE produit identifie le FABRICANT réel (pas un revendeur), pays, ville, port de départ, et un contact export (email/site/LinkedIn) — contactConfidence: verified|likely|guess. N'invente JAMAIS de contact: si inconnu mets "" et baisse la confiance.
 Critères de notation: score global fit Réunion 0-100, logistiqueScore (facilité import 974), tendanceScore (momentum), noveltyScore (100=inconnu local).
 Réponds UNIQUEMENT en JSON valide sans markdown:
-{"searchDate":"${today}","sources":["site1.com","site2.com"],"analysis":"3-4 phrases: ce que tu as trouvé d'original et pourquoi ça colle aux stations Réunion.","products":[{"nom":"Nom produit + format","marque":"Marque","categorie":"Catégorie courte","origine":"Pays fabrication","villeFabricant":"Ville","portDepart":"Port","annee_lancement":"2025","score":82,"logistiqueScore":85,"tendanceScore":78,"noveltyScore":90,"pourquoi":"Pourquoi pertinent pour stations Réunion, preuves concrètes récentes.","tags":["Nouveauté 2026","Halal","TikTok"],"prixAchatEst":"€0.45 – €0.60","pvSuggere":"€2.00 – €2.50","margeEst":"45%","fabricant":"Nom fabricant","fabricantSite":"site.com","contactPersonne":"Nom + rôle ou vide","contactEmail":"export@... ou vide","contactConfidence":"verified","noteDistribution":"Comment acheter: direct usine / grossiste UE / MOQ estimé","accentColor":"#0071E3"}]}
-accentColors en rotation: #0071E3,#34C759,#FF9F0A,#AF52DE,#FF3B30,#B8924A`;
+{"searchDate":"${today}","sources":["site1.com","site2.com"],"analysis":"3-4 phrases: ce que tu as trouvé d'original et pourquoi ça colle aux stations Réunion.","products":[{"nom":"Nom produit + format","marque":"Marque","categorie":"Catégorie courte","origine":"Pays fabrication","villeFabricant":"Ville","portDepart":"Port","annee_lancement":"2025","score":82,"logistiqueScore":85,"tendanceScore":78,"noveltyScore":90,"pourquoi":"Pourquoi pertinent pour stations Réunion, preuves concrètes récentes.","tags":["Nouveauté 2026","Halal","TikTok"],"prixAchatEst":"€0.45 – €0.60","pvSuggere":"€2.00 – €2.50","margeEst":"45%","fabricant":"Nom fabricant","fabricantSite":"site.com","contactPersonne":"Nom + rôle ou vide","contactEmail":"export@... ou vide","contactConfidence":"verified","noteDistribution":"Comment acheter: direct usine / grossiste UE / MOQ estimé","accentColor":"#3b5bdb"}]}
+accentColors en rotation: #3b5bdb,#34C759,#FF9F0A,#AF52DE,#FF3B30,#B8924A`;
 }
 async function launchVeille(){
   const btn=$('vGo');btn.disabled=true;
@@ -1694,7 +1704,7 @@ function renderVeille(d){
   if(d.analysis){$('vAnalysis').style.display='block';$('vAnalysisTxt').textContent=d.analysis;$('vSources').textContent=d.sources?'Sources : '+d.sources.join(' · '):'';}
   const prods=d.products||[];
   $('vResults').innerHTML=prods.map((p,i)=>{
-    const col=p.accentColor||'#0071E3';
+    const col=p.accentColor||'#3b5bdb';
     const sc=p.score>=75?'vs-h':p.score>=50?'vs-m':'vs-l';
     const tags=(p.tags||[]).map(t=>{let c='vtag';if(/halal/i.test(t))c+=' halal';else if(/tiktok|viral|hot|épicé/i.test(t))c+=' hot';else if(/nouveau|2025|2026/i.test(t))c+=' new';return`<span class="${c}">${esc(t)}</span>`;}).join('');
     let contact='';
@@ -1731,7 +1741,11 @@ function renderVeille(d){
 function switchView(v){
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('act'));
   $('v-'+v).classList.add('act');
-  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('act',b.dataset.v===v));
+  document.querySelectorAll('#nav button').forEach(b=>{
+    const on=b.dataset.v===v;
+    b.classList.toggle('act',on);
+    b.setAttribute('aria-selected',on?'true':'false');
+  });
   if(v==='marketing')setTimeout(mkRender,50);
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1945,7 +1959,9 @@ let cmpCats=[null,null,null];
 function bindCmp(){
   for(let i=0;i<3;i++){
     const z=$('cmpDrop'+i),f=$('cmpFile'+i);
+    z.setAttribute('role','button');z.setAttribute('tabindex','0');
     z.addEventListener('click',()=>f.click());
+    z.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f.click();}});
     bindDrop(z,f,async files=>{
       const file=files&&files[0];if(!file)return;
       sts('cmpSts','📥 Lecture de '+file.name+'…','load');
@@ -1960,7 +1976,9 @@ function bindCmp(){
   // Devis transitaires
   for(let i=0;i<3;i++){
     const z=$('trDrop'+i),f=$('trFile'+i);
+    z.setAttribute('role','button');z.setAttribute('tabindex','0');
     z.addEventListener('click',()=>f.click());
+    z.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f.click();}});
     bindDrop(z,f,files=>{
       const file=files&&files[0];if(!file)return;
       trQuotes[i]={file,name:file.name,data:null};
@@ -2205,7 +2223,7 @@ async function mkExport(){
 (async function init(){
   // Indicateur de chargement
   const bar=document.createElement('div');
-  bar.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0071E3,#34C759);z-index:9999;';
+  bar.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:#3b5bdb;z-index:9999;';
   document.body.prepend(bar);
 
   // Charger les paramètres depuis Supabase (puis les données ventes)

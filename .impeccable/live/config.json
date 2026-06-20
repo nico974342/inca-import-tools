@@ -1,0 +1,8 @@
+{
+  "files": ["*.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": ["<!-- ", " -->"],
+  "cspChecked": true,
+  "framework": "static-html",
+  "devServer": "npx serve . (ou python -m http.server 3000)"
+}
