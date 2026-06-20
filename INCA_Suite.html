@@ -233,6 +233,50 @@ tbody tr:hover{background:var(--card2)}
   .seg::-webkit-scrollbar{display:none}
   .seg button{flex-shrink:0;padding:7px 12px}
 }
+/* ===== Conteneur params collapse ===== */
+.params-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:4px 0}
+.params-toggle .arr{transition:transform .3s;font-size:11px;color:var(--ink2);flex-shrink:0}
+.params-toggle.open .arr{transform:rotate(90deg)}
+.params-body{overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1)}
+/* ===== CRR clickable ===== */
+.crr-cell{cursor:pointer;text-decoration:underline dotted var(--ink3);color:var(--ink)}
+.crr-cell:hover{color:var(--blue)}
+/* ===== Rotation badge ===== */
+.rot-ok{background:var(--green-bg);color:var(--green-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;display:inline-block}
+.rot-low{background:var(--red-bg);color:var(--red-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;display:inline-block}
+.rot-high{background:var(--amber-bg);color:var(--amber-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;display:inline-block}
+/* ===== Comparateur inner tabs ===== */
+.inner-tabs{display:flex;gap:2px;background:rgba(118,118,128,.10);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content}
+.inner-tab{border:none;background:transparent;padding:6px 18px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .2s;min-height:36px}
+.inner-tab.act{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.10)}
+.inner-pane{display:none}
+.inner-pane.act{display:block}
+/* ===== Veille quick searches ===== */
+.qs-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-bottom:6px}
+.qs-chip{border:none;background:var(--blue-bg);color:var(--blue);border-radius:16px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.qs-chip:hover{background:var(--blue);color:#fff}
+/* ===== Veille history ===== */
+.vh-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+.vh-item:last-child{border:0}
+.vh-q{flex:1;font-size:12px;font-weight:600;color:var(--ink)}
+.vh-date{font-size:10px;color:var(--ink3);white-space:nowrap}
+/* ===== Drop compact ===== */
+.drop-compact{border:1.5px solid var(--line2);border-radius:12px;background:var(--card);padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:border-color .2s;margin-bottom:10px}
+.drop-compact:hover{border-color:var(--blue)}
+.drop-compact .dc-icon{font-size:20px}
+.drop-compact .dc-info{flex:1;min-width:0}
+.drop-compact .dc-name{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drop-compact .dc-sub{font-size:10px;color:var(--ink2);margin-top:1px}
+.drop-compact .dc-btn{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:var(--sans);flex-shrink:0;min-height:32px}
+/* ===== Status dot ===== */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.status-dot.ok{background:var(--green)}.status-dot.err{background:var(--red)}.status-dot.wait{background:var(--amber)}
+/* ===== FOB cible cell ===== */
+.fob-cible{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber-d);background:var(--amber-bg);padding:2px 7px;border-radius:8px;white-space:nowrap}
+/* ===== Promo form sections ===== */
+.mkt-sec{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.mkt-sec:first-child{border-top:none;margin-top:0;padding-top:0}
+.mkt-sec-title{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -315,72 +359,96 @@ tbody tr:hover{background:var(--card2)}
 
 <!-- ============ VUE CATALOGUE IA ============ -->
 <section class="view" id="v-compare">
-<div class="wrap2">
+<div class="inner-tabs">
+  <button class="inner-tab act" onclick="cmpTab('catalogues')">📋 Catalogues fournisseurs</button>
+  <button class="inner-tab" onclick="cmpTab('devis')">🚛 Devis transitaires</button>
+</div>
+
+<div class="inner-pane act" id="cmpPane-catalogues">
   <div class="card">
     <div class="card-t g">⚖️ Comparateur de catalogues fournisseurs</div>
     <p style="font-size:12px;color:var(--ink2);margin:4px 0 14px">Charge 2 ou 3 catalogues (Excel ou PDF). Les produits identiques sont rapprochés automatiquement, même sous des appellations légèrement différentes, et comparés au référentiel local.</p>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="cmpZones">
-      <div class="drop" id="cmpDrop0" style="min-height:110px"><b>Catalogue A</b><div class="mini" id="cmpName0">PDF / Excel</div><input type="file" id="cmpFile0" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
-      <div class="drop" id="cmpDrop1" style="min-height:110px"><b>Catalogue B</b><div class="mini" id="cmpName1">PDF / Excel</div><input type="file" id="cmpFile1" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
-      <div class="drop" id="cmpDrop2" style="min-height:110px"><b>Catalogue C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="cmpName2">PDF / Excel</div><input type="file" id="cmpFile2" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+      <div class="drop" id="cmpDrop0" style="min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📁</div><b>Catalogue A</b><div class="mini" id="cmpName0">PDF · Excel · CSV</div><input type="file" id="cmpFile0" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+      <div class="drop" id="cmpDrop1" style="min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📁</div><b>Catalogue B</b><div class="mini" id="cmpName1">PDF · Excel · CSV</div><input type="file" id="cmpFile1" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
+      <div class="drop" id="cmpDrop2" style="min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📁</div><b>Catalogue C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="cmpName2">PDF · Excel · CSV</div><input type="file" id="cmpFile2" accept=".xlsx,.xls,.csv,.pdf" hidden></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn" onclick="runCompare()">⚖️ Comparer les catalogues</button>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
+      <button class="btn pri" onclick="runCompare()">⚖️ Comparer les catalogues</button>
       <button class="btn gh" onclick="exportCompare()">⬇ Export Excel</button>
+      <span class="sp"></span>
+      <button class="btn gh" style="font-size:11px" onclick="importCatIA()">📥 Utiliser le Catalogue IA actif</button>
     </div>
     <div id="cmpSts" style="margin-top:8px"></div>
   </div>
-  <div class="card" style="margin-top:16px">
-    <div class="card-t g">🚛 Comparateur de devis transitaires</div>
-    <p style="font-size:12px;color:var(--ink2);margin:4px 0 14px">Charge 2 ou 3 cotations PDF (DSG, autres transitaires). L'IA extrait fret, frais fixes, transit time — la comparaison porte sur les <b>frais transitaire hors droits & taxes</b> (OM/TVA identiques quel que soit le prestataire). Clé API requise.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-      <div class="drop" id="trDrop0" style="min-height:100px"><b>Devis A</b><div class="mini" id="trName0">PDF</div><input type="file" id="trFile0" accept=".pdf" hidden></div>
-      <div class="drop" id="trDrop1" style="min-height:100px"><b>Devis B</b><div class="mini" id="trName1">PDF</div><input type="file" id="trFile1" accept=".pdf" hidden></div>
-      <div class="drop" id="trDrop2" style="min-height:100px"><b>Devis C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="trName2">PDF</div><input type="file" id="trFile2" accept=".pdf" hidden></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn" onclick="runTransitCompare()">🚛 Comparer les devis</button>
-    </div>
-    <div id="trSts" style="margin-top:8px"></div>
-    <div class="tbl-wrap" id="trResWrap" style="display:none;max-height:560px;overflow:auto;margin-top:12px"><table class="tbl" id="trTable"><thead></thead><tbody></tbody></table></div>
-  </div>
-  <div class="card" id="cmpResCard" style="display:none">
+  <div class="card" id="cmpResCard" style="display:none;margin-top:16px">
     <div class="card-t">Résultat du rapprochement</div>
     <div id="cmpKpis" style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px"></div>
     <div class="tbl-wrap" style="max-height:560px;overflow:auto"><table class="tbl" id="cmpTable"><thead></thead><tbody></tbody></table></div>
   </div>
 </div>
+
+<div class="inner-pane" id="cmpPane-devis">
+  <div class="card">
+    <div class="card-t g">🚛 Comparateur de devis transitaires</div>
+    <div class="sts warn show" style="margin-bottom:12px">⚠️ <b>Clé API Anthropic requise</b> pour extraire les PDF — configurez-la dans ⚙️ Réglages.</div>
+    <p style="font-size:12px;color:var(--ink2);margin:4px 0 14px">Charge 2 ou 3 cotations PDF (DSG, autres transitaires). L'IA extrait fret, frais fixes, transit time — la comparaison porte sur les <b>frais transitaire hors droits & taxes</b> (OM/TVA identiques quel que soit le prestataire).</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      <div class="drop" id="trDrop0" style="min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📄</div><b>Devis A</b><div class="mini" id="trName0">PDF</div><input type="file" id="trFile0" accept=".pdf" hidden></div>
+      <div class="drop" id="trDrop1" style="min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📄</div><b>Devis B</b><div class="mini" id="trName1">PDF</div><input type="file" id="trFile1" accept=".pdf" hidden></div>
+      <div class="drop" id="trDrop2" style="min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="font-size:28px">📄</div><b>Devis C <span style="font-weight:400">(optionnel)</span></b><div class="mini" id="trName2">PDF</div><input type="file" id="trFile2" accept=".pdf" hidden></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn pri" onclick="runTransitCompare()">🚛 Comparer les devis</button>
+    </div>
+    <div id="trSts" style="margin-top:8px"></div>
+    <div class="tbl-wrap" id="trResWrap" style="display:none;max-height:560px;overflow:auto;margin-top:12px"><table class="tbl" id="trTable"><thead></thead><tbody></tbody></table></div>
+  </div>
+</div>
 </section>
 <section class="view" id="v-catalogue">
-  <div class="grid2" style="grid-template-columns:1.3fr 1fr;align-items:start">
-    <div>
-      <div class="drop" id="dropCat" role="button" tabindex="0" aria-label="Charger un catalogue fournisseur" onclick="document.getElementById('fiCat').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fiCat').click()}">
-        <div class="drop-ic" style="background:var(--purple-bg)">🧠</div>
-        <h3>Analysez un catalogue fournisseur</h3>
-        <p>Glissez un <b>PDF</b> (catalogue, proforma, offre) ou un <b>Excel/CSV</b>.<br>L'IA extrait produits, prix unitaires, colisage — puis croise avec vos ventes,<br>vos prix d'achat locaux et calcule le <b>CRR rendu Réunion</b>.</p>
-        <div class="fmt-row"><span class="fmt">PDF (texte ou scanné)</span><span class="fmt">XLSX</span><span class="fmt">CSV</span><span class="fmt">OCR Vision IA</span></div>
-        <input type="file" id="fiCat" accept=".pdf,.xlsx,.xls,.csv">
+  <div id="catDropZone">
+    <div class="grid2" style="grid-template-columns:1.3fr 1fr;align-items:start">
+      <div>
+        <div class="drop" id="dropCat" role="button" tabindex="0" aria-label="Charger un catalogue fournisseur" onclick="document.getElementById('fiCat').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fiCat').click()}">
+          <div class="drop-ic" style="background:var(--purple-bg)">🧠</div>
+          <h3>Analysez un catalogue fournisseur</h3>
+          <p>Glissez un <b>PDF</b> (catalogue, proforma, offre) ou un <b>Excel/CSV</b>.<br>L'IA extrait produits, prix unitaires, colisage — puis croise avec vos ventes,<br>vos prix d'achat locaux et calcule le <b>CRR rendu Réunion</b>.</p>
+          <div class="fmt-row"><span class="fmt">PDF (texte ou scanné)</span><span class="fmt">XLSX</span><span class="fmt">CSV</span><span class="fmt">OCR Vision IA</span></div>
+          <input type="file" id="fiCat" accept=".pdf,.xlsx,.xls,.csv">
+        </div>
+        <div class="sts" id="catSts" aria-live="polite"></div>
+        <div class="ai-think" id="catThink"><div class="spin"></div><div><div class="t1" id="catThinkT1">Lecture du document…</div><div class="t2" id="catThinkT2">Extraction des produits, prix et colisage</div></div></div>
       </div>
-      <div class="sts" id="catSts" aria-live="polite"></div>
-      <div class="ai-think" id="catThink"><div class="spin"></div><div><div class="t1" id="catThinkT1">Lecture du document…</div><div class="t2" id="catThinkT2">Extraction des produits, prix et colisage</div></div></div>
-    </div>
-    <div class="card" style="margin:0">
-      <div class="card-t au">Méthodologie Expert Achat</div>
-      <div class="hint" style="margin-bottom:10px"><b>1 · Extraction</b> — Excel : détection auto des colonnes. PDF : extraction texte + structuration IA ; si scanné, OCR vision IA page par page.</div>
-      <div class="hint" style="margin-bottom:10px"><b>2 · Matching</b> — Chaque produit est comparé à vos ventes stations (par marque + format) et au référentiel <b>PRIX_D_ACHATS</b> (229 articles). Produit inconnu → comparaison à sa catégorie.</div>
-      <div class="hint" style="margin-bottom:10px"><b>3 · CRR rendu</b> — Prix + fret/DSG pro-rata + droits de douane + OM 25,5% + OMR 2,5% + TVA 2,1% + <b>taxe soda 2026</b> + stickering.</div>
-      <div class="hint"><b>4 · Verdict & quantité</b> — IMPORTER / NÉGOCIER / REJETER / NOUVEAU, avec quantité recommandée = ventes mensuelles × rotation cible, arrondie au carton.</div>
+      <div class="card" style="margin:0">
+        <div class="card-t au">Méthodologie Expert Achat <button class="btn gh" style="padding:3px 10px;font-size:10px;margin-left:auto;min-height:28px" onclick="$('catDropZone').querySelector('.card').style.display='none'">✕</button></div>
+        <div class="hint" style="margin-bottom:10px"><b>1 · Extraction</b> — Excel : détection auto des colonnes. PDF : extraction texte + structuration IA ; si scanné, OCR vision IA page par page.</div>
+        <div class="hint" style="margin-bottom:10px"><b>2 · Matching</b> — Chaque produit est comparé à vos ventes stations (par marque + format) et au référentiel <b>PRIX_D_ACHATS</b> (229 articles). Produit inconnu → comparaison à sa catégorie.</div>
+        <div class="hint" style="margin-bottom:10px"><b>3 · CRR rendu</b> — Prix + fret/DSG pro-rata + droits de douane + OM 25,5% + OMR 2,5% + TVA 2,1% + <b>taxe soda 2026</b> + stickering. Cliquez le CRR d'une ligne pour voir le détail.</div>
+        <div class="hint"><b>4 · Verdict & quantité</b> — IMPORTER / NÉGOCIER / REJETER / NOUVEAU, avec quantité recommandée = ventes mensuelles × rotation cible, arrondie au carton.</div>
+      </div>
     </div>
   </div>
 
   <div id="catResults" style="display:none">
     <div class="kpis" id="catKpis"></div>
-    <div class="toolbar">
+    <div class="toolbar" style="gap:8px;flex-wrap:wrap">
       <div class="pills" id="catVerdictPills"></div>
       <div class="search"><input class="inp" id="catSearch" aria-label="Filtrer le catalogue" placeholder="Filtrer…" oninput="renderCatTable()"></div>
       <span class="sp"></span>
-      <button class="btn gold" onclick="sendToContainer()">🚢 Envoyer la sélection au conteneur</button>
-      <button class="btn gh" onclick="exportCat()">⬇ Export Excel</button>
+      <div style="display:flex;align-items:center;gap:6px;background:var(--amber-bg);border-radius:10px;padding:5px 10px">
+        <span style="font-size:11px;font-weight:700;color:var(--amber-d);white-space:nowrap">🍬 Soda :</span>
+        <select id="sodaGlobal" onchange="setSodaAll(this.value)" style="border:none;background:transparent;font-size:11px;font-weight:700;color:var(--amber-d);cursor:pointer;font-family:var(--sans)">
+          <option value="">— par produit —</option>
+          <option value="none">Sans taxe</option>
+          <option value="low">Sucre &lt;5g</option>
+          <option value="mid">5–8g</option>
+          <option value="high">&gt;8g</option>
+          <option value="sweet">Édulcorants</option>
+        </select>
+      </div>
+      <button class="btn gold" onclick="sendToContainer()">🚢 Envoyer au conteneur</button>
+      <button class="btn gh" onclick="exportCat()">⬇ Excel</button>
     </div>
     <div class="tbl-wrap"><table id="catTable"><thead></thead><tbody></tbody></table></div>
   </div>
@@ -414,22 +482,29 @@ tbody tr:hover{background:var(--card2)}
     </div>
     <div>
       <div class="card" style="margin-bottom:12px">
-        <div class="card-t">Paramètres logistiques & fiscaux</div>
-        <div class="grid3" style="gap:10px">
-          <div class="field"><label>Fret 40' HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_fret" value="3850" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
-          <div class="field"><label>Transit DSG</label><div class="iwrap"><input class="inp mono" type="number" id="p_dsg" value="1329" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
-          <div class="field"><label>Stickering / unité</label><div class="iwrap"><input class="inp mono" type="number" id="p_stick" value="0.05" step="0.01" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
-          <div class="field"><label>OM V395</label><div class="iwrap"><input class="inp mono" type="number" id="p_om" value="25.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
-          <div class="field"><label>OM Régional</label><div class="iwrap"><input class="inp mono" type="number" id="p_omr" value="2.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
-          <div class="field"><label>TVA import</label><div class="iwrap"><input class="inp mono" type="number" id="p_tva" value="2.1" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
-          <div class="field"><label>DD Boissons</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_b" value="9.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
-          <div class="field"><label>DD Confiserie/sec</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_c" value="5.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
-          <div class="field"><label>Capacité utile</label><div class="iwrap"><input class="inp mono" type="number" id="p_cap" value="67" oninput="recalcContainer()"><span class="sfx">m³</span></div></div>
-          <div class="field"><label>Palettes euro / 40'HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_plt" value="25" oninput="recalcContainer()"><span class="sfx">plt</span></div></div>
+        <div class="params-toggle" id="paramsToggle" onclick="toggleParams()" title="Afficher / masquer les paramètres">
+          <div class="card-t" style="margin:0;flex:1">⚙️ Paramètres logistiques & fiscaux</div>
+          <span class="arr">▶</span>
         </div>
-        <div class="hint" style="margin-top:10px">💧 <b>Taxe soda 2026</b> appliquée automatiquement aux boissons selon le niveau de sucre choisi par ligne : 4,07 / 21,38 / 35,07 €/hl · édulcorants 4,50 €/hl.</div>
+        <div class="params-body" id="paramsBody" style="max-height:0">
+          <div style="padding-top:12px">
+          <div class="grid3" style="gap:10px">
+            <div class="field"><label>Fret 40' HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_fret" value="3850" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+            <div class="field"><label>Transit DSG</label><div class="iwrap"><input class="inp mono" type="number" id="p_dsg" value="1329" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+            <div class="field"><label>Stickering / unité</label><div class="iwrap"><input class="inp mono" type="number" id="p_stick" value="0.05" step="0.01" oninput="recalcContainer()"><span class="sfx">€</span></div></div>
+            <div class="field"><label>OM V395</label><div class="iwrap"><input class="inp mono" type="number" id="p_om" value="25.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+            <div class="field"><label>OM Régional</label><div class="iwrap"><input class="inp mono" type="number" id="p_omr" value="2.5" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+            <div class="field"><label>TVA import</label><div class="iwrap"><input class="inp mono" type="number" id="p_tva" value="2.1" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+            <div class="field"><label>DD Boissons</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_b" value="9.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+            <div class="field"><label>DD Confiserie/sec</label><div class="iwrap"><input class="inp mono" type="number" id="p_dd_c" value="5.6" step="0.1" oninput="recalcContainer()"><span class="sfx">%</span></div></div>
+            <div class="field"><label>Capacité utile</label><div class="iwrap"><input class="inp mono" type="number" id="p_cap" value="67" oninput="recalcContainer()"><span class="sfx">m³</span></div></div>
+            <div class="field"><label>Palettes euro / 40'HC</label><div class="iwrap"><input class="inp mono" type="number" id="p_plt" value="25" oninput="recalcContainer()"><span class="sfx">plt</span></div></div>
+          </div>
+          <div class="hint" style="margin-top:10px">💧 <b>Taxe soda 2026</b> appliquée automatiquement aux boissons selon le niveau de sucre choisi par ligne : 4,07 / 21,38 / 35,07 €/hl · édulcorants 4,50 €/hl.</div>
+          </div>
+        </div>
       </div>
-      <div class="sts inf show" id="contInfo" style="margin:0">Ajoutez des produits depuis l'onglet <b>Catalogue IA</b> ou chargez directement une proforma ici.</div>
+      <div class="sts inf show" id="contInfo" style="margin:0">Ajoutez des produits depuis l'onglet <b>Catalogue IA</b>.</div>
     </div>
   </div>
   <div class="card" style="margin-top:16px">
@@ -446,25 +521,44 @@ tbody tr:hover{background:var(--card2)}
 <!-- ============ VUE VEILLE ============ -->
 <section class="view" id="v-veille">
   <div class="card">
-    <div class="card-t p">Veille mondiale — découverte produits & fournisseurs</div>
-    <div class="toolbar" style="margin-bottom:10px">
+    <div class="card-t p">🌍 Veille mondiale — découverte produits & fournisseurs</div>
+    <div class="toolbar" style="margin-bottom:8px">
       <input class="inp" id="vSearch" aria-label="Rechercher des produits pour la veille" placeholder="Ex : boissons virales TikTok Asie, snacks halal Turquie, sodas coréens 2026…" style="flex:1;min-width:260px" onkeydown="if(event.key==='Enter')launchVeille()">
-      <button class="btn pri" id="vGo" onclick="launchVeille()">🔴 Lancer la veille live</button>
+      <button class="btn pri" id="vGo" onclick="launchVeille()">🔍 Lancer la veille</button>
     </div>
-    <div class="toolbar" style="margin-bottom:0">
+    <div class="qs-chips">
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">Energy halal Europe 2026</button>
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">K-food viral TikTok</button>
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">Boissons Turquie export</button>
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">Snacks Asie single-serve</button>
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">Bubble tea fabricant Europe</button>
+      <button class="qs-chip" onclick="$('vSearch').value=this.textContent;launchVeille()">Nouveautés SIAL 2026</button>
+    </div>
+    <div class="toolbar" style="margin-top:10px;margin-bottom:0">
       <div class="pills" id="vCats">
         <button class="pill act" data-c="all">Tout</button><button class="pill" data-c="boissons">Boissons</button><button class="pill" data-c="energy">Energy</button><button class="pill" data-c="snacks">Snacks</button><button class="pill" data-c="confiserie">Confiserie</button><button class="pill" data-c="asiatique">Asiatique</button>
       </div>
       <span class="sp"></span>
-      <div class="pills">
-        <button class="pill act" id="vHalal" onclick="this.classList.toggle('act')">☪️ Halal prioritaire</button>
-        <button class="pill act" id="vNoUS" onclick="this.classList.toggle('act')">🚫 Exclure USA</button>
-      </div>
+      <button class="pill act" id="vHalal" onclick="this.classList.toggle('act')">☪️ Halal</button>
     </div>
   </div>
+
+  <div class="card" id="vHistoryCard" style="margin-bottom:0">
+    <div class="card-t" style="margin-bottom:8px">Recherches récentes</div>
+    <div id="vHistory"><span class="mini" style="color:var(--ink3)">Aucune recherche sauvegardée</span></div>
+  </div>
+
   <div class="ai-think" id="vThink"><div class="spin"></div><div><div class="t1">Recherche web en cours…</div><div class="t2" id="vThinkT2">Scan des lancements produits, TikTok trends, salons & fabricants Europe/Asie</div></div></div>
   <div class="sts" id="vSts" aria-live="polite"></div>
-  <div id="vAnalysis" style="display:none" class="card"><div class="card-t">Analyse</div><p style="font-size:13px;line-height:1.7" id="vAnalysisTxt"></p><div class="mini" id="vSources" style="margin-top:8px"></div></div>
+  <div id="vAnalysis" style="display:none" class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div class="card-t" style="margin:0;flex:1">Analyse</div>
+      <button class="btn go" style="padding:6px 14px;font-size:11px" id="vSaveBtn" onclick="saveCurrentVeille()">💾 Sauvegarder</button>
+      <button class="btn gh" style="padding:6px 14px;font-size:11px" onclick="exportVeille()">⬇ Excel</button>
+    </div>
+    <p style="font-size:13px;line-height:1.7" id="vAnalysisTxt"></p>
+    <div class="mini" id="vSources" style="margin-top:8px"></div>
+  </div>
   <div class="vgrid" id="vResults"></div>
   <div class="empty" id="vEmpty"><div class="ic">🌍</div><h3>Votre radar produits mondial</h3><p>L'IA scanne le web en direct : nouveaux lancements, marques émergentes, fabricants avec contacts export vérifiables — filtrés selon vos critères (Europe/Asie, halal, formats single-serve 1,20–3,50 €, hors marques déjà bien distribuées localement).</p></div>
 </section>
@@ -506,81 +600,107 @@ tbody tr:hover{background:var(--card2)}
   <div class="mkt-grid">
     <div class="card mkt-form">
       <div class="card-t g">📣 Studio Promo</div>
-      <div class="mkt-lbl">Produit</div>
-      <input class="inp" id="mkProd" list="mkProdList" placeholder="Monster Energy 500ml" oninput="mkAutoFill();mkRender()">
-      <datalist id="mkProdList"></datalist>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1"><div class="mkt-lbl">Prix normal €</div><input class="inp" id="mkOld" type="number" step="0.05" placeholder="2.50" oninput="mkRender()"></div>
-        <div style="flex:1"><div class="mkt-lbl">Prix PROMO €</div><input class="inp" id="mkNew" type="number" step="0.05" placeholder="1.90" oninput="mkRender()"></div>
+
+      <!-- Section 1 : Contenu -->
+      <div class="mkt-sec">
+        <div class="mkt-sec-title">1 · Produit & Prix</div>
+        <div class="mkt-lbl">Produit</div>
+        <input class="inp" id="mkProd" list="mkProdList" placeholder="Monster Energy 500ml" oninput="mkAutoFill();mkRender()">
+        <datalist id="mkProdList"></datalist>
+        <div id="mkCatIaHint" style="display:none;font-size:10px;color:var(--purple);margin-top:3px;font-weight:600">✨ Prix pré-rempli depuis le Catalogue IA</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <div style="flex:1"><div class="mkt-lbl">Prix normal €</div><input class="inp" id="mkOld" type="number" step="0.05" placeholder="2.50" oninput="mkRender()"></div>
+          <div style="flex:1"><div class="mkt-lbl">Prix PROMO €</div><input class="inp" id="mkNew" type="number" step="0.05" placeholder="1.90" oninput="mkRender()"></div>
+        </div>
+        <div class="mkt-lbl" style="margin-top:8px">Accroche</div>
+        <input class="inp" id="mkHook" placeholder="LE PLEIN D'ÉNERGIE" oninput="mkRender()">
+        <button class="btn gh" style="width:100%;margin:6px 0 2px" onclick="mkSlogans()">✨ Générer des accroches IA</button>
+        <div id="mkSloganBox"></div>
+        <div class="mkt-lbl" style="margin-top:6px">Mention bas (période, condition)</div>
+        <input class="inp" id="mkPeriod" placeholder="Du 15 au 30 juin · dans la limite du stock" oninput="mkRender()">
+        <div class="mkt-lbl">Stations</div>
+        <input class="inp" id="mkStations" value="OLA · TOTAL · VITO" oninput="mkRender()">
       </div>
-      <div class="mkt-lbl">Accroche</div>
-      <input class="inp" id="mkHook" placeholder="LE PLEIN D'ÉNERGIE" oninput="mkRender()">
-      <button class="btn gh" style="width:100%;margin:4px 0 2px" onclick="mkSlogans()">✨ Générer des accroches IA</button>
-      <div id="mkSloganBox"></div>
-      <div class="mkt-lbl">Mention bas (période, condition)</div>
-      <input class="inp" id="mkPeriod" placeholder="Du 15 au 30 juin · dans la limite du stock" oninput="mkRender()">
-      <div class="mkt-lbl">Stations</div>
-      <input class="inp" id="mkStations" value="OLA · TOTAL · VITO" oninput="mkRender()">
-      <div class="mkt-lbl">Thème</div>
-      <div class="mkt-themes" id="mkThemes"></div>
-      <div class="mkt-lbl">Format</div>
-      <div class="mkt-fmt" id="mkFmts">
-        <button data-f="story" onclick="mkFmt('story')">📱 Story<br>1080×1920</button>
-        <button data-f="post" class="act" onclick="mkFmt('post')">⬛ Post<br>1080×1080</button>
-        <button data-f="tv" onclick="mkFmt('tv')">🖥 Écran TV<br>1920×1080</button>
+
+      <!-- Section 2 : Visuel poster -->
+      <div class="mkt-sec">
+        <div class="mkt-sec-title">2 · Visuel poster</div>
+        <div class="mkt-lbl">Thème</div>
+        <div class="mkt-themes" id="mkThemes"></div>
+        <div class="mkt-lbl" style="margin-top:8px">Format</div>
+        <div class="mkt-fmt" id="mkFmts">
+          <button data-f="story" onclick="mkFmt('story')">📱 Story<br>1080×1920</button>
+          <button data-f="post" class="act" onclick="mkFmt('post')">⬛ Post<br>1080×1080</button>
+          <button data-f="tv" onclick="mkFmt('tv')">🖥 TV<br>1920×1080</button>
+        </div>
       </div>
-      <button class="btn" style="width:100%;margin-top:14px;background:var(--purple);color:#fff" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
-      <div class="mkt-lbl">Ambiance produit</div>
-      <div class="pills" id="mkCatPills">
-        <div class="pill act" data-c="sport" onclick="mkCat('sport')">🌴 Sport & Santé</div>
-        <div class="pill" data-c="energy" onclick="mkCat('energy')">⚡ Energy</div>
-        <div class="pill" data-c="snack" onclick="mkCat('snack')">🍫 Snack & Gourmand</div>
+
+      <!-- Section 3 : Génération IA -->
+      <div class="mkt-sec">
+        <div class="mkt-sec-title">3 · Génération IA</div>
+        <button class="btn" style="width:100%;background:var(--purple);color:#fff" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
+        <button class="btn gh" style="width:100%;margin-top:6px" onclick="mkBackManual()">↩ Revenir au modèle CSS</button>
+
+        <div class="mkt-lbl" style="margin-top:10px">Photo produit pour visuel photo-réaliste</div>
+        <div class="drop" id="mkPhotoDrop" role="button" tabindex="0" aria-label="Charger une photo du produit" style="padding:14px;min-height:60px" onclick="$('mkPhotoFile').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();$('mkPhotoFile').click()}">
+          <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">📸 Cliquer ou glisser une photo du produit</div>
+          <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
+        </div>
+        <div class="mkt-lbl" style="margin-top:6px">Ambiance</div>
+        <div class="pills" id="mkCatPills" style="gap:5px">
+          <div class="pill act" data-c="sport" onclick="mkCat('sport')" style="font-size:11px;padding:5px 12px">🌴 Sport</div>
+          <div class="pill" data-c="energy" onclick="mkCat('energy')" style="font-size:11px;padding:5px 12px">⚡ Energy</div>
+          <div class="pill" data-c="snack" onclick="mkCat('snack')" style="font-size:11px;padding:5px 12px">🍫 Snack</div>
+        </div>
+        <div class="mkt-lbl" style="margin-top:6px">Style de scène</div>
+        <div class="pills" id="mkScenePills" style="gap:5px">
+          <div class="pill act" data-s="static" onclick="mkScene('static')" style="font-size:11px;padding:5px 12px">📷 Studio</div>
+          <div class="pill" data-s="action" onclick="mkScene('action')" style="font-size:11px;padding:5px 12px">💦 Action</div>
+          <div class="pill" data-s="hand" onclick="mkScene('hand')" style="font-size:11px;padding:5px 12px">🤚 En main</div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:8px;background:var(--purple);color:#fff" onclick="mkGenAIPhoto()">📸 Générer visuel photo-réaliste (FLUX)</button>
       </div>
-      <div class="mkt-lbl">Style de scène</div>
-      <div class="pills" id="mkScenePills">
-        <div class="pill act" data-s="static" onclick="mkScene('static')">📷 Studio</div>
-        <div class="pill" data-s="action" onclick="mkScene('action')">💦 Versé / Action</div>
-        <div class="pill" data-s="hand" onclick="mkScene('hand')">🤚 Tenu en main</div>
-      </div>
-      <div class="mkt-lbl">Photo produit (optionnel)</div>
-      <div class="drop" id="mkPhotoDrop" role="button" tabindex="0" aria-label="Charger une photo du produit" style="padding:18px;min-height:70px" onclick="$('mkPhotoFile').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();$('mkPhotoFile').click()}">
-        <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">Clique pour uploader une photo du produit</div>
-        <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
-      </div>
-      <button class="btn" style="width:100%;margin-top:8px;background:var(--purple);color:#fff" onclick="mkGenAIPhoto()">📸 Visuel photo-réaliste (FLUX)</button>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn gh" style="flex:1" onclick="mkGenAI()">↻ Variante</button>
-        <button class="btn gh" style="flex:1" onclick="mkBackManual()">Modèle simple</button>
-      </div>
-      <button class="btn" style="width:100%;margin-top:8px" onclick="mkExport()">⬇ Télécharger PNG</button>
+
       <div id="mkSts" style="margin-top:8px"></div>
     </div>
     <div>
       <div class="mkt-stage" id="mkStage"><div id="mkPoster"></div></div>
-      <p style="font-size:11px;color:var(--ink2);margin-top:8px">Astuce : clique une accroche générée pour l'appliquer. Le PNG est exporté en pleine résolution, prêt pour WhatsApp, Insta/TikTok ou l'écran caisse.</p>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn pri" style="flex:1;justify-content:center" onclick="mkExport()">⬇ Télécharger PNG</button>
+      </div>
     </div>
   </div>
 </div>
 </section>
 <section class="view" id="v-reglages">
-  <div class="grid2">
-    <div class="card">
-      <div class="card-t">Clé API Anthropic (pour GitHub Pages)</div>
-      <p style="font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:10px">Nécessaire pour l'<b>analyse IA des PDF</b> et la <b>veille live</b> quand l'app est hébergée sur GitHub Pages. Stockée uniquement dans votre navigateur (localStorage).</p>
-      <div class="toolbar"><input class="inp mono" type="password" id="apiKeyInp" aria-label="Clé API Anthropic" placeholder="sk-ant-…" style="flex:1"><button class="btn pri" onclick="saveApiKey()">Enregistrer</button></div>
-      <div class="sts" id="keySts" aria-live="polite"></div>
-    </div>
-    <div class="card">
-      <div class="card-t g">Taxe soda 2026 (€/hl)</div>
-      <div class="grid3" style="gap:10px">
-        <div class="field"><label>Sucre &lt; 5g/100ml</label><input class="inp mono" type="number" id="ts_low" value="4.07" step="0.01"></div>
-        <div class="field"><label>5–8 g/100ml</label><input class="inp mono" type="number" id="ts_mid" value="21.38" step="0.01"></div>
-        <div class="field"><label>&gt; 8 g/100ml</label><input class="inp mono" type="number" id="ts_high" value="35.07" step="0.01"></div>
+  <!-- Section 1 : API & Connexion -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-t">🔐 API & Connexion</div>
+    <div class="grid2">
+      <div>
+        <div class="field" style="margin-bottom:10px"><label>Clé API Anthropic</label>
+          <div style="display:flex;gap:8px">
+            <input class="inp mono" type="password" id="apiKeyInp" aria-label="Clé API Anthropic" placeholder="sk-ant-…" style="flex:1">
+            <button class="btn pri" onclick="saveApiKey()" style="flex-shrink:0">Enregistrer</button>
+            <button class="btn gh" onclick="testApiKey()" style="flex-shrink:0">🔍 Tester</button>
+          </div>
+        </div>
+        <div class="sts" id="keySts" aria-live="polite"></div>
+        <p style="font-size:11px;color:var(--ink2);line-height:1.6;margin-top:6px">Nécessaire pour l'analyse IA des PDF et la veille. Stockée uniquement dans votre navigateur.</p>
       </div>
-      <div class="field" style="margin-top:10px;max-width:200px"><label>Édulcorants</label><input class="inp mono" type="number" id="ts_sweet" value="4.50" step="0.01"></div>
+      <div>
+        <div class="field"><label>Connexion Supabase</label>
+          <div style="display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--card2);border-radius:11px;border:1px solid var(--line)">
+            <span id="supaStatus" style="font-size:12px;font-weight:600;flex:1"><span class="status-dot wait"></span>Non testé</span>
+            <button class="btn gh" style="font-size:11px;padding:5px 12px;min-height:32px" onclick="checkSupabase()">Tester</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="grid2">
+
+  <!-- Section 2 : Paramètres import -->
+  <div class="grid2" style="margin-bottom:16px">
     <div class="card">
       <div class="card-t o">Rotations cibles (mois)</div>
       <div class="grid3" style="gap:10px">
@@ -592,9 +712,43 @@ tbody tr:hover{background:var(--card2)}
       </div>
     </div>
     <div class="card">
-      <div class="card-t au">Données locales</div>
-      <div class="srow"><div><b style="font-size:13px">Années de ventes sauvegardées</b><div class="mini" id="dataYearsInfo">—</div></div><button class="btn dng" onclick="wipeAll()">Tout effacer</button></div>
-      <div class="hint" style="margin-top:10px">Référentiel embarqué : <b>229 prix d'achat 2026</b> + <b>ventes stations agrégées</b>. Vos fichiers chargés enrichissent et remplacent ces références.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="card-t g" style="margin:0">Taxe soda 2026 (€/hl)</div>
+        <button class="btn gh" style="font-size:10px;padding:4px 10px;min-height:28px;margin-left:auto" id="sodaEditBtn" onclick="toggleSodaEdit()">✏️ Modifier si maj légale</button>
+      </div>
+      <div class="hint" style="margin-bottom:10px;font-size:10px">Source : Loi de finances 2024 — taux en vigueur depuis janvier 2026.</div>
+      <div class="grid3" style="gap:10px">
+        <div class="field"><label>Sucre &lt; 5g/100ml</label><input class="inp mono" type="number" id="ts_low" value="4.07" step="0.01" readonly style="background:var(--card2);cursor:default"></div>
+        <div class="field"><label>5–8 g/100ml</label><input class="inp mono" type="number" id="ts_mid" value="21.38" step="0.01" readonly style="background:var(--card2);cursor:default"></div>
+        <div class="field"><label>&gt; 8 g/100ml</label><input class="inp mono" type="number" id="ts_high" value="35.07" step="0.01" readonly style="background:var(--card2);cursor:default"></div>
+      </div>
+      <div class="field" style="margin-top:10px;max-width:200px"><label>Édulcorants</label><input class="inp mono" type="number" id="ts_sweet" value="4.50" step="0.01" readonly style="background:var(--card2);cursor:default"></div>
+    </div>
+  </div>
+
+  <!-- Section 3 : Données & Sauvegarde -->
+  <div class="card">
+    <div class="card-t au">💾 Données & Sauvegarde</div>
+    <div class="grid2">
+      <div>
+        <div style="margin-bottom:12px"><b style="font-size:13px">Années de ventes sauvegardées</b><div class="mini" id="dataYearsInfo" style="margin-top:3px">—</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="btn gh" onclick="exportBackup()">⬇ Exporter backup JSON</button>
+          <button class="btn gh" onclick="$('importFile').click()">📂 Importer backup</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+        </div>
+        <div class="hint">Référentiel embarqué : <b>229 prix d'achat 2026</b> + <b>ventes stations agrégées</b>. Vos fichiers chargés enrichissent et remplacent ces références.</div>
+      </div>
+      <div>
+        <div style="background:var(--red-bg);border-radius:12px;padding:14px">
+          <div style="font-size:12px;font-weight:800;color:var(--red-d);margin-bottom:8px">⚠️ Zone danger — irréversible</div>
+          <div style="font-size:11px;color:var(--red-d);margin-bottom:10px">Tapez <b>EFFACER</b> pour confirmer la suppression complète.</div>
+          <div style="display:flex;gap:8px">
+            <input class="inp" type="text" id="wipeConfirm" placeholder="EFFACER" style="flex:1;border-color:var(--red);font-size:12px">
+            <button class="btn dng" onclick="wipeAll()">Effacer</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1424,16 +1578,18 @@ function renderCatTable(){
   const q=norm($('catSearch').value);
   let arr=catProducts.filter(p=>(catFilter==='all'||p.verdict===catFilter)&&(!q||norm(p.name+' '+p.brand).includes(q)));
   arr.sort((a,b)=>{const va=a[catSort.col]??-1e9,vb=b[catSort.col]??-1e9;return(va>vb?1:va<vb?-1:0)*catSort.dir;});
-  const TH=[['score','Score'],['name','Produit'],['price','Prix FOB'],['crr','CRR rendu'],['prix_local','PA local'],['gainPct','Gain'],['monthly','Ventes/mois'],['margePct','Marge'],['recoQty','Qté reco'],['verdict','Verdict'],['qty','Commande']];
-  $('catTable').querySelector('thead').innerHTML='<tr>'+TH.map(([c,l])=>`<th class="${['price','crr','prix_local','gainPct','monthly','margePct','recoQty','qty'].includes(c)?'num':''}" onclick="catSort={col:'${c==='prix_local'?'gainPct':c}',dir:catSort.col==='${c}'?-catSort.dir:-1};renderCatTable()">${l}</th>`).join('')+'</tr>';
+  const TH=[['score','Score'],['name','Produit'],['price','FOB'],['crr','CRR rendu'],['fobCible','FOB cible'],['prix_local','PA local'],['gainPct','Gain'],['monthly','Ventes/mois'],['margePct','Marge'],['recoQty','Qté reco'],['verdict','Verdict'],['qty','Commande']];
+  $('catTable').querySelector('thead').innerHTML='<tr>'+TH.map(([c,l])=>`<th class="${['price','crr','fobCible','prix_local','gainPct','monthly','margePct','recoQty','qty'].includes(c)?'num':''}" onclick="catSort={col:'${c==='prix_local'?'gainPct':c==='fobCible'?'gainPct':c}',dir:catSort.col==='${c}'?-catSort.dir:-1};renderCatTable()">${l}</th>`).join('')+'</tr>';
   $('catTable').querySelector('tbody').innerHTML=arr.map(p=>{
     const V=VERDICTS[p.verdict];
     const sodaSel=p.cat==='Boissons'?`<select class="inp" style="padding:3px 6px;font-size:10px;width:auto;border-radius:7px" onchange="catProducts[${p.id}].soda=this.value;computeVerdict(catProducts[${p.id}]);renderCatKpis();renderCatTable()">${[['none','sans taxe'],['low','sucre &lt;5g'],['mid','5–8g'],['high','&gt;8g'],['sweet','édulc.']].map(([v,l])=>`<option value="${v}" ${p.soda===v?'selected':''}>${l}</option>`).join('')}</select>`:'';
+    const fobC=p.verdict==='NEGOCIER'&&p.prixLocal?fobMax(p.prixLocal.puaht_recent,p):null;
     return`<tr>
       <td class="num"><b style="color:${p.score>=70?'var(--green-d)':p.score>=45?'var(--amber-d)':'var(--ink3)'}">${p.score}</b></td>
       <td><div class="pname">${esc(p.name)} ${p._ai?'<span class="tag-ai">IA</span>':''}</div><div class="psub">${esc(p.brand)} · ${p.cat}${p.ml?' · '+p.ml+' ml':''}${p.pcsCase?' · ctn ×'+p.pcsCase:''} ${sodaSel}</div>${p.sales?`<div class="psub">↳ <b>${esc(p.sales.article)}</b> (match ${Math.round(p.sales.conf*100)}%)</div>`:''}</td>
       <td class="num">${f2(p.price)} €</td>
-      <td class="num"><b>${f2(p.crr)} €</b></td>
+      <td class="num crr-cell" onclick="showCRRDetail(${p.id})" title="Voir le détail du calcul"><b>${f2(p.crr)} €</b></td>
+      <td class="num">${fobC?`<span class="fob-cible" title="FOB max pour garder +5% vs local">≤ ${f2(fobC)} €</span>`:'—'}</td>
       <td class="num"><input class="qty-inp" type="number" step="0.01" min="0" style="width:74px" value="${p.prixLocal?(+p.prixLocal.puaht_recent).toFixed(2):''}" placeholder="—" onchange="setPA(${p.id},this.value)"><div class="mini">${p.prixLocal?esc(p.prixLocal.fournisseur_recent||'')+(p.prixLocal._edit?' ✏️':''):''}</div></td>
       <td class="num" style="color:${p.gainPct>5?'var(--green-d)':p.gainPct<-5?'var(--red-d)':'var(--amber-d)'}">${p.gainPct!=null?(p.gainPct>0?'+':'')+f2(p.gainPct)+'%':'—'}</td>
       <td class="num">${p.monthly?f0(p.monthly):'—'}</td>
@@ -1442,7 +1598,7 @@ function renderCatTable(){
       <td><span class="vd ${V.cls}">${V.ic} ${V.lbl}</span></td>
       <td class="num"><input class="qty-inp" type="number" min="0" value="${p.qty||''}" placeholder="${p.recoQty||0}" onchange="catProducts[${p.id}].qty=parseInt(this.value)||0"></td>
     </tr>`;
-  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--ink2)">Aucun produit dans ce filtre.</td></tr>';
+  }).join('')||'<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--ink2)">Aucun produit dans ce filtre.</td></tr>';
 }
 // Édition manuelle du PA local (prix d'achat variable) → recalcul gain/verdict/score
 function setPA(id,val){
@@ -1553,16 +1709,25 @@ function renderContTable(){
     if(!groups[k]){groups[k]={items:[],label:null};order.push(k);}
     groups[k].items.push({p,i});
   });
+  const rotBadge=(qty,monthly)=>{
+    if(!monthly||!qty)return'';
+    const m=qty/monthly;
+    if(m<2)return`<span class="rot-low">${f2(m)}m</span>`;
+    if(m<=4)return`<span class="rot-ok">${f2(m)}m</span>`;
+    return`<span class="rot-high">${f2(m)}m</span>`;
+  };
   const rowHTML=({p,i},child)=>{
     const gain=p.prixLocal?(p.prixLocal.puaht_recent-p._crr)*(p.qty||0):null;
+    const freightU=p._crr&&p.price?(p._crr-p.price)*0.4:null; // estimation fret dans CRR
+    const rot=rotBadge(p.qty,p.monthly);
     return`<tr${child?' style="background:#fafbff"':''}>
-      <td style="${child?'padding-left:34px':''}"><div class="pname"${child?' style="font-weight:600;font-size:12px"':''}>${esc(p.name)}</div><div class="psub">${esc(p.brand)} · ${p.cat}${p.monthly?` · ${f0(p.monthly)} u/mois → rotation ${p.monthly>0?f2((p.qty||0)/p.monthly):'—'} mois`:''}</div></td>
+      <td style="${child?'padding-left:34px':''}"><div class="pname"${child?' style="font-weight:600;font-size:12px"':''}>${esc(p.name)}</div><div class="psub">${esc(p.brand)} · ${p.cat}${p.monthly?` · ${f0(p.monthly)} u/mois ${rot}`:''}</div></td>
       <td class="num">${f2(p.price)} €</td>
       <td class="num"><input class="qty-inp" type="number" min="0" value="${p.qty||0}" onchange="updContQty(${i},this.value)"></td>
       <td class="num">${f0(p._cases)}${p.pcsCase?`<div class="mini">×${p.pcsCase}/ctn</div>`:''}</td>
       <td class="num">${f2(p._plt)}${p.casePallet?`<div class="mini">${p.casePallet} ctn/plt</div>`:'<div class="mini">est.</div>'}</td>
       <td class="num">${f2(p._cbm)}</td>
-      <td class="num"><b>${f2(p._crr)} €</b></td>
+      <td class="num"><b>${f2(p._crr)} €</b>${freightU?`<div class="mini">fret ≈${f2(freightU)} €/u</div>`:''}</td>
       <td class="num">${fK(p._crrTot)}</td>
       <td class="num" style="color:${gain>0?'var(--green-d)':gain<0?'var(--red-d)':'var(--ink3)'}">${gain!=null?(gain>0?'+':'')+f0(gain)+' €':'—'}</td>
       <td><button class="btn dng" style="padding:5px 10px;font-size:11px" onclick="rmContItem(${i})">✕</button></td>
@@ -1762,7 +1927,8 @@ bindDrop($('dropVentes'),$('fiVentes'),files=>{[...files].forEach(f=>{const r=ne
 bindDrop($('dropCat'),$('fiCat'),files=>{if(files[0])handleCatFile(files[0]);});
 
 async function wipeAll(){
-  if(!confirm('Effacer toutes les données (ventes, paramètres, clé API) ?'))return;
+  const conf=$('wipeConfirm')?.value?.trim();
+  if(conf!=='EFFACER'){alert('Tapez EFFACER dans le champ de confirmation pour continuer.');return;}
   const ys=Object.keys(YEARS);
   for(const y of ys)await dbDel('years',y);
   YEARS={};
@@ -2133,15 +2299,26 @@ const MK_FMT={story:[1080,1920],post:[1080,1080],tv:[1920,1080]};
 let mkTheme='flash',mkFormat='post';
 function mkInit(){
   $('mkThemes').innerHTML=MK_THEMES.map(t=>`<div class="mkt-th ${mkTheme===t.id?'act':''}" style="background:${t.bg}" onclick="mkTheme='${t.id}';mkInit();mkRender()">${t.n}</div>`).join('');
-  // datalist produits depuis ventes + référentiel
   const names=new Set();
+  if(typeof catProducts!=='undefined')catProducts.forEach(p=>names.add(p.name));
   salesIndex.slice().sort((a,b)=>b.qtyYear-a.qtyYear).slice(0,150).forEach(e=>names.add(e.article));
   PRIX_ACHATS_DB.forEach(r=>names.add(r.article));
-  $('mkProdList').innerHTML=[...names].slice(0,400).map(n=>`<option value="${esc(n)}">`).join('');
+  $('mkProdList').innerHTML=[...names].slice(0,500).map(n=>`<option value="${esc(n)}">`).join('');
 }
 function mkAutoFill(){
-  // pré-remplit le prix normal depuis PV connu
   const n=$('mkProd').value;if(!n)return;
+  const hint=$('mkCatIaHint');
+  // 1. Depuis le Catalogue IA actif
+  if(typeof catProducts!=='undefined'&&catProducts.length){
+    const cp=catProducts.find(p=>norm(p.name).includes(norm(n))||norm(n).includes(norm(p.name.split(' ')[0])));
+    if(cp){
+      if(!$('mkOld').value&&cp.pv)$('mkOld').value=(+cp.pv).toFixed(2);
+      if(hint)hint.style.display='block';
+      return;
+    }
+  }
+  if(hint)hint.style.display='none';
+  // 2. Depuis ventes (PV connu)
   const s=matchSales(n);const pv=s?.pv;
   if(pv&&!$('mkOld').value)$('mkOld').value=(+pv).toFixed(2);
 }
@@ -2220,6 +2397,159 @@ async function mkExport(){
   tmp.remove();
 }
 
+/* ===== TOGGLE PARAMS (Conteneur) ===== */
+function toggleParams(){
+  const body=$('paramsBody'),toggle=$('paramsToggle');
+  const open=toggle.classList.toggle('open');
+  body.style.maxHeight=open?(body.scrollHeight+20)+'px':'0';
+}
+
+/* ===== COMPARATEUR INNER TABS ===== */
+function cmpTab(tab){
+  document.querySelectorAll('.inner-pane').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('act'));
+  const pane=$('cmpPane-'+tab);if(pane)pane.classList.add('act');
+  document.querySelectorAll('.inner-tab').forEach(b=>{if(b.textContent.toLowerCase().includes(tab==='catalogues'?'catalogue':'devis'))b.classList.add('act');});
+}
+function importCatIA(){
+  if(typeof catProducts==='undefined'||!catProducts?.length){sts('cmpSts','Chargez d\'abord un catalogue dans l\'onglet Catalogue IA.','warn');return;}
+  sts('cmpSts',`✅ ${catProducts.length} produits du Catalogue IA prêts à comparer.`,'ok');
+}
+
+/* ===== CRR DETAIL MODAL ===== */
+function calcCRRDetail(p){
+  const fu=freightPerUnit(p);
+  const fob=+p.price;
+  const dd=fob*0.0; // DD variable selon prod — simplifié
+  const om=fob*0.255;
+  const omr=fob*0.025;
+  const tva=(fob+om+omr)*0.021;
+  const soda=sodaPerUnit(p.soda,p.ml);
+  const stick=gP('p_stick')||0.03;
+  const crr=fob+fu+om+omr+tva+soda+stick;
+  return{fob,fu,om,omr,tva,soda,stick,crr};
+}
+function showCRRDetail(id){
+  const p=catProducts[id];if(!p)return;
+  const d=calcCRRDetail(p);
+  const rows=[
+    ['FOB fournisseur',d.fob],
+    ['Fret + manutention',d.fu],
+    ['OM 25.5%',d.om],
+    ['OMR 2.5%',d.omr],
+    ['TVA import 2.1%',d.tva],
+    ['Taxe soda',d.soda],
+    ['Étiquetage (stickering)',d.stick],
+    ['<b>CRR rendu La Possession</b>',d.crr],
+  ];
+  const $m=$('modalBox');
+  $m.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:800">Détail CRR — ${esc(p.name)}</div>
+    <button onclick="$('modalBg').classList.remove('show')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink2)">✕</button>
+  </div>
+  <table class="tbl" style="font-size:12px"><tbody>`+rows.map(([l,v])=>`<tr><td>${l}</td><td class="num" style="font-family:var(--mono);font-size:13px;${v===d.crr?'font-weight:800;color:var(--blue)':''}">${f2(v)} €</td></tr>`).join('')+`</tbody></table>
+  <div class="hint" style="margin-top:10px;font-size:10px">Calcul : FOB + fret logistique + OM 25.5% + OMR 2.5% + TVA import 2.1% + taxe soda 2026 + stickering</div>`;
+  $('modalBg').classList.add('show');
+}
+
+/* ===== SODA GLOBAL ===== */
+function setSodaAll(level){
+  if(!catProducts?.length)return;
+  catProducts.forEach(p=>{if(p.cat==='Boissons'){p.soda=level||p.soda;computeVerdict(p);}});
+  renderCatKpis();renderCatPills();renderCatTable();
+}
+
+/* ===== VEILLE HISTORY ===== */
+let veilleHistory=[];
+async function saveCurrentVeille(){
+  const res=$('vAnalysisTxt')?.innerText?.trim();
+  const q=$('vSearch')?.value?.trim();
+  if(!res||!q){sts('vSts','Aucun résultat à sauvegarder.','warn');return;}
+  const entry={q,date:new Date().toISOString().slice(0,10),res:res.slice(0,4000)};
+  veilleHistory.unshift(entry);
+  if(veilleHistory.length>20)veilleHistory=veilleHistory.slice(0,20);
+  try{await sbSet('veille:history',veilleHistory);sts('vSts','✅ Veille sauvegardée.','ok');}
+  catch(e){sts('vSts','⚠️ Sauvegarde locale uniquement.','warn');}
+  renderVeilleHistory();
+}
+async function loadVeilleHistory(){
+  try{const d=await sbGet('veille:history');if(Array.isArray(d))veilleHistory=d;}
+  catch(e){}
+  renderVeilleHistory();
+}
+function renderVeilleHistory(){
+  const c=$('vHistory');if(!c)return;
+  if(!veilleHistory.length){c.innerHTML='<div style="font-size:11px;color:var(--ink3);padding:8px 0">Aucune recherche sauvegardée.</div>';return;}
+  c.innerHTML=veilleHistory.slice(0,10).map((e,i)=>`<div class="vh-item"><div class="vh-q" onclick="rerunVeille(${i})" style="cursor:pointer">${esc(e.q)}</div><div class="vh-date">${e.date}</div></div>`).join('');
+}
+function rerunVeille(i){
+  const e=veilleHistory[i];if(!e)return;
+  $('vSearch').value=e.q;
+  $('vAnalysisTxt').textContent=e.res;
+  $('vAnalysis').style.display='block';
+  $('vEmpty').style.display='none';
+}
+function exportVeille(){
+  const res=$('vAnalysisTxt')?.innerText?.trim();
+  const q=$('vSearch')?.value?.trim()||'veille';
+  if(!res){sts('vSts','Aucun résultat à exporter.','warn');return;}
+  const rows=res.split('\n').filter(Boolean).map(l=>({Contenu:l}));
+  const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Veille');
+  XLSX.writeFile(wb,`INCA_Veille_${q.replace(/\W+/g,'_').slice(0,30)}.xlsx`);
+}
+
+/* ===== RÉGLAGES ===== */
+async function checkSupabase(){
+  $('supaStatus').innerHTML='<span class="status-dot wait"></span>Test en cours…';
+  try{
+    await sbGet('__ping__');
+    $('supaStatus').innerHTML='<span class="status-dot ok"></span>Connecté';
+  }catch(e){
+    $('supaStatus').innerHTML='<span class="status-dot err"></span>Erreur — '+esc(e.message.slice(0,50));
+  }
+}
+async function testApiKey(){
+  sts('keySts','🔍 Test en cours…','load');
+  const k=apiKey();
+  if(!k){sts('keySts','⚠️ Aucune clé enregistrée.','warn');return;}
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/models',{headers:{'x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}});
+    if(r.ok)sts('keySts','✅ Clé valide — accès API confirmé.','ok');
+    else sts('keySts','❌ Clé refusée (HTTP '+r.status+').','err');
+  }catch(e){sts('keySts','❌ Erreur réseau : '+e.message.slice(0,60),'err');}
+}
+function toggleSodaEdit(){
+  const fields=['ts_low','ts_mid','ts_high','ts_sweet'];
+  const btn=$('sodaEditBtn');
+  const locked=fields[0]&&$('ts_low').readOnly;
+  fields.forEach(id=>{const el=$(id);if(el){el.readOnly=!locked;el.style.background=locked?'':'var(--card2)';el.style.cursor=locked?'':'default';}});
+  if(btn)btn.textContent=locked?'🔒 Verrouiller':'✏️ Modifier si maj légale';
+}
+function exportBackup(){
+  const data={YEARS,params:{}};
+  ['p_fob','p_fret','p_dsg','p_cap','p_plt','p_stick','p_dd_bois','p_dd_autre','ts_low','ts_mid','ts_high','ts_sweet',
+   'rot_Boissons','rot_Chips','rot_Confiseries','rot_Biscuiterie','rot_Autre'].forEach(k=>{const el=$(k);if(el)data.params[k]=el.value;});
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='INCA_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function importBackup(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.YEARS)Object.assign(YEARS,d.YEARS);
+      if(d.params)Object.entries(d.params).forEach(([k,v])=>{const el=$(k);if(el)el.value=v;});
+      rebuildSalesIndex();
+      alert('✅ Backup importé avec succès.');
+    }catch(err){alert('❌ Fichier invalide : '+err.message);}
+    ev.target.value='';
+  };
+  reader.readAsText(f);
+}
+
 (async function init(){
   // Indicateur de chargement
   const bar=document.createElement('div');
@@ -2240,6 +2570,8 @@ async function mkExport(){
   if(ys.length){AY=ys[ys.length-1];enterDash();}
   recalcContainer();
   mkInit();mkRender();bindCmp();
+  loadVeilleHistory();
+  checkSupabase();
 
   bar.style.opacity='0';
   setTimeout(()=>bar.remove(),500);
