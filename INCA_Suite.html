@@ -655,6 +655,7 @@ tbody tr:hover{background:var(--card2)}
           <div class="pill act" data-s="static" onclick="mkScene('static')" style="font-size:11px;padding:5px 12px">📷 Studio</div>
           <div class="pill" data-s="action" onclick="mkScene('action')" style="font-size:11px;padding:5px 12px">💦 Action</div>
           <div class="pill" data-s="hand" onclick="mkScene('hand')" style="font-size:11px;padding:5px 12px">🤚 En main</div>
+          <div class="pill" data-s="macro" onclick="mkScene('macro')" style="font-size:11px;padding:5px 12px">💧 Macro / Gouttes</div>
         </div>
         <button class="btn" style="width:100%;margin-top:8px;background:var(--purple);color:#fff" onclick="mkGenAIPhoto()">📸 Générer visuel photo-réaliste (FLUX)</button>
       </div>
@@ -1968,7 +1969,8 @@ function mkScene(s) {
 const SCENE_STYLE = {
   static: 'professional product photography, clean composition',
   action: 'dynamic candid lifestyle photo, liquid pouring or splashing naturally, motion captured mid-action, genuine energetic moment, shot like a real Instagram influencer photo on a phone camera, natural unedited color grading, slight authentic imperfection, not a sterile studio render',
-  hand: 'a real human hand naturally holding or about to drink the product, candid lifestyle moment, genuine emotion and energy on a sunny day, shot like a real iPhone photo, natural skin tones, authentic unposed feel, not corporate stock photo'
+  hand: 'a real human hand naturally holding or about to drink the product, candid lifestyle moment, genuine emotion and energy on a sunny day, shot like a real iPhone photo, natural skin tones, authentic unposed feel, not corporate stock photo',
+  macro: 'extreme close-up macro product photography, dramatic condensation water droplets covering the entire surface, vibrant saturated colors, dynamic angled composition, cold refreshing atmosphere, dramatic studio lighting with specular highlights on droplets, high contrast, premium FMCG advertising photography'
 };
 const CATEGORY_AMBIANCE = {
   sport: 'bright natural sunlight, tropical Réunion island atmosphere, soft blurred green palm leaves and ocean blue tones in background, healthy active lifestyle feel, clean fresh bright mood, warm terracotta orange (#c45b18) color accents, summer vibe',
