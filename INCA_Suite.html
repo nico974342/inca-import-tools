@@ -635,13 +635,11 @@ tbody tr:hover{background:var(--card2)}
         </div>
       </div>
 
-      <!-- Section 3 : Génération IA -->
+      <!-- Section 3 : Génération IA (FLUX) -->
       <div class="mkt-sec">
         <div class="mkt-sec-title">3 · Génération IA</div>
-        <button class="btn" style="width:100%;background:var(--purple);color:#fff" onclick="mkGenAI()">🎨 Générer la pub avec l'IA</button>
-        <button class="btn gh" style="width:100%;margin-top:6px" onclick="mkBackManual()">↩ Revenir au modèle CSS</button>
 
-        <div class="mkt-lbl" style="margin-top:10px">Photo produit pour visuel photo-réaliste</div>
+        <div class="mkt-lbl">Photo produit (obligatoire)</div>
         <div class="drop" id="mkPhotoDrop" role="button" tabindex="0" aria-label="Charger une photo du produit" style="padding:14px;min-height:60px" onclick="$('mkPhotoFile').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();$('mkPhotoFile').click()}">
           <div id="mkPhotoPreview" style="font-size:11px;color:var(--ink2)">📸 Cliquer ou glisser une photo du produit</div>
           <input type="file" id="mkPhotoFile" accept="image/*" onchange="mkPhotoUpload(event)">
@@ -1955,47 +1953,6 @@ function mkPhotoUpload(e){
   };
   reader.readAsDataURL(file);
 }
-async function mkGenAI(){
-  const v=mkVals();const[W,H]=MK_FMT[mkFormat];const t=MK_THEMES.find(x=>x.id===mkTheme);
-  if(!v.neu&&!v.old){sts('mkSts','Renseigne au moins un prix.','err');return;}
-  sts('mkSts','🎨 L\'IA dessine ta pub… (10-20s)','load');
-  try{
-    const data=await claudeCall({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:
-`Tu es un directeur artistique senior spécialisé retail/FMCG. Crée une PUBLICITÉ PROMO ultra vendeuse, moderne et premium (niveau agence, pas "généré par IA") en HTML+CSS inline UNIQUEMENT.
-
-BRIEF:
-- Annonceur: INCA IMPORT (distributeur, La Réunion) — stations ${v.stations}
-- Produit: ${v.prod}
-- ${v.old&&v.neu?`Prix barré ${v.old.toFixed(2)}€ → PRIX PROMO ${v.neu.toFixed(2)}€ (-${v.pct}%)`:`Prix: ${(v.neu||v.old).toFixed(2)}€`}
-- Accroche souhaitée: "${v.hook}" (tu peux l'améliorer)
-- Mention légale bas: "${v.period}"
-- Ambiance couleur: ${t.n} (dominante ${t.id==='flash'?'rouge énergique':t.id==='inca'?'navy/or premium':t.id==='trop'?'tropicale verte/soleil':'nuit néon'})
-- Cible: 15-40 ans, Réunion, codes réseaux sociaux
-
-DIRECTION ARTISTIQUE EXIGÉE:
-- Typographie XXL ultra-bold pour le prix (le héros visuel, min 25% de la hauteur), chiffres avec € intégré stylé
-- Composition dynamique: diagonales, formes géométriques découpées (clip-path), cercles de glow, dégradés riches multi-stops
-- Badge promo percutant (étoile/cercle/étiquette rotée) si réduction
-- Profondeur: ombres portées colorées, layering, léger grain via repeating-linear-gradient subtil
-- Nom produit traité graphiquement (lettres serrées, uppercase, éventuel contour)
-- Footer pro discret: INCA IMPORT + stations + mention
-- AUCUNE image externe, AUCUN <script>, AUCUNE police externe (utilise 'Plus Jakarta Sans',sans-serif déjà chargée)
-
-CONTRAINTES TECHNIQUES STRICTES:
-- UN SEUL <div> racine avec style="width:${W}px;height:${H}px;position:relative;overflow:hidden;..."
-- Tout en styles inline ou via éléments imbriqués stylés inline
-- Texte 100% en français
-Réponds UNIQUEMENT avec le code HTML, sans backticks ni explication.`}]});
-    let raw='';(data.content||[]).forEach(b=>{if(b.type==='text')raw+=b.text;});
-    raw=raw.replace(/```html|```/g,'').trim();
-    const i=raw.indexOf('<div');if(i<0)throw new Error('HTML non reçu');
-    raw=raw.slice(i,raw.lastIndexOf('</div>')+6);
-    if(/<script/i.test(raw))throw new Error('script refusé');
-    mkAIHtml=raw;
-    mkRender();
-    sts('mkSts','✅ Pub générée. ↻ pour une variante, ou modifie les champs puis régénère.','ok');
-  }catch(e){sts('mkSts','❌ '+e.message+(apiKey()?'':' — ajoute ta clé API dans ⚙️'),'err');}
-}
 function mkBackManual(){mkAIHtml=null;mkRender();}
 
 let mkCategory = 'sport';
@@ -2044,16 +2001,18 @@ async function mkGenAIPhoto() {
     if (v.old && v.neu) {
       priceHtml = '<span style="text-decoration:line-through;opacity:.6;font-size:22px;color:#fff">' + mkPrice(v.old) + '</span>';
     }
-    mkAIHtml = '<div style="width:' + W + 'px;height:' + H + 'px;background:url(\'' + data.images[0].url + '\') center/cover;position:relative;font-family:\'Plus Jakarta Sans\',sans-serif">' +
-      '<div style="position:absolute;top:5%;left:5%;background:rgba(255,255,255,.92);padding:8px 16px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.2)"><img src="' + LOGO_URL + '" style="height:28px;display:block"></div>' +
+    mkAIHtml = '<div style="width:' + W + 'px;height:' + H + 'px;background:url(\'' + data.images[0].url + '\') center/cover;position:relative;font-family:\'Plus Jakarta Sans\',sans-serif;overflow:hidden">' +
+      '<div style="position:absolute;top:5%;left:5%;background:rgba(255,255,255,.97);padding:11px 22px;border-radius:13px;box-shadow:0 8px 30px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.15)"><img src="' + LOGO_URL + '" style="height:48px;display:block"></div>' +
       badgeHtml +
-      '<div style="position:absolute;bottom:0;left:0;right:0;background:#c45b18;padding:6% 6% 7%;color:#fff">' +
-        '<div style="font-size:20px;font-weight:800;margin:0 0 4px">' + esc(v.prod) + '</div>' +
-        '<div style="display:flex;align-items:baseline;gap:10px">' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#c45b18 0%,#a84d14 100%);padding:6% 6% 7%;color:#fff;overflow:hidden">' +
+        '<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#e8915a,rgba(232,145,90,.15))"></div>' +
+        '<div style="position:absolute;top:4px;left:0;width:38%;height:8px;background:#e8915a;opacity:.35;transform:skewX(-18deg);transform-origin:left top"></div>' +
+        '<div style="font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;opacity:.82;margin:0 0 8px">' + esc(v.prod) + '</div>' +
+        '<div style="display:flex;align-items:baseline;gap:14px">' +
           priceHtml +
-          '<span style="font-size:48px;font-weight:900;color:#fff">' + mkPrice(v.neu || v.old) + '</span>' +
+          '<span style="font-size:64px;font-weight:900;line-height:1;letter-spacing:-1px;color:#fff;text-shadow:0 4px 16px rgba(0,0,0,.25)">' + mkPrice(v.neu || v.old) + '</span>' +
         '</div>' +
-        '<div style="font-size:11px;opacity:.85;margin-top:6px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
+        '<div style="font-size:11px;opacity:.72;margin-top:10px;letter-spacing:.3px">' + esc(v.stations) + ' · ' + esc(v.period) + '</div>' +
       '</div>' +
     '</div>';
     mkRender();
